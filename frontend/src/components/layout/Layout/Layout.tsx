@@ -1,4 +1,3 @@
-import Icone from '../../../components/ui/Icone/Icone'
 import useNavegacaoStore from '../../../store/useNavegacaoStore'
 import Sidebar from '../Sidebar/Sidebar'
 import Topbar from '../Topbar/Topbar'

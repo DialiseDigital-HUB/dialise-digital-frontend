@@ -1,0 +1,71 @@
+.input-grupo {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.input-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--gray-700);
+  letter-spacing: .02em;
+  text-transform: uppercase;
+}
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-campo {
+  width: 100%;
+  height: 40px;
+  padding: 0 12px;
+  border: 1.5px solid var(--gray-300);
+  border-radius: var(--radius-sm);
+  background: var(--white);
+  font-family: var(--font-base);
+  font-size: 14px;
+  color: var(--gray-900);
+  transition: var(--transition);
+  outline: none;
+}
+
+.input-campo::placeholder {
+  color: var(--gray-500);
+}
+
+.input-campo:focus {
+  border-color: var(--teal-mid);
+  box-shadow: var(--shadow-glow);
+}
+
+.input-campo:disabled {
+  background: var(--gray-100);
+  color: var(--gray-500);
+  cursor: not-allowed;
+}
+
+.input-sufixo {
+  position: absolute;
+  right: 12px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--gray-500);
+  pointer-events: none;
+}
+
+.input-grupo--erro .input-campo {
+  border-color: var(--red);
+}
+
+.input-grupo--erro .input-campo:focus {
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, .15);
+}
+
+.input-mensagem-erro {
+  font-size: 12px;
+  color: var(--red);
+  font-weight: 500;
+}
