@@ -1,0 +1,51 @@
+.radio-grupo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.radio-grupo__label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--gray-700);
+  letter-spacing: .02em;
+  text-transform: uppercase;
+}
+
+.radio-grupo__opcoes {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.radio-pill {
+  height: 34px;
+  padding: 0 16px;
+  border: 1.5px solid var(--gray-300);
+  border-radius: 999px;
+  background: var(--white);
+  font-family: var(--font-base);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--gray-700);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.radio-pill:hover {
+  border-color: var(--teal-mid);
+  color: var(--teal-mid);
+  background: var(--teal-pale);
+}
+
+.radio-pill--ativo {
+  background: var(--teal-mid);
+  border-color: var(--teal-mid);
+  color: var(--white);
+}
+
+.radio-pill--ativo:hover {
+  background: var(--teal-sea);
+  border-color: var(--teal-sea);
+  color: var(--white);
+}

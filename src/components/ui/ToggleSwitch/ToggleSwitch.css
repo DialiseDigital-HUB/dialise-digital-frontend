@@ -1,0 +1,50 @@
+.toggle-grupo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.toggle-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--gray-700);
+}
+
+.toggle-btn {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  border-radius: 999px;
+  border: none;
+  background: var(--gray-300);
+  cursor: pointer;
+  transition: background .2s ease;
+  flex-shrink: 0;
+  padding: 0;
+}
+
+.toggle-btn--ativo {
+  background: var(--teal-mid);
+}
+
+.toggle-btn:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+.toggle-thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--white);
+  box-shadow: var(--shadow-sm);
+  transition: transform .2s cubic-bezier(.34, 1.56, .64, 1);
+}
+
+.toggle-btn--ativo .toggle-thumb {
+  transform: translateX(20px);
+}

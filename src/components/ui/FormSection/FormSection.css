@@ -1,0 +1,26 @@
+.form-section {
+  background: var(--white);
+  border-radius: var(--radius);
+  border: 1px solid var(--gray-100);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  animation: fadeSlideUp .25s ease both;
+}
+
+.form-section__titulo {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--teal-mid);
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--gray-100);
+  background: var(--teal-pale);
+}
+
+.form-section__corpo {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
