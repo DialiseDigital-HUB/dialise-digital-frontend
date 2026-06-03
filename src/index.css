@@ -1,0 +1,94 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,400&family=DM+Mono:wght@400;500&display=swap');
+
+:root {
+  --teal-deep:   #023D4A;
+  --teal-mid:    #028090;
+  --teal-sea:    #00A896;
+  --teal-mint:   #02C39A;
+  --teal-light:  #E0F5F2;
+  --teal-pale:   #F0FAFA;
+
+  --amber:       #F59E0B;
+  --red:         #EF4444;
+  --red-light:   #FEF2F2;
+  --blue-soft:   #EFF6FF;
+
+  --gray-900:    #0F172A;
+  --gray-700:    #334155;
+  --gray-500:    #64748B;
+  --gray-300:    #CBD5E1;
+  --gray-100:    #F1F5F9;
+  --white:       #FFFFFF;
+
+  --shadow-sm:   0 1px 3px rgba(0, 0, 0, .08);
+  --shadow-md:   0 4px 16px rgba(2, 64, 74, .10);
+  --shadow-lg:   0 8px 32px rgba(2, 64, 74, .14);
+  --shadow-glow: 0 0 0 3px rgba(2, 128, 144, .15);
+
+  --radius:      12px;
+  --radius-sm:   8px;
+  --radius-xs:   6px;
+
+  --font-base:   'DM Sans', sans-serif;
+  --font-mono:   'DM Mono', monospace;
+
+  --sidebar-w:   248px;
+  --topbar-h:    64px;
+
+  --transition:        all .18s ease;
+  --transition-slow:   all .3s ease;
+  --transition-spring: all .2s cubic-bezier(.34, 1.56, .64, 1);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-base);
+  background: var(--gray-100);
+  color: var(--gray-900);
+  min-height: 100vh;
+}
+
+#root {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* Scrollbar customizada */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--gray-300); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--gray-500); }
+
+/* Animações globais */
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: .5; }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.animate-fade-slide { animation: fadeSlideUp .25s ease both; }
+.animate-fade       { animation: fadeIn .2s ease both; }
