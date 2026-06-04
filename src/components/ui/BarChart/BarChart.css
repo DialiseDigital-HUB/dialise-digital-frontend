@@ -1,0 +1,62 @@
+.bar-chart {
+  width: 100%;
+}
+
+.bar-chart__area {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  width: 100%;
+}
+
+.bar-chart__coluna {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.bar-chart__valor {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--gray-700);
+  font-family: var(--font-mono);
+  line-height: 1;
+}
+
+.bar-chart__trilha {
+  position: relative;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  background: var(--gray-100);
+  border-radius: 4px 4px 0 0;
+  overflow: visible;
+}
+
+.bar-chart__barra {
+  width: 100%;
+  border-radius: 4px 4px 0 0;
+  transition: height .35s cubic-bezier(.34, 1.56, .64, 1);
+  min-height: 4px;
+}
+
+.bar-chart__meta-linha {
+  position: absolute;
+  left: -4px;
+  right: -4px;
+  height: 2px;
+  background: var(--gray-300);
+  border-radius: 1px;
+}
+
+.bar-chart__rotulo {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--gray-500);
+  letter-spacing: .02em;
+  text-align: center;
+  white-space: nowrap;
+}

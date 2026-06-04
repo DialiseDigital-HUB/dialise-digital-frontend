@@ -40,14 +40,7 @@ export default function Evolucao() {
   return (
     <div className="evolucao-pagina">
       <div className="evolucao-pagina__cabecalho">
-        <div>
-          <h1 className="evolucao-pagina__titulo">Evolução Mensal</h1>
-          <p className="evolucao-pagina__subtitulo">
-            {pacienteAtivo
-              ? `${pacienteAtivo.nomeCompleto} — ${dados.mesReferencia || 'competência não selecionada'}`
-              : 'Selecione o paciente e a competência para iniciar'}
-          </p>
-        </div>
+        <h1 className="evolucao-pagina__titulo">Evolução Mensal</h1>
         {idPacienteAtivo && (
           <div className="evolucao-pagina__acoes">
             <Botao variante="ghost" onClick={resetar}>

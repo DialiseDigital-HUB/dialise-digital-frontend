@@ -1,0 +1,119 @@
+.timeline {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+}
+
+.timeline__vazio {
+  font-size: 13px;
+  color: var(--gray-500);
+  padding: 24px 0;
+}
+
+.timeline-item {
+  display: flex;
+  gap: 16px;
+  position: relative;
+}
+
+.timeline-item__conector {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+  width: 16px;
+  padding-top: 3px;
+}
+
+.timeline-item__dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2.5px solid;
+  background: var(--white);
+  flex-shrink: 0;
+  z-index: 1;
+}
+
+.timeline-item__linha {
+  flex: 1;
+  width: 2px;
+  background: var(--gray-100);
+  margin: 4px 0;
+  min-height: 24px;
+}
+
+.timeline-item__conteudo {
+  padding-bottom: 24px;
+  flex: 1;
+  min-width: 0;
+}
+
+.timeline-item__cabecalho {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.timeline-item__mes {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--gray-900);
+}
+
+.timeline-item__badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.timeline-item__resumo {
+  font-size: 13px;
+  color: var(--gray-700);
+  line-height: 1.55;
+  margin-bottom: 10px;
+}
+
+.timeline-item__metricas {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  font-size: 12px;
+  color: var(--gray-500);
+  margin-bottom: 6px;
+}
+
+.timeline-item__metricas strong {
+  color: var(--gray-900);
+  font-weight: 600;
+}
+
+.timeline-item__medico {
+  font-size: 11px;
+  color: var(--gray-500);
+  font-style: italic;
+}
+
+.timeline-item--ok      .timeline-item__dot   { border-color: var(--teal-sea);  }
+.timeline-item--atencao .timeline-item__dot   { border-color: var(--amber);     }
+.timeline-item--critico .timeline-item__dot   { border-color: var(--red);       }
+
+.timeline-item__badge--ok      { background: var(--teal-pale);  color: var(--teal-sea);  }
+.timeline-item__badge--atencao { background: #fffbeb;            color: var(--amber);     }
+.timeline-item__badge--critico { background: var(--red-light);   color: var(--red);       }
+
+.timeline-item--clicavel {
+  cursor: pointer;
+}
+
+.timeline-item--clicavel:hover .timeline-item__conteudo {
+  background: var(--teal-pale);
+  border-radius: var(--radius-sm);
+  margin-left: -8px;
+  padding-left: 8px;
+  transition: var(--transition);
+}
