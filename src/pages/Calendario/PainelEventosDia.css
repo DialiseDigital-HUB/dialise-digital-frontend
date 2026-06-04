@@ -1,0 +1,81 @@
+.painel-eventos-dia {
+  background: var(--white);
+  border-radius: var(--radius);
+  border: 1px solid var(--gray-100);
+  box-shadow: var(--shadow-sm);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  animation: fadeSlideUp .2s ease both;
+}
+
+.painel-eventos-dia__titulo {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--teal-mid);
+  letter-spacing: .03em;
+  text-transform: uppercase;
+}
+
+.painel-eventos-dia__vazio {
+  font-size: 13px;
+  color: var(--gray-500);
+}
+
+.painel-eventos-dia__lista {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.evento-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  border-left: 3px solid;
+  background: var(--gray-100);
+}
+
+.evento-item__tipo {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  min-width: 72px;
+}
+
+.evento-item__info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.evento-item__info strong {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--gray-900);
+}
+
+.evento-item__info span {
+  font-size: 12px;
+  color: var(--gray-500);
+}
+
+.evento-item--dialise    { border-color: var(--teal-mid);  background: var(--teal-pale); }
+.evento-item--dialise    .evento-item__tipo { color: var(--teal-mid); }
+
+.evento-item--antibiotico { border-color: var(--red);      background: var(--red-light); }
+.evento-item--antibiotico .evento-item__tipo { color: var(--red); }
+
+.evento-item--exame      { border-color: var(--amber);     background: #fffbeb; }
+.evento-item--exame      .evento-item__tipo { color: var(--amber); }
+
+.evento-item--internacao { border-color: var(--gray-700);  background: var(--gray-100); }
+.evento-item--internacao .evento-item__tipo { color: var(--gray-700); }
+
+.evento-item--retorno    { border-color: var(--teal-sea);  background: var(--teal-pale); }
+.evento-item--retorno    .evento-item__tipo { color: var(--teal-sea); }
