@@ -1,0 +1,121 @@
+.cal-grid {
+  background: var(--white);
+  border-radius: var(--radius);
+  border: 1px solid var(--gray-100);
+  box-shadow: var(--shadow-sm);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cal-grid__cabecalho {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cal-grid__mes-ano {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--gray-900);
+}
+
+.cal-grid__nav {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-xs);
+  border: 1px solid var(--gray-300);
+  background: var(--white);
+  color: var(--gray-700);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.cal-grid__nav:hover {
+  background: var(--teal-pale);
+  border-color: var(--teal-mid);
+  color: var(--teal-mid);
+}
+
+.cal-grid__semana {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.cal-grid__dia-semana {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--gray-500);
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  padding: 4px 0;
+}
+
+.cal-grid__dias {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.cal-grid__celula {
+  position: relative;
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid transparent;
+  background: none;
+  cursor: pointer;
+  transition: var(--transition);
+  gap: 3px;
+  padding: 4px 2px;
+  font-family: var(--font-base);
+}
+
+.cal-grid__celula:hover {
+  background: var(--teal-pale);
+  border-color: var(--teal-light);
+}
+
+.cal-grid__celula--ativo {
+  background: var(--teal-mid);
+  border-color: var(--teal-mid);
+}
+
+.cal-grid__celula--ativo .cal-grid__numero {
+  color: var(--white);
+  font-weight: 700;
+}
+
+.cal-grid__celula--vazia {
+  cursor: default;
+  pointer-events: none;
+}
+
+.cal-grid__numero {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--gray-900);
+  line-height: 1;
+}
+
+.cal-grid__dots {
+  display: flex;
+  gap: 2px;
+  align-items: center;
+}
+
+.cal-grid__dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}

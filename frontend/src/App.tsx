@@ -2,14 +2,18 @@ import Layout from './components/layout/Layout/Layout'
 import Dashboard from './pages/Dashboard/Dashboard'
 import Pacientes from './pages/Pacientes/Pacientes'
 import Evolucao from './pages/Evolucao/Evolucao'
+import Calendario from './pages/Calendario/Calendario'
+import Exames from './pages/Exames/Exames'
 import Icone from './components/ui/Icone/Icone'
 import useNavegacaoStore from './store/useNavegacaoStore'
 import './index.css'
 
 const paginasDisponiveis: Record<string, React.ComponentType> = {
-  dashboard: Dashboard,
-  pacientes: Pacientes,
-  evolucao:  Evolucao,
+  dashboard:  Dashboard,
+  pacientes:  Pacientes,
+  evolucao:   Evolucao,
+  calendario: Calendario,
+  exames:     Exames,
 }
 
 function PaginaAtual() {
