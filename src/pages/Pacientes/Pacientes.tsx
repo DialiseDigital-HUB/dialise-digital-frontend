@@ -1,5 +1,7 @@
 import { useCallback } from 'react'
 import usePacientesStore from '../../store/usePacientesStore'
+import useNavegacaoStore from '../../store/useNavegacaoStore'
+import useEvolucaoStore from '../../store/useEvolucaoStore'
 import type { Paciente } from '../../store/usePacientesStore'
 import Card from '../../components/ui/Card/Card'
 import Badge from '../../components/ui/Badge/Badge'
@@ -71,15 +73,25 @@ function DetalheModal({ paciente }: { paciente: Paciente }) {
 }
 
 export default function Pacientes() {
-  const termoBusca         = usePacientesStore(s => s.termoBusca)
+  const termoBusca          = usePacientesStore(s => s.termoBusca)
   const pacienteSelecionado = usePacientesStore(s => s.pacienteSelecionado)
   const definirBusca        = usePacientesStore(s => s.definirBusca)
   const selecionarPaciente  = usePacientesStore(s => s.selecionarPaciente)
   const pacientesFiltrados  = usePacientesStore(s => s.pacientesFiltrados)
+  const navegar              = useNavegacaoStore(s => s.navegar)
+  const definirPaciente      = useEvolucaoStore(s => s.definirPaciente)
+  const modalCadastro        = useNavegacaoStore(s => s.modalCadastroPacienteAberto)
+  const fecharModalCadastro  = useNavegacaoStore(s => s.fecharModalCadastro)
 
   const lista = pacientesFiltrados()
 
   const aoFecharModal = useCallback(() => selecionarPaciente(null), [selecionarPaciente])
+
+  const aoNovaEvolucao = (paciente: Paciente) => {
+    definirPaciente(paciente.id)
+    selecionarPaciente(null)
+    navegar('evolucao')
+  }
 
   return (
     <div className="pacientes">
@@ -166,11 +178,34 @@ export default function Pacientes() {
         rodape={
           <>
             <Botao variante="ghost" onClick={aoFecharModal}>Fechar</Botao>
-            <Botao variante="primary" onClick={aoFecharModal}>Nova Evolução</Botao>
+            <Botao
+              variante="primary"
+              onClick={() => pacienteSelecionado && aoNovaEvolucao(pacienteSelecionado)}
+            >
+              Nova Evolução
+            </Botao>
           </>
         }
       >
         {pacienteSelecionado && <DetalheModal paciente={pacienteSelecionado} />}
+      </Modal>
+
+      <Modal
+        aberto={modalCadastro}
+        titulo="Novo Paciente"
+        aoFechar={fecharModalCadastro}
+        rodape={
+          <>
+            <Botao variante="ghost" onClick={fecharModalCadastro}>Cancelar</Botao>
+            <Botao variante="primary" onClick={fecharModalCadastro}>Salvar</Botao>
+          </>
+        }
+      >
+        <div className="detalhe-paciente__grid">
+          <p style={{ color: 'var(--gray-400)', fontSize: '0.8125rem', gridColumn: '1 / -1' }}>
+            Funcionalidade de cadastro integrada ao backend em desenvolvimento.
+          </p>
+        </div>
       </Modal>
     </div>
   )

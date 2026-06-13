@@ -4,9 +4,7 @@ import Topbar from '../Topbar/Topbar'
 import './Layout.css'
 
 const configAcaoPrimaria: Partial<Record<string, string>> = {
-  evolucao:   '+ Nova Evolução',
-  pacientes:  '+ Novo Paciente',
-  calendario: '+ Registrar Antibiótico',
+  pacientes: '+ Novo Paciente',
 }
 
 interface LayoutProps {
@@ -14,9 +12,10 @@ interface LayoutProps {
 }
 
 export default function Layout({ children }: LayoutProps) {
-  const paginaAtiva  = useNavegacaoStore(s => s.paginaAtiva)
-  const totalAlertas = useNavegacaoStore(s => s.totalAlertas)
-  const navegar      = useNavegacaoStore(s => s.navegar)
+  const paginaAtiva        = useNavegacaoStore(s => s.paginaAtiva)
+  const totalAlertas       = useNavegacaoStore(s => s.totalAlertas)
+  const navegar            = useNavegacaoStore(s => s.navegar)
+  const abrirModalCadastro = useNavegacaoStore(s => s.abrirModalCadastro)
 
   const labelAcao = configAcaoPrimaria[paginaAtiva]
 
@@ -31,7 +30,7 @@ export default function Layout({ children }: LayoutProps) {
         <Topbar
           tituloPagina={paginaAtiva}
           labelAcaoPrimaria={labelAcao}
-          aoNovaCriacao={labelAcao ? () => {} : undefined}
+          aoNovaCriacao={labelAcao ? abrirModalCadastro : undefined}
         />
         <main className="layout__pagina">
           {children}

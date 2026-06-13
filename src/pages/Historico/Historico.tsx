@@ -5,6 +5,7 @@ import type { TabItem } from '../../components/ui/Tabs/Tabs'
 import Timeline from '../../components/ui/Timeline/Timeline'
 import BarChart from '../../components/ui/BarChart/BarChart'
 import FeedAcessos from '../../components/ui/FeedAcessos/FeedAcessos'
+import BuscaPaciente from '../../components/ui/BuscaPaciente/BuscaPaciente'
 import useHistoricoStore from '../../store/useHistoricoStore'
 import usePacientesStore from '../../store/usePacientesStore'
 import useAcessosStore from '../../store/useAcessosStore'
@@ -45,16 +46,10 @@ export default function Historico() {
             <aside className="historico-pagina__lateral">
               <div className="historico-lateral__bloco">
                 <span className="historico-lateral__rotulo">Paciente</span>
-                <select
-                  className="historico-lateral__select"
-                  value={idPacienteAtivo ?? ''}
-                  onChange={e => definirPaciente(e.target.value)}
-                >
-                  <option value="" disabled>Selecione...</option>
-                  {pacientes.map(p => (
-                    <option key={p.id} value={p.id}>{p.nomeCompleto}</option>
-                  ))}
-                </select>
+                <BuscaPaciente
+                  idPacienteAtivo={idPacienteAtivo}
+                  aoSelecionar={p => definirPaciente(p.id)}
+                />
               </div>
 
               {evolucoes.length > 0 && (
