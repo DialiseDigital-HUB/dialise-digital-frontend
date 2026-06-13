@@ -3,62 +3,101 @@ import { create } from 'zustand'
 export interface DadosEvolucao {
   mesReferencia: string
 
-  pesoSeco: string
-  pesoAtual: string
-  pressaoArterialSistolica: string
-  pressaoArterialDiastolica: string
-  ultrafiltracaoMedia: string
-
-  queixasPrincipais: string
-  estadoGeral: string
-  intercorrenciasDialise: string
-
+  // 3. Evolução
+  evolucaoClinica: string
   ktv: string
-  urr: string
-  fluxoSanguineo: string
+
+  // 4. Acesso vascular
+  acessoData: string
+  acessosPrevios: string
+
+  // 5. Prescrição diálise
+  pesoSeco: string
   tempoSessao: string
   heparinaUtilizada: string
+  fbs: string
+  fbd: string
+  sodio: string
+  bic: string
+  perfisOutros: string
 
+  // 6. Medicações de alto custo
+  usandoFerroEv: boolean
+  usandoEpo: boolean
+  usandoSevelamer: boolean
+  usandoCaCo3: boolean
+  usandoCalcitriol: boolean
+  usandoCinacalcete: boolean
+
+  // 7. Medicamentos em uso
+  medicamentosEmUso: string
+
+  // 8. Alergias
+  alergias: string
+
+  // 9. Dados (Boolean)
+  vacinouHepB: boolean
+  imunizadoHepB: boolean
+  inscritoTransplante: boolean
+  internouEsseMes: boolean
+  recebeuTransfusao: boolean
+  complicacoesInfecciosas: boolean
+  complicacoesCardiovasculares: boolean
+  complicacoesAcessoVascular: boolean
+
+  // 10. Exames complementares
+  examesComplementares: string
+
+  // 11. Exames Laboratoriais
   hemoglobina: string
-  hematocrito: string
-  ferritina: string
-  saturacaoTransferrina: string
-  albumina: string
-  fosforo: string
   calcio: string
+  ferritina: string
+  antiHiv: string
+  ct: string
+  // mantendo alguns úteis que já existiam
+  hematocrito: string
+  fosforo: string
   paratormonio: string
   potassio: string
-  observacoesLaboratorio: string
 
-  usandoEpo: boolean
-  doseEpo: string
-  usandoFerroEv: boolean
-  usandoCalcitriol: boolean
+  // 12. Exame Físico
+  pa: string
+  fc: string
+  altura: string
+  pesoAtual: string
+  imc: string
+  acv: string
+  ar: string
+  ext: string
 
-  usandoAntibiotico: boolean
-  antibiotico: string
-  dataInicioAntibiotico: string
-  dataTerminoAntibiotico: string
-  motivoAntibiotico: string
-
-  inscritoTransplante: boolean
-  classificacaoTransplante: string
-  complicacoesVasculares: string
-
-  observacoesGerais: string
+  // 13. Conduta
+  conduta: string
 }
 
 const estadoInicial: DadosEvolucao = {
   mesReferencia: '',
-  pesoSeco: '', pesoAtual: '', pressaoArterialSistolica: '', pressaoArterialDiastolica: '', ultrafiltracaoMedia: '',
-  queixasPrincipais: '', estadoGeral: '', intercorrenciasDialise: '',
-  ktv: '', urr: '', fluxoSanguineo: '', tempoSessao: '', heparinaUtilizada: '',
-  hemoglobina: '', hematocrito: '', ferritina: '', saturacaoTransferrina: '',
-  albumina: '', fosforo: '', calcio: '', paratormonio: '', potassio: '', observacoesLaboratorio: '',
-  usandoEpo: false, doseEpo: '', usandoFerroEv: false, usandoCalcitriol: false,
-  usandoAntibiotico: false, antibiotico: '', dataInicioAntibiotico: '', dataTerminoAntibiotico: '', motivoAntibiotico: '',
-  inscritoTransplante: false, classificacaoTransplante: '', complicacoesVasculares: '',
-  observacoesGerais: '',
+
+  evolucaoClinica: '', ktv: '',
+
+  acessoData: '', acessosPrevios: '',
+
+  pesoSeco: '', tempoSessao: '', heparinaUtilizada: '', fbs: '', fbd: '', sodio: '', bic: '', perfisOutros: '',
+
+  usandoFerroEv: false, usandoEpo: false, usandoSevelamer: false, usandoCaCo3: false, usandoCalcitriol: false, usandoCinacalcete: false,
+
+  medicamentosEmUso: '', alergias: '',
+
+  vacinouHepB: false, imunizadoHepB: false, inscritoTransplante: false, internouEsseMes: false,
+  recebeuTransfusao: false, complicacoesInfecciosas: false, complicacoesCardiovasculares: false, complicacoesAcessoVascular: false,
+
+  examesComplementares: '',
+
+  hemoglobina: '', calcio: '', ferritina: '', antiHiv: '', ct: '',
+  hematocrito: '', fosforo: '', paratormonio: '', potassio: '',
+
+  pa: '', fc: '', altura: '', pesoAtual: '', imc: '', acv: '', ar: '', ext: '',
+
+  conduta: '',
 }
 
 interface EstadoEvolucao {

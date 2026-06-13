@@ -10,14 +10,16 @@ import useEvolucaoStore from '../../store/useEvolucaoStore'
 import useNavegacaoStore from '../../store/useNavegacaoStore'
 
 const secoesFormulario = [
-  { id: 'sec-hemodinamica',  titulo: '1. Dados Hemodinâmicos' },
-  { id: 'sec-clinico',       titulo: '2. Avaliação Clínica' },
-  { id: 'sec-dialise',       titulo: '3. Parâmetros de Diálise' },
-  { id: 'sec-laboratorio',   titulo: '4. Exames Laboratoriais' },
-  { id: 'sec-medicamentos',  titulo: '5. Medicamentos em Curso' },
-  { id: 'sec-antibiotico',   titulo: '6. Antibioticoterapia' },
-  { id: 'sec-transplante',   titulo: '7. Transplante e Complicações' },
-  { id: 'sec-observacoes',   titulo: '8. Observações Gerais' },
+  { id: 'sec-evolucao',    titulo: '3. Evolução' },
+  { id: 'sec-acesso',      titulo: '4. Acesso Vascular' },
+  { id: 'sec-prescricao',  titulo: '5. Prescrição Diálise' },
+  { id: 'sec-altocusto',   titulo: '6. Alto Custo' },
+  { id: 'sec-meds',        titulo: '7 e 8. Meds e Alergias' },
+  { id: 'sec-dados',       titulo: '9. Dados' },
+  { id: 'sec-exames-comp', titulo: '10. Exames Comp.' },
+  { id: 'sec-exames',      titulo: '11. Exames' },
+  { id: 'sec-fisico',      titulo: '12. Exame Físico' },
+  { id: 'sec-conduta',     titulo: '13. Conduta' },
 ]
 
 export default function Evolucao() {
