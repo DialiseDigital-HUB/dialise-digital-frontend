@@ -8,7 +8,7 @@ const legendaTipos = [
   { cor: 'var(--teal-mid)',  rotulo: 'Diálise' },
   { cor: 'var(--red)',       rotulo: 'Antibiótico' },
   { cor: 'var(--amber)',     rotulo: 'Exame' },
-  { cor: 'var(--teal-sea)', rotulo: 'Retorno' },
+  { cor: 'var(--blue)',      rotulo: 'Retorno' },
   { cor: 'var(--gray-700)', rotulo: 'Internação' },
 ]
 
