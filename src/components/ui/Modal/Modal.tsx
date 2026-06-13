@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import './Modal.css'
 
 type TamanhoModal = 'sm' | 'md' | 'lg'
@@ -31,7 +32,7 @@ export default function Modal({
 
   if (!aberto) return null
 
-  return (
+  return createPortal(
     <div className="modal-overlay" onClick={e => e.target === e.currentTarget && aoFechar()}>
       <div className={`modal${tamanho !== 'md' ? ` modal--${tamanho}` : ''}`}>
         <div className="modal__header">
@@ -41,6 +42,7 @@ export default function Modal({
         <div className="modal__corpo">{children}</div>
         {rodape && <div className="modal__rodape">{rodape}</div>}
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }
