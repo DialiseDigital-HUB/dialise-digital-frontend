@@ -1,4 +1,4 @@
-import { useMemo, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import Botao from '../../ui/Button/Button'
 import './Topbar.css'
 
@@ -44,9 +44,6 @@ export default function Topbar({
 }: TopbarProps) {
   const [scrollado, setScrollado] = useState(false)
 
-  const dataFormatada = useMemo(() =>
-    new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' }),
-  [])
 
   useEffect(() => {
     const areaConteudo = document.querySelector('.layout__pagina')
@@ -78,8 +75,6 @@ export default function Topbar({
       )}
 
       <div className="topbar__direita">
-        <span className="topbar__data">{dataFormatada}</span>
-
         <div className="topbar__avatar-wrapper">
           <span className="topbar__usuario-nome">{nomeUsuario}</span>
           <span className="topbar__usuario-cargo">{cargoUsuario}</span>
