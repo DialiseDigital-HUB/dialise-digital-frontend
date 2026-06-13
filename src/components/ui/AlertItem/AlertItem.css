@@ -7,7 +7,7 @@
   border-left: 4px solid;
   margin-bottom: 8px;
   transition: var(--transition);
-  cursor: default;
+  cursor: pointer;
 }
 
 .alert-item:last-child {
@@ -40,6 +40,10 @@
   line-height: 1;
 }
 
+.alert-item--danger .alert-item__icone { color: var(--red); }
+.alert-item--warn .alert-item__icone { color: var(--amber); }
+.alert-item--info .alert-item__icone { color: var(--teal-sea); }
+
 .alert-item__corpo {
   display: flex;
   flex-direction: column;
@@ -60,6 +64,9 @@
   font-size: 12px;
   color: var(--gray-500);
   line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .alert-item__badge {

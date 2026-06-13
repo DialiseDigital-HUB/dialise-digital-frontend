@@ -36,7 +36,10 @@
   transition: var(--transition);
   position: relative;
   overflow: hidden;
-  cursor: default;
+}
+
+.dash-stat.clickable {
+  cursor: pointer;
 }
 
 .dash-stat::before {
