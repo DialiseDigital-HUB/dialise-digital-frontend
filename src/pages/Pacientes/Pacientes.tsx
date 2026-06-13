@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { useCallback, useEffect } from 'react'
 import usePacientesStore from '../../store/usePacientesStore'
 import useNavegacaoStore from '../../store/useNavegacaoStore'
 import useEvolucaoStore from '../../store/useEvolucaoStore'
@@ -84,6 +84,20 @@ export default function Pacientes() {
   const fecharModalCadastro  = useNavegacaoStore(s => s.fecharModalCadastro)
 
   const lista = pacientesFiltrados()
+  const pacienteEmFoco = useNavegacaoStore(s => s.pacienteEmFoco)
+  const limparContexto = useNavegacaoStore(s => s.limparContexto)
+
+  useEffect(() => {
+    if (pacienteEmFoco) {
+      // Find the specific patient by ID (or name, depending on what the store holds)
+      // Since our fake patients don't have UUIDs yet, let's assume pacienteEmFoco is a substring of the name for now, or an ID.
+      const p = lista.find(pac => pac.id === pacienteEmFoco || pac.nomeCompleto.toLowerCase().includes(pacienteEmFoco.toLowerCase()))
+      if (p) {
+        selecionarPaciente(p)
+      }
+      limparContexto()
+    }
+  }, [pacienteEmFoco, lista, selecionarPaciente, limparContexto])
 
   const aoFecharModal = useCallback(() => selecionarPaciente(null), [selecionarPaciente])
 

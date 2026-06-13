@@ -7,6 +7,7 @@ interface ProgressBarProps {
   valorAtual: number
   valorTotal: number
   variante?: VarianteBar
+  tooltip?: string
 }
 
 export default function ProgressBar({
@@ -14,11 +15,12 @@ export default function ProgressBar({
   valorAtual,
   valorTotal,
   variante = 'primary',
+  tooltip,
 }: ProgressBarProps) {
   const percentual = valorTotal > 0 ? Math.round((valorAtual / valorTotal) * 100) : 0
 
   return (
-    <div className="progress-bar">
+    <div className="progress-bar" title={tooltip}>
       <div className="progress-bar__topo">
         <span className="progress-bar__label">{label}</span>
         <span className="progress-bar__valor">{valorAtual} / {valorTotal}</span>

@@ -6,6 +6,7 @@ import Calendario from './pages/Calendario/Calendario'
 import Exames from './pages/Exames/Exames'
 import Historico from './pages/Historico/Historico'
 import LLM from './pages/LLM/LLM'
+import LME from './pages/LME/LME'
 import Icone from './components/ui/Icone/Icone'
 import useNavegacaoStore from './store/useNavegacaoStore'
 import './index.css'
@@ -18,6 +19,7 @@ const paginasDisponiveis: Record<string, React.ComponentType> = {
   exames:     Exames,
   historico:  Historico,
   llm:        LLM,
+  lme:        LME,
 }
 
 function PaginaAtual() {

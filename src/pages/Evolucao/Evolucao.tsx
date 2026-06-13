@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import './Evolucao.css'
 import './FormEvolucao.css'
 import PainelSelecao from './PainelSelecao'
@@ -7,6 +7,7 @@ import Modal from '../../components/ui/Modal/Modal'
 import Botao from '../../components/ui/Button/Button'
 import usePacientesStore from '../../store/usePacientesStore'
 import useEvolucaoStore from '../../store/useEvolucaoStore'
+import useNavegacaoStore from '../../store/useNavegacaoStore'
 
 const secoesFormulario = [
   { id: 'sec-hemodinamica',  titulo: '1. Dados Hemodinâmicos' },
@@ -25,6 +26,17 @@ export default function Evolucao() {
   const [modalConfirmacao, setModalConfirmacao] = useState(false)
 
   const pacienteAtivo = pacientes.find(p => p.id === idPacienteAtivo) ?? null
+
+  const pacienteEmFoco = useNavegacaoStore(s => s.pacienteEmFoco)
+  const limparContexto = useNavegacaoStore(s => s.limparContexto)
+
+  // Consumir Deep Link
+  useEffect(() => {
+    if (pacienteEmFoco) {
+      definirPaciente(pacienteEmFoco)
+      limparContexto()
+    }
+  }, [pacienteEmFoco, limparContexto, definirPaciente])
 
   const aoSelecionarPaciente = (idPaciente: string) => {
     definirPaciente(idPaciente)

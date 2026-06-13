@@ -1,0 +1,170 @@
+.lme-pagina {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  height: 100%;
+}
+
+.lme-pagina__cabecalho {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.lme-pagina__titulo {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--gray-900);
+  margin-bottom: 4px;
+}
+
+.lme-pagina__sub {
+  font-size: 14px;
+  color: var(--gray-500);
+}
+
+.lme-pagina__acoes {
+  display: flex;
+  gap: 12px;
+}
+
+.lme-pagina__corpo {
+  display: flex;
+  gap: 24px;
+  height: calc(100vh - 180px);
+}
+
+.lme-sidebar {
+  width: 280px;
+  background: var(--white);
+  border-radius: var(--radius);
+  border: 1px solid var(--gray-300);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.lme-sidebar__titulo {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--gray-900);
+  padding: 16px;
+  border-bottom: 1px solid var(--gray-300);
+  background: var(--gray-100);
+}
+
+.lme-lista-pacientes {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.lme-paciente-item {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--gray-100);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: var(--transition);
+}
+
+.lme-paciente-item:hover {
+  background: var(--teal-pale);
+}
+
+.lme-paciente-item--ativo {
+  background: var(--teal-light);
+  border-left: 4px solid var(--teal-mid);
+}
+
+.lme-paciente-item strong {
+  font-size: 14px;
+  color: var(--gray-900);
+}
+
+.lme-paciente-item span {
+  font-size: 12px;
+  color: var(--gray-500);
+}
+
+.lme-formulario-container {
+  flex: 1;
+  background: var(--white);
+  border-radius: var(--radius);
+  border: 1px solid var(--gray-300);
+  overflow-y: auto;
+}
+
+.lme-vazio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--gray-500);
+  gap: 16px;
+}
+
+.lme-formulario {
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.lme-secao {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.lme-secao h4 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--teal-deep);
+  border-bottom: 1px solid var(--gray-300);
+  padding-bottom: 8px;
+}
+
+.lme-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.lme-campo {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.lme-campo label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--gray-700);
+}
+
+.lme-campo input,
+.lme-campo select,
+.lme-campo textarea {
+  padding: 10px 12px;
+  border: 1px solid var(--gray-300);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-family: inherit;
+  transition: var(--transition);
+}
+
+.lme-campo input:focus,
+.lme-campo select:focus,
+.lme-campo textarea:focus {
+  outline: none;
+  border-color: var(--teal-mid);
+  box-shadow: 0 0 0 3px var(--teal-light);
+}
+
+.input-readOnly {
+  background: var(--gray-100);
+  color: var(--gray-700);
+  cursor: not-allowed;
+}

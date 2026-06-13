@@ -8,11 +8,12 @@ interface AlertItemProps {
   titulo: string
   sub: string
   badge?: React.ReactNode
+  onClick?: () => void
 }
 
-export default function AlertItem({ severidade, icone, titulo, sub, badge }: AlertItemProps) {
+export default function AlertItem({ severidade, icone, titulo, sub, badge, onClick }: AlertItemProps) {
   return (
-    <div className={`alert-item alert-item--${severidade}`}>
+    <div className={`alert-item alert-item--${severidade}`} onClick={onClick}>
       <span className="alert-item__icone">{icone}</span>
       <div className="alert-item__corpo">
         <span className="alert-item__titulo">{titulo}</span>

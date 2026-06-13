@@ -2,7 +2,7 @@ import Icone from '../../ui/Icone/Icone'
 import type { NomeIcone } from '../../ui/Icone/Icone'
 import './Sidebar.css'
 
-type PaginaAtiva = 'dashboard' | 'pacientes' | 'evolucao' | 'calendario' | 'exames' | 'historico' | 'llm'
+type PaginaAtiva = 'dashboard' | 'pacientes' | 'evolucao' | 'calendario' | 'exames' | 'historico' | 'llm' | 'lme'
 
 interface SidebarProps {
   paginaAtiva: PaginaAtiva
@@ -31,6 +31,7 @@ const secoes: { label: string; itens: ItemNavegacao[] }[] = [
       { id: 'calendario', rotulo: 'Calendário & Alertas',  icone: 'calendario' },
       { id: 'exames',     rotulo: 'Exames',                icone: 'exames'     },
       { id: 'historico',  rotulo: 'Histórico',             icone: 'historico'  },
+      { id: 'lme',        rotulo: 'Laudos LME (SUS)',      icone: 'lme'        },
     ],
   },
   {
