@@ -1,5 +1,6 @@
 import './PainelSelecao.css'
 import Avatar from '../../components/ui/Avatar/Avatar'
+import Select from '../../components/ui/Select/Select'
 import BuscaPaciente from '../../components/ui/BuscaPaciente/BuscaPaciente'
 import type { Paciente } from '../../store/usePacientesStore'
 
