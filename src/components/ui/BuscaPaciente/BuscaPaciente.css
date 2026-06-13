@@ -1,0 +1,112 @@
+.busca-paciente {
+  position: relative;
+  width: 100%;
+}
+
+.busca-paciente__campo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--surface-1, #f8fafc);
+  border: 1px solid var(--gray-200, #e2e8f0);
+  border-radius: 8px;
+  padding: 8px 10px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.busca-paciente__campo:focus-within {
+  border-color: var(--teal-mid, #0d9488);
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.12);
+}
+
+.busca-paciente__icone {
+  color: var(--gray-400, #94a3b8);
+  flex-shrink: 0;
+}
+
+.busca-paciente__input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 0.8125rem;
+  color: var(--gray-800, #1e293b);
+  outline: none;
+  min-width: 0;
+}
+
+.busca-paciente__input::placeholder {
+  color: var(--gray-400, #94a3b8);
+}
+
+.busca-paciente__limpar {
+  background: none;
+  border: none;
+  color: var(--gray-400, #94a3b8);
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+  padding: 0 2px;
+  flex-shrink: 0;
+  transition: color 0.15s;
+}
+
+.busca-paciente__limpar:hover {
+  color: var(--gray-700, #334155);
+}
+
+.busca-paciente__lista {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: var(--white, #ffffff);
+  border: 1px solid var(--gray-200, #e2e8f0);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  list-style: none;
+  margin: 0;
+  padding: 4px;
+  z-index: 200;
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.busca-paciente__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.busca-paciente__item:hover {
+  background: var(--teal-light, #f0fdfa);
+}
+
+.busca-paciente__item--ativo {
+  background: var(--teal-light, #f0fdfa);
+}
+
+.busca-paciente__item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.busca-paciente__item-nome {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--gray-800, #1e293b);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.busca-paciente__item-prontuario {
+  font-size: 0.725rem;
+  color: var(--gray-400, #94a3b8);
+  font-family: monospace;
+}

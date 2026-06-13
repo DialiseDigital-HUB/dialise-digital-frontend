@@ -1,6 +1,6 @@
 import './PainelSelecao.css'
 import Avatar from '../../components/ui/Avatar/Avatar'
-import Select from '../../components/ui/Select/Select'
+import BuscaPaciente from '../../components/ui/BuscaPaciente/BuscaPaciente'
 import type { Paciente } from '../../store/usePacientesStore'
 
 const mesesDisponiveis = [
@@ -40,13 +40,9 @@ export default function PainelSelecao({
     <aside className="painel-selecao">
       <div className="painel-selecao__bloco">
         <span className="painel-selecao__rotulo">Paciente</span>
-        <Select
-          id="sel-paciente-evolucao"
-          label=""
-          valor={idPacienteAtivo ?? ''}
-          aoAlterar={aoSelecionarPaciente}
-          opcoes={pacientes.map(p => ({ valor: p.id, rotulo: p.nomeCompleto }))}
-          placeholder="Selecione o paciente"
+        <BuscaPaciente
+          idPacienteAtivo={idPacienteAtivo}
+          aoSelecionar={p => aoSelecionarPaciente(p.id)}
         />
         {pacienteAtivo && (
           <div className="painel-selecao__perfil">
