@@ -34,73 +34,27 @@
   height: calc(100vh - 180px);
 }
 
-.lme-sidebar {
-  width: 280px;
-  background: var(--white);
-  border-radius: var(--radius);
-  border: 1px solid var(--gray-300);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.lme-sidebar__titulo {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--gray-900);
-  padding: 16px;
-  border-bottom: 1px solid var(--gray-300);
-  background: var(--gray-100);
-}
-
-.lme-lista-pacientes {
-  flex: 1;
-  overflow-y: auto;
-}
-
-.lme-paciente-item {
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--gray-100);
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  transition: var(--transition);
-}
-
-.lme-paciente-item:hover {
-  background: var(--teal-pale);
-}
-
-.lme-paciente-item--ativo {
-  background: var(--teal-light);
-  border-left: 4px solid var(--teal-mid);
-}
-
-.lme-paciente-item strong {
-  font-size: 14px;
-  color: var(--gray-900);
-}
-
-.lme-paciente-item span {
-  font-size: 12px;
-  color: var(--gray-500);
-}
-
 .lme-formulario-container {
   flex: 1;
   background: var(--white);
   border-radius: var(--radius);
   border: 1px solid var(--gray-300);
   overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.lme-busca-topo {
+  padding: 24px 32px 0 32px;
 }
 
 .lme-vazio {
+  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 100%;
+  min-height: 400px;
   color: var(--gray-500);
   gap: 16px;
 }
