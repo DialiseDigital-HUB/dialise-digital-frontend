@@ -2,7 +2,6 @@ import './Exames.css'
 import Badge from '../../components/ui/Badge/Badge'
 import BuscaPaciente from '../../components/ui/BuscaPaciente/BuscaPaciente'
 import useExamesStore from '../../store/useExamesStore'
-import usePacientesStore from '../../store/usePacientesStore'
 import type { StatusExame, PeriodicidadeExame } from '../../store/useExamesStore'
 
 const rotuloStatus: Record<StatusExame, string> = {
@@ -32,11 +31,8 @@ const opcoesStatus = [
 ]
 
 export default function Exames() {
-  const pacientes = usePacientesStore(s => s.pacientes)
   const { filtroPaciente, filtroStatus, definirFiltroPaciente, definirFiltroStatus, examesFiltrados } = useExamesStore()
   const listaFiltrada = examesFiltrados()
-
-  const pacienteAtivo = pacientes.find(p => p.id === filtroPaciente) ?? null
 
   const totalVencidos   = examesFiltrados().filter(e => e.status === 'vencido').length
   const totalVenceBreve = examesFiltrados().filter(e => e.status === 'vence_breve').length
