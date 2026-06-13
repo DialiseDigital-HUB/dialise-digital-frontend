@@ -106,6 +106,7 @@ interface EstadoEvolucao {
   carregando: boolean
   definirPaciente: (idPaciente: string) => void
   atualizarCampo: <C extends keyof DadosEvolucao>(campo: C, valor: DadosEvolucao[C]) => void
+  preencherParaDebug: () => void // Apenas para debug/testes
   resetar: () => void
 }
 
@@ -124,6 +125,27 @@ const useEvolucaoStore = create<EstadoEvolucao>(set => ({
   atualizarCampo: (campo, valor) =>
     set(estado => ({
       dados: { ...estado.dados, [campo]: valor },
+    })),
+
+  preencherParaDebug: () =>
+    set(estado => ({
+      dados: {
+        ...estado.dados,
+        mesReferencia: '2026-06',
+        evolucaoClinica: 'Paciente clinicamente estável, sem queixas. Acesso vascular funcionando adequadamente.',
+        ktv: '1.4',
+        acessoData: '2024-01-15', acessosPrevios: 'Cateter Duplo Lúmen',
+        pesoSeco: '70', tempoSessao: '4', heparinaUtilizada: '5000UI', fbs: '300', fbd: '350', sodio: '138', bic: '32', perfisOutros: 'N/A',
+        usandoFerroEv: true, usandoEpo: true, usandoSevelamer: false, usandoCaCo3: true, usandoCalcitriol: false, usandoCinacalcete: false,
+        medicamentosEmUso: 'Losartana 50mg, Anlodipino 5mg', alergias: 'Dipirona',
+        vacinouHepB: true, imunizadoHepB: true, inscritoTransplante: true, internouEsseMes: false,
+        recebeuTransfusao: false, complicacoesInfecciosas: false, complicacoesCardiovasculares: false, complicacoesAcessoVascular: false,
+        examesComplementares: 'Raio-X de Tórax sem alterações recentes.',
+        hemoglobina: '11.2', calcio: '9.0', ferritina: '450', antiHiv: 'Não Reagente', ct: '20',
+        hematocrito: '34', fosforo: '4.5', paratormonio: '300', potassio: '4.8',
+        pa: '120/80', fc: '78', altura: '1.70', pesoAtual: '71', imc: '24.5', acv: 'BNF, RCR', ar: 'MV+, sem RA', ext: 'Sem edemas',
+        conduta: 'Manter prescrição dialítica atual.',
+      },
     })),
 
   resetar: () => set({ idPacienteAtivo: null, dados: estadoInicial }),

@@ -24,7 +24,7 @@ const secoesFormulario = [
 
 export default function Evolucao() {
   const pacientes         = usePacientesStore(s => s.pacientes)
-  const { idPacienteAtivo, dados, definirPaciente, atualizarCampo, resetar } = useEvolucaoStore()
+  const { idPacienteAtivo, dados, definirPaciente, atualizarCampo, resetar, preencherParaDebug } = useEvolucaoStore()
   const [modalConfirmacao, setModalConfirmacao] = useState(false)
 
   const pacienteAtivo = pacientes.find(p => p.id === idPacienteAtivo) ?? null
@@ -57,6 +57,10 @@ export default function Evolucao() {
         <h1 className="evolucao-pagina__titulo">Evolução Mensal</h1>
         {idPacienteAtivo && (
           <div className="evolucao-pagina__acoes">
+            {/* DEBUG: Preencher com dados mockados para facilitar testes */}
+            <Botao variante="ghost" onClick={preencherParaDebug}>
+              Preencher Debug
+            </Botao>
             <Botao variante="ghost" onClick={resetar}>
               Limpar
             </Botao>

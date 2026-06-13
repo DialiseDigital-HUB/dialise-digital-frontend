@@ -3,6 +3,7 @@ import useNavegacaoStore from '../../store/useNavegacaoStore'
 import usePacientesStore from '../../store/usePacientesStore'
 import Botao from '../../components/ui/Button/Button'
 import Icone from '../../components/ui/Icone/Icone'
+import BuscaPaciente from '../../components/ui/BuscaPaciente/BuscaPaciente'
 import './LME.css'
 
 export default function LME() {
@@ -38,27 +39,19 @@ export default function LME() {
       </div>
 
       <div className="lme-pagina__corpo">
-        <div className="lme-sidebar">
-          <h3 className="lme-sidebar__titulo">Pacientes</h3>
-          <div className="lme-lista-pacientes">
-            {pacientes.map(p => (
-              <div 
-                key={p.id} 
-                className={`lme-paciente-item ${p.id === pacienteAtivoId ? 'lme-paciente-item--ativo' : ''}`}
-                onClick={() => setPacienteAtivoId(p.id)}
-              >
-                <strong>{p.nomeCompleto}</strong>
-                <span>{p.prontuario}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
         <div className="lme-formulario-container">
+          <div className="lme-busca-topo">
+            <BuscaPaciente 
+              idPacienteAtivo={pacienteAtivoId} 
+              aoSelecionar={p => setPacienteAtivoId(p.id || null)} 
+              placeholder="Pesquise o paciente para preencher o LME..."
+            />
+          </div>
+
           {!paciente ? (
              <div className="lme-vazio">
                <Icone nome="lme" tamanho={48} cor="var(--gray-300)" />
-               <p>Selecione um paciente para preencher o LME</p>
+               <p>Selecione um paciente para iniciar o preenchimento do LME</p>
              </div>
           ) : (
             <div className="lme-formulario">

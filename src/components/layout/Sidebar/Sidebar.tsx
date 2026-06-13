@@ -30,7 +30,7 @@ const secoes: { label: string; itens: ItemNavegacao[] }[] = [
       { id: 'evolucao',   rotulo: 'Evolução Mensal',       icone: 'evolucao'   },
       { id: 'calendario', rotulo: 'Calendário & Alertas',  icone: 'calendario' },
       { id: 'exames',     rotulo: 'Exames',                icone: 'exames'     },
-      { id: 'lme',        rotulo: 'Laudos LME (SUS)',      icone: 'lme'        },
+      { id: 'lme',        rotulo: 'Laudos LME',            icone: 'lme'        },
       { id: 'historico',  rotulo: 'Histórico',             icone: 'historico'  },
     ],
   },

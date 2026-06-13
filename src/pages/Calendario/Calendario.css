@@ -15,9 +15,10 @@
 }
 
 .calendario-pagina__titulo {
-  font-size: 22px;
-  font-weight: 700;
-  color: var(--gray-900);
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--teal-deep);
+  letter-spacing: -0.02em;
   margin: 0;
 }
 

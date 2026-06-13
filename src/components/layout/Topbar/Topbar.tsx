@@ -19,6 +19,7 @@ const mapaRotulos: Record<string, string> = {
   exames:     'Exames',
   historico:  'Histórico',
   llm:        'Apoio LLM',
+  lme:        'Laudo de Solicitação de Medicamentos (LME)',
 }
 
 const mapaSubtitulos: Record<string, string> = {
@@ -29,6 +30,7 @@ const mapaSubtitulos: Record<string, string> = {
   exames:     'Periodicidade e status por paciente',
   historico:  'Rastreabilidade de evoluções',
   llm:        'Organização textual e extração de pendências',
+  lme:        'Componente Especializado da Assistência Farmacêutica (CEAF / SUS)',
 }
 
 function extrairIniciais(nome: string): string {

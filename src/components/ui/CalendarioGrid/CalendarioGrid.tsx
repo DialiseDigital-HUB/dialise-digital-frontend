@@ -6,7 +6,7 @@ const corPorTipo: Record<TipoEvento, string> = {
   antibiotico:'var(--red)',
   exame:      'var(--amber)',
   internacao: 'var(--gray-700)',
-  retorno:    'var(--teal-sea)',
+  retorno:    'var(--blue)',
 }
 
 const nomesMeses = [
@@ -75,6 +75,7 @@ export default function CalendarioGrid({
               type="button"
               className={`cal-grid__celula ${estaAtivo ? 'cal-grid__celula--ativo' : ''}`}
               onClick={() => aoSelecionarDia(estaAtivo ? null : dia)}
+              style={eventosNoDia.length > 0 ? { '--cor-destaque': corPorTipo[eventosNoDia[0].tipo] } as React.CSSProperties : undefined}
             >
               <span className="cal-grid__numero">{dia}</span>
               {eventosNoDia.length > 0 && (
