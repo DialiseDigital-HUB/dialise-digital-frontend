@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import Layout from './components/layout/Layout/Layout'
 import Dashboard from './pages/Dashboard/Dashboard'
 import Pacientes from './pages/Pacientes/Pacientes'
@@ -9,6 +10,7 @@ import LLM from './pages/LLM/LLM'
 import LME from './pages/LME/LME'
 import Icone from './components/ui/Icone/Icone'
 import useNavegacaoStore from './store/useNavegacaoStore'
+import usePacientesStore from './store/usePacientesStore'
 import './index.css'
 
 const paginasDisponiveis: Record<string, React.ComponentType> = {
@@ -47,6 +49,12 @@ function PaginaAtual() {
 }
 
 export default function App() {
+  const buscarPacientes = usePacientesStore(s => s.buscarPacientes)
+
+  useEffect(() => {
+    buscarPacientes()
+  }, [buscarPacientes])
+
   return (
     <Layout>
       <PaginaAtual />
