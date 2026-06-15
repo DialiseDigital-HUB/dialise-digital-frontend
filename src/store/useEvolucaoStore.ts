@@ -1,4 +1,7 @@
+
+
 import { create } from 'zustand'
+import axios from 'axios'
 
 export interface DadosEvolucao {
   mesReferencia: string
@@ -104,27 +107,168 @@ interface EstadoEvolucao {
   idPacienteAtivo: string | null
   dados: DadosEvolucao
   carregando: boolean
+  erro: string | null
+  sucesso: boolean
   definirPaciente: (idPaciente: string) => void
+  buscarEvolucaoAnterior: (idPaciente: string) => Promise<void>
+  salvarEvolucao: () => Promise<void>
   atualizarCampo: <C extends keyof DadosEvolucao>(campo: C, valor: DadosEvolucao[C]) => void
   preencherParaDebug: () => void // Apenas para debug/testes
   resetar: () => void
 }
 
-const useEvolucaoStore = create<EstadoEvolucao>(set => ({
+const useEvolucaoStore = create<EstadoEvolucao>((set, get) => ({
   idPacienteAtivo: null,
   dados: estadoInicial,
   carregando: false,
+  erro: null,
+  sucesso: false,
 
   definirPaciente: idPaciente =>
     set({
       idPacienteAtivo: idPaciente,
       dados: estadoInicial,
       carregando: false,
+      erro: null,
+      sucesso: false,
     }),
+
+  buscarEvolucaoAnterior: async (idPaciente: string) => {
+    set({ carregando: true, erro: null })
+    try {
+      const response = await axios.get(`http://localhost:8000/evolucoes?paciente_id=${idPaciente}`)
+      if (response.data && response.data.length > 0) {
+        const evo = response.data[0]
+        set({
+          dados: {
+            mesReferencia: evo.mes_referencia || evo.mesReferencia || '',
+            evolucaoClinica: evo.evolucao_clinica || evo.evolucaoClinica || '',
+            ktv: evo.ktv || '',
+            acessoData: evo.acesso_data || evo.acessoData || '',
+            acessosPrevios: evo.acessos_previos || evo.acessosPrevios || '',
+            pesoSeco: evo.peso_seco || evo.pesoSeco || '',
+            tempoSessao: evo.tempo_sessao || evo.tempoSessao || '',
+            heparinaUtilizada: evo.heparina_utilizada || evo.heparinaUtilizada || '',
+            fbs: evo.fbs || '',
+            fbd: evo.fbd || '',
+            sodio: evo.sodio || '',
+            bic: evo.bic || '',
+            perfisOutros: evo.perfis_outros || evo.perfisOutros || '',
+            usandoFerroEv: evo.usando_ferro_ev ?? evo.usandoFerroEv ?? false,
+            usandoEpo: evo.usando_epo ?? evo.usandoEpo ?? false,
+            usandoSevelamer: evo.usando_sevelamer ?? evo.usandoSevelamer ?? false,
+            usandoCaCo3: evo.usando_caco3 ?? evo.usandoCaCo3 ?? false,
+            usandoCalcitriol: evo.usando_calcitriol ?? evo.usandoCalcitriol ?? false,
+            usandoCinacalcete: evo.usando_cinacalcete ?? evo.usandoCinacalcete ?? false,
+            medicamentosEmUso: evo.medicamentos_em_uso || evo.medicamentosEmUso || '',
+            alergias: evo.alergias || '',
+            vacinouHepB: evo.vacinou_hep_b ?? evo.vacinouHepB ?? false,
+            imunizadoHepB: evo.imunizado_hep_b ?? evo.imunizadoHepB ?? false,
+            inscritoTransplante: evo.inscrito_transplante ?? evo.inscritoTransplante ?? false,
+            internouEsseMes: evo.internou_esse_mes ?? evo.internouEsseMes ?? false,
+            recebeuTransfusao: evo.recebeu_transfusao ?? evo.recebeuTransfusao ?? false,
+            complicacoesInfecciosas: evo.complicacoes_infecciosas ?? evo.complicacoesInfecciosas ?? false,
+            complicacoesCardiovasculares: evo.complicacoes_cardiovasculares ?? evo.complicacoesCardiovasculares ?? false,
+            complicacoesAcessoVascular: evo.complicacoes_acesso_vascular ?? evo.complicacoesAcessoVascular ?? false,
+            examesComplementares: evo.exames_complementares || evo.examesComplementares || '',
+            hemoglobina: evo.hemoglobina || '',
+            calcio: evo.calcio || '',
+            ferritina: evo.ferritina || '',
+            antiHiv: evo.anti_hiv || evo.antiHiv || '',
+            ct: evo.ct || '',
+            hematocrito: evo.hematocrito || '',
+            fosforo: evo.fosforo || '',
+            paratormonio: evo.paratormonio || '',
+            potassio: evo.potassio || '',
+            pa: evo.pa || '',
+            fc: evo.fc || '',
+            altura: evo.altura || '',
+            pesoAtual: evo.peso_atual || evo.pesoAtual || '',
+            imc: evo.imc || '',
+            acv: evo.acv || '',
+            ar: evo.ar || '',
+            ext: evo.ext || '',
+            conduta: evo.conduta || ''
+          },
+          carregando: false
+        })
+      } else {
+        set({ carregando: false })
+      }
+    } catch (error) {
+      set({ erro: 'Falha ao buscar evolução', carregando: false })
+    }
+  },
+
+  salvarEvolucao: async () => {
+    const { idPacienteAtivo, dados } = get()
+    if (!idPacienteAtivo) return
+
+    set({ carregando: true, erro: null, sucesso: false })
+    try {
+      const payload = {
+        paciente_id: idPacienteAtivo,
+        mes_referencia: dados.mesReferencia,
+        evolucao_clinica: dados.evolucaoClinica,
+        ktv: dados.ktv,
+        acesso_data: dados.acessoData,
+        acessos_previos: dados.acessosPrevios,
+        peso_seco: dados.pesoSeco,
+        tempo_sessao: dados.tempoSessao,
+        heparina_utilizada: dados.heparinaUtilizada,
+        fbs: dados.fbs,
+        fbd: dados.fbd,
+        sodio: dados.sodio,
+        bic: dados.bic,
+        perfis_outros: dados.perfisOutros,
+        usando_ferro_ev: dados.usandoFerroEv,
+        usando_epo: dados.usandoEpo,
+        usando_sevelamer: dados.usandoSevelamer,
+        usando_caco3: dados.usandoCaCo3,
+        usando_calcitriol: dados.usandoCalcitriol,
+        usando_cinacalcete: dados.usandoCinacalcete,
+        medicamentos_em_uso: dados.medicamentosEmUso,
+        alergias: dados.alergias,
+        vacinou_hep_b: dados.vacinouHepB,
+        imunizado_hep_b: dados.imunizadoHepB,
+        inscrito_transplante: dados.inscritoTransplante,
+        internou_esse_mes: dados.internouEsseMes,
+        recebeu_transfusao: dados.recebeuTransfusao,
+        complicacoes_infecciosas: dados.complicacoesInfecciosas,
+        complicacoes_cardiovasculares: dados.complicacoesCardiovasculares,
+        complicacoes_acesso_vascular: dados.complicacoesAcessoVascular,
+        exames_complementares: dados.examesComplementares,
+        hemoglobina: dados.hemoglobina,
+        calcio: dados.calcio,
+        ferritina: dados.ferritina,
+        anti_hiv: dados.antiHiv,
+        ct: dados.ct,
+        hematocrito: dados.hematocrito,
+        fosforo: dados.fosforo,
+        paratormonio: dados.paratormonio,
+        potassio: dados.potassio,
+        pa: dados.pa,
+        fc: dados.fc,
+        altura: dados.altura,
+        peso_atual: dados.pesoAtual,
+        imc: dados.imc,
+        acv: dados.acv,
+        ar: dados.ar,
+        ext: dados.ext,
+        conduta: dados.conduta
+      }
+
+      await axios.post('http://localhost:8000/evolucoes', payload)
+      set({ carregando: false, sucesso: true })
+    } catch (error) {
+      set({ erro: 'Falha ao salvar evolução', carregando: false })
+    }
+  },
 
   atualizarCampo: (campo, valor) =>
     set(estado => ({
       dados: { ...estado.dados, [campo]: valor },
+      sucesso: false
     })),
 
   preencherParaDebug: () =>
@@ -148,7 +292,7 @@ const useEvolucaoStore = create<EstadoEvolucao>(set => ({
       },
     })),
 
-  resetar: () => set({ idPacienteAtivo: null, dados: estadoInicial }),
+  resetar: () => set({ idPacienteAtivo: null, dados: estadoInicial, erro: null, sucesso: false }),
 }))
 
 export default useEvolucaoStore

@@ -3,12 +3,11 @@ import './Button.css'
 type Variante = 'primary' | 'ghost' | 'danger'
 type Tamanho  = 'sm' | 'md' | 'lg'
 
-interface BotaoProps {
+interface BotaoProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variante?: Variante
   tamanho?: Tamanho
   desabilitado?: boolean
   tipo?: 'button' | 'submit' | 'reset'
-  onClick?: () => void
   children: React.ReactNode
 }
 
@@ -17,8 +16,8 @@ export default function Botao({
   tamanho = 'md',
   desabilitado = false,
   tipo = 'button',
-  onClick,
   children,
+  ...props
 }: BotaoProps) {
   const classeTamanho = tamanho !== 'md' ? `btn--${tamanho}` : ''
 
@@ -26,8 +25,8 @@ export default function Botao({
     <button
       type={tipo}
       disabled={desabilitado}
-      onClick={onClick}
       className={`btn btn--${variante} ${classeTamanho}`.trim()}
+      {...props}
     >
       {children}
     </button>

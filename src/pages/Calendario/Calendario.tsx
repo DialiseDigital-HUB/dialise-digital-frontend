@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import './Calendario.css'
 import CalendarioGrid from '../../components/ui/CalendarioGrid/CalendarioGrid'
 import PainelEventosDia from './PainelEventosDia'
@@ -15,8 +16,12 @@ const legendaTipos = [
 export default function Calendario() {
   const {
     mesAtivo, anoAtivo, eventos, antibioticosCurso,
-    diaSelecionado, definirDia, avancarMes, retrocederMes, eventosDoDia,
+    diaSelecionado, definirDia, avancarMes, retrocederMes, eventosDoDia, buscarEventosEAntibioticos
   } = useCalendarioStore()
+
+  useEffect(() => {
+    buscarEventosEAntibioticos()
+  }, [buscarEventosEAntibioticos])
 
   const eventosDodiaSelecionado = diaSelecionado ? eventosDoDia(diaSelecionado) : []
 

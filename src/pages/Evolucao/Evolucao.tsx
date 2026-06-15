@@ -24,7 +24,7 @@ const secoesFormulario = [
 
 export default function Evolucao() {
   const pacientes         = usePacientesStore(s => s.pacientes)
-  const { idPacienteAtivo, dados, definirPaciente, atualizarCampo, resetar, preencherParaDebug } = useEvolucaoStore()
+  const { idPacienteAtivo, dados, definirPaciente, atualizarCampo, resetar, preencherParaDebug, salvarEvolucao, buscarEvolucaoAnterior } = useEvolucaoStore()
   const [modalConfirmacao, setModalConfirmacao] = useState(false)
 
   const pacienteAtivo = pacientes.find(p => p.id === idPacienteAtivo) ?? null
@@ -42,6 +42,7 @@ export default function Evolucao() {
 
   const aoSelecionarPaciente = (idPaciente: string) => {
     definirPaciente(idPaciente)
+    buscarEvolucaoAnterior(idPaciente)
   }
 
   const aoDefinirMes = (mes: string) => {
@@ -118,8 +119,9 @@ export default function Evolucao() {
             </Botao>
             <Botao
               variante="primary"
-              onClick={() => {
+              onClick={async () => {
                 setModalConfirmacao(false)
+                await salvarEvolucao()
                 resetar()
               }}
             >
