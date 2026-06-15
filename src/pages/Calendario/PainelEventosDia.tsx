@@ -2,7 +2,6 @@ import { useState } from 'react'
 import './PainelEventosDia.css'
 import type { EventoCalendario, TipoEvento } from '../../store/useCalendarioStore'
 import useNavegacaoStore from '../../store/useNavegacaoStore'
-import usePacientesStore from '../../store/usePacientesStore'
 
 const rotuloTipo: Record<TipoEvento, string> = {
   dialise:    'Diálise',
@@ -35,14 +34,10 @@ interface PainelEventosDiaProps {
 
 export default function PainelEventosDia({ dia, eventos }: PainelEventosDiaProps) {
   const navegarComContexto = useNavegacaoStore(state => state.navegarComContexto)
-  const pacientes = usePacientesStore(state => state.pacientes)
   const [eventoAberto, setEventoAberto] = useState<string | null>(null)
 
   const aoClicarAcao = (ev: EventoCalendario) => {
-    const pacienteEncontrado = pacientes.find(p => p.nomeCompleto === ev.paciente)
-    if (pacienteEncontrado) {
-      navegarComContexto(acaoTipo[ev.tipo].pagina, pacienteEncontrado.id)
-    }
+    navegarComContexto(acaoTipo[ev.tipo].pagina, ev.idPaciente)
   }
 
   const agruparEventos = (eventos: EventoCalendario[]) => {

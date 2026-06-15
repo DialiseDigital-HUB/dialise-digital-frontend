@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import './Historico.css'
 import Tabs from '../../components/ui/Tabs/Tabs'
 import type { TabItem } from '../../components/ui/Tabs/Tabs'
@@ -19,8 +19,13 @@ export default function Historico() {
   const [abaAtiva, setAbaAtiva] = useState('prontuario')
 
   const pacientes = usePacientesStore(s => s.pacientes)
-  const { idPacienteAtivo, definirPaciente, evolucoesDoPaciente } = useHistoricoStore()
-  const { registrosFiltrados, filtroTipo, definirFiltroTipo } = useAcessosStore()
+  const { idPacienteAtivo, definirPaciente, evolucoesDoPaciente, buscarHistorico } = useHistoricoStore()
+  const { registrosFiltrados, filtroTipo, definirFiltroTipo, buscarAcessos } = useAcessosStore()
+
+  useEffect(() => {
+    buscarHistorico()
+    buscarAcessos()
+  }, [buscarHistorico, buscarAcessos])
 
   const pacienteAtivo = pacientes.find(p => p.id === idPacienteAtivo) ?? null
   const evolucoes     = evolucoesDoPaciente()

@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import './Exames.css'
 import Badge from '../../components/ui/Badge/Badge'
 import BuscaPaciente from '../../components/ui/BuscaPaciente/BuscaPaciente'
@@ -31,7 +32,12 @@ const opcoesStatus = [
 ]
 
 export default function Exames() {
-  const { filtroPaciente, filtroStatus, definirFiltroPaciente, definirFiltroStatus, examesFiltrados } = useExamesStore()
+  const { filtroPaciente, filtroStatus, definirFiltroPaciente, definirFiltroStatus, examesFiltrados, buscarExames } = useExamesStore()
+  
+  useEffect(() => {
+    buscarExames()
+  }, [buscarExames])
+
   const listaFiltrada = examesFiltrados()
 
   const totalVencidos   = examesFiltrados().filter(e => e.status === 'vencido').length

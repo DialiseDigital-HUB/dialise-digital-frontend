@@ -1,58 +1,82 @@
 import { create } from 'zustand'
+import axios from 'axios'
 
 export type TipoAcesso = 'visualizou' | 'editou'
 
 export interface RegistroAcesso {
   id: string
   idPaciente: string
-  nomePaciente: string
-  idEvolucao: string
-  mesEvolucao: string
+  nomePaciente?: string
+  idEvolucao?: string
+  mesEvolucao?: string
   tipo: TipoAcesso
   timestamp: Date
 }
 
-const agora = new Date()
-const h = (horasAtras: number) => new Date(agora.getTime() - horasAtras * 60 * 60 * 1000)
-
-const acessosMock: RegistroAcesso[] = [
-  { id: 'A01', idPaciente: 'P002', nomePaciente: 'Maria Luiza Santos',  idEvolucao: 'H12', mesEvolucao: 'Jun 2026', tipo: 'visualizou', timestamp: h(0.3) },
-  { id: 'A02', idPaciente: 'P001', nomePaciente: 'João Silva',          idEvolucao: 'H06', mesEvolucao: 'Jun 2026', tipo: 'editou',     timestamp: h(1.1) },
-  { id: 'A03', idPaciente: 'P004', nomePaciente: 'Ana Paula Rodrigues', idEvolucao: 'H08', mesEvolucao: 'Mai 2026', tipo: 'visualizou', timestamp: h(2.5) },
-  { id: 'A04', idPaciente: 'P001', nomePaciente: 'João Silva',          idEvolucao: 'H04', mesEvolucao: 'Abr 2026', tipo: 'editou',     timestamp: h(3.2) },
-  { id: 'A05', idPaciente: 'P003', nomePaciente: 'Carlos Ferreira',     idEvolucao: 'H05', mesEvolucao: 'Mai 2026', tipo: 'visualizou', timestamp: h(5.0) },
-  { id: 'A06', idPaciente: 'P002', nomePaciente: 'Maria Luiza Santos',  idEvolucao: 'H08', mesEvolucao: 'Fev 2026', tipo: 'editou',     timestamp: h(22) },
-  { id: 'A07', idPaciente: 'P005', nomePaciente: 'Pedro Alves Costa',   idEvolucao: 'H09', mesEvolucao: 'Mar 2026', tipo: 'visualizou', timestamp: h(26) },
-  { id: 'A08', idPaciente: 'P006', nomePaciente: 'Fernanda Lima',       idEvolucao: 'H10', mesEvolucao: 'Abr 2026', tipo: 'visualizou', timestamp: h(30) },
-  { id: 'A09', idPaciente: 'P001', nomePaciente: 'João Silva',          idEvolucao: 'H02', mesEvolucao: 'Fev 2026', tipo: 'editou',     timestamp: h(48) },
-  { id: 'A10', idPaciente: 'P007', nomePaciente: 'Roberto Gomes',       idEvolucao: 'H11', mesEvolucao: 'Mai 2026', tipo: 'visualizou', timestamp: h(50) },
-]
-
 interface EstadoAcessos {
   registros: RegistroAcesso[]
   filtroTipo: TipoAcesso | 'todos'
+  carregando: boolean
+  erro: string | null
   definirFiltroTipo: (tipo: TipoAcesso | 'todos') => void
-  registrarAcesso: (dados: Omit<RegistroAcesso, 'id' | 'timestamp'>) => void
+  buscarAcessos: (idPaciente?: string) => Promise<void>
+  registrarAcesso: (dados: Omit<RegistroAcesso, 'id' | 'timestamp'>) => Promise<void>
   registrosFiltrados: () => RegistroAcesso[]
 }
 
 const useAcessosStore = create<EstadoAcessos>((set, get) => ({
-  registros: acessosMock,
+  registros: [],
   filtroTipo: 'todos',
+  carregando: false,
+  erro: null,
 
   definirFiltroTipo: tipo => set({ filtroTipo: tipo }),
 
-  registrarAcesso: dados =>
-    set(estado => ({
-      registros: [
-        {
-          ...dados,
-          id: `A${Date.now()}`,
-          timestamp: new Date(),
-        },
-        ...estado.registros,
-      ],
-    })),
+  buscarAcessos: async (idPaciente?: string) => {
+    set({ carregando: true, erro: null })
+    try {
+      const url = idPaciente && idPaciente !== 'todos'
+        ? `http://localhost:8000/acessos/?paciente_id=${idPaciente}`
+        : 'http://localhost:8000/acessos/'
+      const response = await axios.get(url)
+      const registrosMapeados: RegistroAcesso[] = response.data.map((r: any) => ({
+        id: r.id,
+        idPaciente: r.paciente_id,
+        idEvolucao: r.evolucao_id,
+        mesEvolucao: r.mes_evolucao,
+        tipo: r.tipo as TipoAcesso,
+        timestamp: new Date(r.timestamp)
+      }))
+      set({ registros: registrosMapeados, carregando: false })
+    } catch (error) {
+      set({ erro: 'Falha ao buscar acessos', carregando: false })
+    }
+  },
+
+  registrarAcesso: async dados => {
+    try {
+      const payload = {
+        paciente_id: dados.idPaciente,
+        evolucao_id: dados.idEvolucao,
+        mes_evolucao: dados.mesEvolucao,
+        tipo: dados.tipo
+      }
+      const response = await axios.post('http://localhost:8000/acessos/', payload)
+      const novoAcesso: RegistroAcesso = {
+        id: response.data.id,
+        idPaciente: response.data.paciente_id,
+        idEvolucao: response.data.evolucao_id,
+        mesEvolucao: response.data.mes_evolucao,
+        tipo: response.data.tipo as TipoAcesso,
+        timestamp: new Date(response.data.timestamp)
+      }
+      set(estado => ({
+        registros: [novoAcesso, ...estado.registros],
+      }))
+    } catch (error) {
+      console.error('Falha ao registrar acesso:', error)
+    }
+  },
 
   registrosFiltrados: () => {
     const { registros, filtroTipo } = get()

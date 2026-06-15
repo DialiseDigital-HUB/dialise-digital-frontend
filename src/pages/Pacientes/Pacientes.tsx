@@ -9,6 +9,7 @@ import Avatar from '../../components/ui/Avatar/Avatar'
 import Modal from '../../components/ui/Modal/Modal'
 import Botao from '../../components/ui/Button/Button'
 import Icone from '../../components/ui/Icone/Icone'
+import FormCadastroPaciente from './FormCadastroPaciente'
 import './Pacientes.css'
 
 const ktvHistorico = [
@@ -82,6 +83,16 @@ export default function Pacientes() {
   const definirPaciente      = useEvolucaoStore(s => s.definirPaciente)
   const modalCadastro        = useNavegacaoStore(s => s.modalCadastroPacienteAberto)
   const fecharModalCadastro  = useNavegacaoStore(s => s.fecharModalCadastro)
+  const cadastrarPaciente    = usePacientesStore(s => s.cadastrarPaciente)
+
+  const handleCadastro = async (dados: any) => {
+    const sucesso = await cadastrarPaciente(dados)
+    if (sucesso) {
+      fecharModalCadastro()
+    } else {
+      alert('Erro ao cadastrar paciente. Tente novamente.')
+    }
+  }
 
   const lista = pacientesFiltrados()
   const pacienteEmFoco = useNavegacaoStore(s => s.pacienteEmFoco)
@@ -89,8 +100,6 @@ export default function Pacientes() {
 
   useEffect(() => {
     if (pacienteEmFoco) {
-      // Find the specific patient by ID (or name, depending on what the store holds)
-      // Since our fake patients don't have UUIDs yet, let's assume pacienteEmFoco is a substring of the name for now, or an ID.
       const p = lista.find(pac => pac.id === pacienteEmFoco || pac.nomeCompleto.toLowerCase().includes(pacienteEmFoco.toLowerCase()))
       if (p) {
         selecionarPaciente(p)
@@ -211,15 +220,11 @@ export default function Pacientes() {
         rodape={
           <>
             <Botao variante="ghost" onClick={fecharModalCadastro}>Cancelar</Botao>
-            <Botao variante="primary" onClick={fecharModalCadastro}>Salvar</Botao>
+            <Botao variante="primary" form="form-cadastro-paciente" type="submit">Salvar</Botao>
           </>
         }
       >
-        <div className="detalhe-paciente__grid">
-          <p style={{ color: 'var(--gray-400)', fontSize: '0.8125rem', gridColumn: '1 / -1' }}>
-            Funcionalidade de cadastro integrada ao backend em desenvolvimento.
-          </p>
-        </div>
+        <FormCadastroPaciente idForm="form-cadastro-paciente" aoSubmeter={handleCadastro} />
       </Modal>
     </div>
   )
