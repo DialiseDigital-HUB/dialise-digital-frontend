@@ -9,6 +9,7 @@ import Historico from './pages/Historico/Historico'
 import LLM from './pages/LLM/LLM'
 import LME from './pages/LME/LME'
 import Icone from './components/ui/Icone/Icone'
+import ToastContainer from './components/ui/Toast/Toast'
 import useNavegacaoStore from './store/useNavegacaoStore'
 import usePacientesStore from './store/usePacientesStore'
 import './index.css'
@@ -58,6 +59,7 @@ export default function App() {
   return (
     <Layout>
       <PaginaAtual />
+      <ToastContainer />
     </Layout>
   )
 }
