@@ -2,6 +2,7 @@ import { useCallback, useEffect } from 'react'
 import usePacientesStore from '../../store/usePacientesStore'
 import useNavegacaoStore from '../../store/useNavegacaoStore'
 import useEvolucaoStore from '../../store/useEvolucaoStore'
+import useToastStore from '../../store/useToastStore'
 import type { Paciente } from '../../store/usePacientesStore'
 import Card from '../../components/ui/Card/Card'
 import Badge from '../../components/ui/Badge/Badge'
@@ -84,13 +85,15 @@ export default function Pacientes() {
   const modalCadastro        = useNavegacaoStore(s => s.modalCadastroPacienteAberto)
   const fecharModalCadastro  = useNavegacaoStore(s => s.fecharModalCadastro)
   const cadastrarPaciente    = usePacientesStore(s => s.cadastrarPaciente)
+  const adicionarToast       = useToastStore(s => s.adicionarToast)
 
   const handleCadastro = async (dados: any) => {
     const sucesso = await cadastrarPaciente(dados)
     if (sucesso) {
       fecharModalCadastro()
+      adicionarToast('Paciente cadastrado com sucesso!', 'sucesso')
     } else {
-      alert('Erro ao cadastrar paciente. Tente novamente.')
+      adicionarToast('Erro ao cadastrar paciente. Tente novamente.', 'erro')
     }
   }
 

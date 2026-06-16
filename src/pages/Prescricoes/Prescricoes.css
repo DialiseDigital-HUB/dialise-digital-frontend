@@ -1,0 +1,97 @@
+.prescricoes {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.prescricoes__cabecalho {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.prescricoes__titulo {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--gray-900);
+  margin: 0;
+}
+
+.prescricoes__subtitulo {
+  font-size: 13px;
+  color: var(--gray-500);
+  margin: 4px 0 0;
+}
+
+.prescricoes__tabela {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.prescricoes__tabela thead tr {
+  background: var(--gray-100);
+}
+
+.prescricoes__tabela th {
+  padding: 10px 16px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: var(--gray-500);
+}
+
+.prescricoes__tabela tbody tr {
+  border-bottom: 1px solid var(--gray-100);
+  cursor: default;
+  transition: var(--transition);
+}
+
+.prescricoes__tabela tbody tr:hover {
+  background: var(--teal-pale);
+}
+
+.prescricoes__tabela td {
+  padding: 12px 16px;
+  color: var(--gray-700);
+}
+
+.prescricoes__td-paciente {
+  font-weight: 600;
+  color: var(--gray-900) !important;
+}
+
+.prescricoes__td-medicacao {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--teal-mid) !important;
+}
+
+.prescricoes__td-dose {
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.prescricoes__td-data {
+  color: var(--gray-500) !important;
+  font-size: 12px;
+}
+
+.prescricoes__linha--encerrada {
+  opacity: .6;
+}
+
+.prescricoes__form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-top: 4px;
+}
+
+.prescricoes__form-linha {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 12px;
+}

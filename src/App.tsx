@@ -8,7 +8,11 @@ import Exames from './pages/Exames/Exames'
 import Historico from './pages/Historico/Historico'
 import LLM from './pages/LLM/LLM'
 import LME from './pages/LME/LME'
+import Prescricoes from './pages/Prescricoes/Prescricoes'
+import Vacinas from './pages/Vacinas/Vacinas'
+import SolicitacaoExames from './pages/SolicitacaoExames/SolicitacaoExames'
 import Icone from './components/ui/Icone/Icone'
+import ToastContainer from './components/ui/Toast/Toast'
 import useNavegacaoStore from './store/useNavegacaoStore'
 import usePacientesStore from './store/usePacientesStore'
 import './index.css'
@@ -21,7 +25,10 @@ const paginasDisponiveis: Record<string, React.ComponentType> = {
   exames:     Exames,
   historico:  Historico,
   llm:        LLM,
-  lme:        LME,
+  lme:               LME,
+  prescricoes:        Prescricoes,
+  vacinas:            Vacinas,
+  'solicitacao-exames': SolicitacaoExames,
 }
 
 function PaginaAtual() {
@@ -58,6 +65,7 @@ export default function App() {
   return (
     <Layout>
       <PaginaAtual />
+      <ToastContainer />
     </Layout>
   )
 }

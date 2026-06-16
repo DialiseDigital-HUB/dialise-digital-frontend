@@ -11,7 +11,7 @@ import './Dashboard.css'
 const statCards = [
   { id: 'pacientes', variante: 'ok',      icone: 'pacientes'  as const, label: 'Pacientes Ativos',  valor: 48, sub: '↑ 2 neste mês'           },
   { id: 'exames',    variante: 'warn',    icone: 'exame_lab'  as const, label: 'Exames Pendentes',  valor: 12, sub: '3 vencidos há > 30 dias' },
-  { id: 'evolucao',  variante: 'danger',  icone: 'medicamento' as const, label: 'Antibióticos',     valor: 5,  sub: '2 vencem esta semana'     },
+  { id: 'evolucao',  variante: 'danger',  icone: 'medicamento' as const, label: 'Antibióticos',     valor: 5,  sub: '2 finalizam esta semana'  },
   { id: 'evolucao',  variante: 'warn',    icone: 'lme'        as const, label: 'LME p/ Renovar',    valor: 3,  sub: 'Vencimento em 15 dias'    },
 ]
 
@@ -21,12 +21,12 @@ const alertas = [
   { 
     severidade: 'danger' as const, icone: 'medicamento' as const, titulo: 'Antibiótico vence amanhã', sub: 'Maria Luiza Santos · Vancomicina iniciada 13/06', 
     pacienteId: '22222222-2222-4222-8222-222222222222', 
-    acoes: [{ rotulo: 'Renovar Vancomicina', rota: 'evolucao', primario: true }, { rotulo: 'Suspender', rota: 'pacientes' }] as AcaoAlerta[]
+    acoes: [{ rotulo: 'Renovar Vancomicina', rota: 'prescricoes', primario: true }, { rotulo: 'Suspender', rota: 'pacientes' }] as AcaoAlerta[]
   },
   { 
     severidade: 'danger' as const, icone: 'exame_lab'   as const, titulo: 'PTH sem coleta há 4 meses', sub: 'Carlos Ferreira · Último: Fev/25 (trimestral)', 
     pacienteId: '33333333-3333-4333-8333-333333333333', 
-    acoes: [{ rotulo: 'Solicitar Exame', rota: 'exames', primario: true }] as AcaoAlerta[]
+    acoes: [{ rotulo: 'Solicitar Exame', rota: 'solicitacao-exames', primario: true }] as AcaoAlerta[]
   },
   { 
     severidade: 'warn'   as const, icone: 'lme'         as const, titulo: 'LME de Sevelamer vence em 12 dias', sub: 'Ana Paula Rodrigues · Precisa de renovação', 
@@ -36,12 +36,12 @@ const alertas = [
   { 
     severidade: 'warn'   as const, icone: 'exame_lab'   as const, titulo: 'Hepatite B — reforço pendente', sub: 'Pedro Alves Costa · Anti-HBs < 10 UI/L', 
     pacienteId: '55555555-5555-4555-8555-555555555555', 
-    acoes: [{ rotulo: 'Registrar Vacina', rota: 'evolucao', primario: true }] as AcaoAlerta[]
+    acoes: [{ rotulo: 'Nova Vacina', rota: 'vacinas', primario: true }] as AcaoAlerta[]
   },
   { 
     severidade: 'info'   as const, icone: 'internacao'  as const, titulo: 'Internação no mês — alta recente', sub: 'João Silva · Alta em 10/06 · Monitorar acesso', 
     pacienteId: '11111111-1111-4111-8111-111111111111', 
-    acoes: [{ rotulo: 'Verificar Prontuário', rota: 'pacientes', primario: true }] as AcaoAlerta[]
+    acoes: [{ rotulo: 'Verificar Prontuário', rota: 'historico', primario: true }] as AcaoAlerta[]
   },
 ]
 
