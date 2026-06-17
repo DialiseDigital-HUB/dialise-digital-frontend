@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import usePacientesStore from '../../store/usePacientesStore'
+import useSolicitacoesExamesStore from '../../store/useSolicitacoesExamesStore'
 import useToastStore from '../../store/useToastStore'
 import Card from '../../components/ui/Card/Card'
 import Modal from '../../components/ui/Modal/Modal'
@@ -9,42 +10,6 @@ import Select from '../../components/ui/Select/Select'
 import Badge from '../../components/ui/Badge/Badge'
 import Icone from '../../components/ui/Icone/Icone'
 import './SolicitacaoExames.css'
-
-interface SolicitacaoExame {
-  id: string
-  paciente: string
-  exame: string
-  periodicidade: string
-  dataSolicitacao: string
-  status: 'pendente' | 'coletado' | 'cancelado'
-}
-
-const solicitacoesMock: SolicitacaoExame[] = [
-  {
-    id: '1',
-    paciente: 'Maria Silva Santos',
-    exame: 'Hemograma',
-    periodicidade: 'Mensal',
-    dataSolicitacao: '01/06/2026',
-    status: 'pendente',
-  },
-  {
-    id: '2',
-    paciente: 'João Pedro Oliveira',
-    exame: 'PTH',
-    periodicidade: 'Trimestral',
-    dataSolicitacao: '15/05/2026',
-    status: 'coletado',
-  },
-  {
-    id: '3',
-    paciente: 'Ana Beatriz Costa',
-    exame: 'Kt/V',
-    periodicidade: 'Mensal',
-    dataSolicitacao: '10/06/2026',
-    status: 'pendente',
-  },
-]
 
 const opcoesExame = [
   { valor: 'Hemograma', rotulo: 'Hemograma' },
@@ -66,15 +31,19 @@ const opcoesPeriodicidade = [
   { valor: 'Único', rotulo: 'Único' },
 ]
 
-const varianteStatus: Record<SolicitacaoExame['status'], 'ok' | 'warn' | 'err'> = {
+const varianteStatus: Record<string, 'ok' | 'warn' | 'err'> = {
   pendente: 'warn',
   coletado: 'ok',
+  solicitado: 'warn',
+  resultado_disponivel: 'ok',
   cancelado: 'err',
 }
 
-const rotuloStatus: Record<SolicitacaoExame['status'], string> = {
+const rotuloStatus: Record<string, string> = {
   pendente: 'Pendente',
+  solicitado: 'Solicitado',
   coletado: 'Coletado',
+  resultado_disponivel: 'Com Resultado',
   cancelado: 'Cancelado',
 }
 
@@ -97,9 +66,20 @@ export default function SolicitacaoExames() {
   const [form, setForm] = useState<FormState>(formInicial)
 
   const pacientes = usePacientesStore(s => s.pacientes)
+  const { registros, buscarSolicitacoes, cadastrarSolicitacao } = useSolicitacoesExamesStore()
   const adicionarToast = useToastStore(s => s.adicionarToast)
 
+  useEffect(() => {
+    buscarSolicitacoes()
+  }, [buscarSolicitacoes])
+
   const opcoesPacientes = pacientes.map(p => ({ valor: p.id, rotulo: p.nomeCompleto }))
+
+  const mapaPacientes = useMemo(() => {
+    const mapa: Record<string, string> = {}
+    pacientes.forEach(p => mapa[p.id] = p.nomeCompleto)
+    return mapa
+  }, [pacientes])
 
   const atualizar = (campo: keyof FormState) => (valor: string) =>
     setForm(prev => ({ ...prev, [campo]: valor }))
@@ -109,10 +89,25 @@ export default function SolicitacaoExames() {
     setForm(formInicial)
   }
 
-  const aoSalvar = (e: React.FormEvent) => {
+  const aoSalvar = async (e: React.FormEvent) => {
     e.preventDefault()
-    adicionarToast('Exame solicitado com sucesso!', 'sucesso')
-    aoFechar()
+    
+    const exameNome = form.exame === 'Outros' ? form.exameOutro : form.exame
+
+    const sucesso = await cadastrarSolicitacao({
+      idPaciente: form.pacienteId,
+      tipoExame: exameNome,
+      dataSolicitacao: new Date().toISOString().split('T')[0],
+      medicoSolicitante: 'Dr. Associado', // Simulação de médico logado
+      prioridade: 'rotina'
+    })
+
+    if (sucesso) {
+      adicionarToast('Exame solicitado com sucesso!', 'sucesso')
+      aoFechar()
+    } else {
+      adicionarToast('Erro ao solicitar exame.', 'erro')
+    }
   }
 
   return (
@@ -127,26 +122,26 @@ export default function SolicitacaoExames() {
         </Botao>
       </div>
 
-      <Card semPadding icone={<Icone nome="exames" tamanho={14} />} titulo={`${solicitacoesMock.length} solicitações`}>
+      <Card semPadding icone={<Icone nome="exames" tamanho={14} />} titulo={`${registros.length} solicitações`}>
         <table className="solicitacao-exames__tabela">
           <thead>
             <tr>
               <th>Paciente</th>
               <th>Exame</th>
-              <th>Periodicidade</th>
+              <th>Prioridade</th>
               <th>Data Solicitação</th>
               <th>Status</th>
             </tr>
           </thead>
           <tbody>
-            {solicitacoesMock.map(s => (
+            {registros.map(s => (
               <tr key={s.id} className={`solicitacao-exames__linha solicitacao-exames__linha--${s.status}`}>
-                <td className="solicitacao-exames__td-paciente">{s.paciente}</td>
-                <td className="solicitacao-exames__td-exame">{s.exame}</td>
-                <td>{s.periodicidade}</td>
+                <td className="solicitacao-exames__td-paciente">{mapaPacientes[s.idPaciente] || 'Desconhecido'}</td>
+                <td className="solicitacao-exames__td-exame">{s.tipoExame}</td>
+                <td>{s.prioridade}</td>
                 <td className="solicitacao-exames__td-data">{s.dataSolicitacao}</td>
                 <td>
-                  <Badge variante={varianteStatus[s.status]}>{rotuloStatus[s.status]}</Badge>
+                  <Badge variante={varianteStatus[s.status] || 'ok'}>{rotuloStatus[s.status] || s.status}</Badge>
                 </td>
               </tr>
             ))}

@@ -40,22 +40,9 @@ const usePacientesStore = create<EstadoPacientes>((set, get) => ({
   buscarPacientes: async () => {
     set({ carregando: true, erro: null })
     try {
-      const response = await axios.get('http://localhost:8000/pacientes/')
+      const response = await axios.get('http://localhost:8000/pacientes/resumo')
       
-      const dadosRicosMockados: Record<string, any> = {
-        '11111111-1111-4111-8111-111111111111': { acessoVascular: 'Cateter tunelizado', ktv: 1.4, statusEvolucao: 'ok', inscritoTransplante: false, recebeuTransfusao: false },
-        '22222222-2222-4222-8222-222222222222': { acessoVascular: 'Fístula AV',         ktv: 1.1, statusEvolucao: 'warn', inscritoTransplante: true,  recebeuTransfusao: false },
-        '33333333-3333-4333-8333-333333333333': { acessoVascular: 'Fístula AV',         ktv: 1.3, statusEvolucao: 'ok',   inscritoTransplante: false, recebeuTransfusao: false },
-        '44444444-4444-4444-8444-444444444444': { acessoVascular: 'Cateter tunelizado', ktv: 0.9, statusEvolucao: 'err',  inscritoTransplante: true,  recebeuTransfusao: true  },
-        '55555555-5555-4555-8555-555555555555': { acessoVascular: 'Prótese vascular',   ktv: 1.2, statusEvolucao: 'warn', inscritoTransplante: false, recebeuTransfusao: false },
-        '66666666-6666-4666-8666-666666666666': { acessoVascular: 'Fístula AV',         ktv: 1.5, statusEvolucao: 'ok',   inscritoTransplante: true,  recebeuTransfusao: false },
-        '77777777-7777-4777-8777-777777777777': { acessoVascular: 'Fístula AV',         ktv: 1.3, statusEvolucao: 'ok',   inscritoTransplante: false, recebeuTransfusao: false },
-        '88888888-8888-4888-8888-888888888888': { acessoVascular: 'Cateter tunelizado', ktv: 1.1, statusEvolucao: 'warn', inscritoTransplante: false, recebeuTransfusao: false }
-      }
-
       const pacientesMapeados: Paciente[] = response.data.map((p: any) => {
-        const mockRico = dadosRicosMockados[p.id] || { acessoVascular: 'N/A', ktv: 0, statusEvolucao: 'ok', inscritoTransplante: false, recebeuTransfusao: false }
-        
         return {
           id: p.id,
           prontuario: p.prontuario,
@@ -65,11 +52,11 @@ const usePacientesStore = create<EstadoPacientes>((set, get) => ({
           turno: p.turno,
           medico: p.medico || 'Dr. Associado',
           diagnostico: p.diagnostico || 'Sem diagnóstico',
-          acessoVascular: mockRico.acessoVascular,
-          ktv: mockRico.ktv,
-          statusEvolucao: mockRico.statusEvolucao,
-          inscritoTransplante: mockRico.inscritoTransplante,
-          recebeuTransfusao: mockRico.recebeuTransfusao
+          acessoVascular: p.acesso_vascular || 'N/A',
+          ktv: p.ktv || 0,
+          statusEvolucao: p.status_evolucao || 'ok',
+          inscritoTransplante: p.inscrito_transplante || false,
+          recebeuTransfusao: p.recebeu_transfusao || false
         }
       })
       set({ pacientes: pacientesMapeados, carregando: false })

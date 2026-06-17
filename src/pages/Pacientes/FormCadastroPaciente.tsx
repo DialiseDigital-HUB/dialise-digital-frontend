@@ -40,8 +40,22 @@ export default function FormCadastroPaciente({ idForm, aoSubmeter }: FormCadastr
     })
   }
 
+  const preencherDebug = () => {
+    setProntuario(String(Math.floor(Math.random() * 90000) + 10000))
+    setNome('Paciente Mockado de Teste')
+    setDataNascimento('1975-08-15')
+    setSexo('M')
+    setTurno('Manhã')
+    setDiagnostico('DRC estágio 5 secundária a DM tipo 2')
+  }
+
   return (
     <form id={idForm} onSubmit={handleSubmit} className="detalhe-paciente__grid" style={{ gap: '1rem', marginTop: '1rem' }}>
+      <div style={{ gridColumn: '1 / -1', display: 'flex', justifyContent: 'flex-end', marginBottom: '-0.5rem' }}>
+        <button type="button" onClick={preencherDebug} style={{ padding: '0.25rem 0.75rem', fontSize: '0.8rem', background: '#e2e8f0', border: 'none', borderRadius: '4px', cursor: 'pointer', color: '#475569' }}>
+          Preencher Debug
+        </button>
+      </div>
       <div style={{ gridColumn: '1 / -1' }}>
         <Input 
           id="nome" 
