@@ -19,6 +19,8 @@ interface Prescricao {
   frequencia: string
   dataFim: string | null
   status: 'ativa' | 'encerrada' | 'suspensa'
+  indicacao?: string
+  resultado_cultura?: string
 }
 
 const prescricoesMock: Prescricao[] = [
@@ -51,6 +53,8 @@ const prescricoesMock: Prescricao[] = [
     frequencia: 'Dose única',
     dataFim: '20/06/2026',
     status: 'encerrada',
+    indicacao: 'Infecção de CVC',
+    resultado_cultura: 'S. aureus MRSA, sensível a Vancomicina'
   },
 ]
 
@@ -106,6 +110,8 @@ interface FormState {
   frequencia: string
   tipoDataFim: string
   dataFim: string
+  indicacao: string
+  resultado_cultura: string
 }
 
 const formInicial: FormState = {
@@ -117,6 +123,8 @@ const formInicial: FormState = {
   frequencia: '',
   tipoDataFim: 'indeterminada',
   dataFim: '',
+  indicacao: '',
+  resultado_cultura: '',
 }
 
 export default function Prescricoes() {
@@ -171,7 +179,15 @@ export default function Prescricoes() {
             {prescricoesMock.map(p => (
               <tr key={p.id} className={`prescricoes__linha prescricoes__linha--${p.status}`}>
                 <td className="prescricoes__td-paciente">{p.paciente}</td>
-                <td className="prescricoes__td-medicacao">{p.medicacao}</td>
+                <td className="prescricoes__td-medicacao">
+                  <div className="prescricoes__medicacao-nome">{p.medicacao}</div>
+                  {p.indicacao && (
+                    <div className="prescricoes__medicacao-contexto">
+                      <strong>Indicação:</strong> {p.indicacao}
+                      {p.resultado_cultura && <><br/><strong>Cultura:</strong> {p.resultado_cultura}</>}
+                    </div>
+                  )}
+                </td>
                 <td className="prescricoes__td-dose">{p.dose}</td>
                 <td>{p.via}</td>
                 <td>{p.frequencia}</td>
@@ -262,6 +278,20 @@ export default function Prescricoes() {
               aoAlterar={atualizar('dataFim')}
             />
           )}
+          <Input
+            id="prescricao-indicacao"
+            label="Indicação (Motivo)"
+            valor={form.indicacao}
+            aoAlterar={atualizar('indicacao')}
+            placeholder="Ex: Pneumonia"
+          />
+          <Input
+            id="prescricao-cultura"
+            label="Resultado de Cultura (Opcional)"
+            valor={form.resultado_cultura}
+            aoAlterar={atualizar('resultado_cultura')}
+            placeholder="Ex: MRSA sensível a Vancomicina"
+          />
         </form>
       </Modal>
     </div>

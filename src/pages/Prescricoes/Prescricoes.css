@@ -64,9 +64,29 @@
 }
 
 .prescricoes__td-medicacao {
-  font-family: var(--font-mono);
-  font-size: 12px;
   color: var(--teal-mid) !important;
+}
+
+.prescricoes__medicacao-nome {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.prescricoes__medicacao-contexto {
+  margin-top: 6px;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--gray-500);
+  background: var(--gray-50);
+  padding: 6px 8px;
+  border-radius: 4px;
+  border-left: 2px solid var(--teal-mid);
+}
+
+.prescricoes__medicacao-contexto strong {
+  font-weight: 600;
+  color: var(--gray-700);
 }
 
 .prescricoes__td-dose {
