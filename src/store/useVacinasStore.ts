@@ -1,86 +1,70 @@
 import { create } from 'zustand'
 import axios from 'axios'
-import usePacientesStore from './usePacientesStore'
 
-export interface Vacina {
+export interface RegistroVacina {
   id: string
-  paciente_id: string
-  paciente?: string
+  idPaciente: string
   vacina: string
-  data_aplicacao: string
-  lote?: string
-  proxima_dose?: string
+  dose: string
+  dataAplicacao: string
+  proximaDose?: string
+  status: 'concluida' | 'pendente' | 'atrasada'
 }
 
 interface EstadoVacinas {
-  vacinas: Vacina[]
-  filtroPaciente: string
+  registros: RegistroVacina[]
   carregando: boolean
   erro: string | null
-  definirFiltroPaciente: (id: string) => void
   buscarVacinas: (idPaciente?: string) => Promise<void>
-  criarVacina: (dados: Omit<Vacina, 'id' | 'paciente'>) => Promise<void>
-  vacinasFiltradas: () => Vacina[]
+  cadastrarVacina: (dados: Omit<RegistroVacina, 'id' | 'status'>) => Promise<boolean>
 }
 
-const API_URL = 'http://localhost:8000/vacinas'
-
 const useVacinasStore = create<EstadoVacinas>((set, get) => ({
-  vacinas: [],
-  filtroPaciente: 'todos',
+  registros: [],
   carregando: false,
   erro: null,
-
-  definirFiltroPaciente: id => set({ filtroPaciente: id }),
 
   buscarVacinas: async (idPaciente?: string) => {
     set({ carregando: true, erro: null })
     try {
-      const { pacientes, buscarPacientes } = usePacientesStore.getState()
-      if (pacientes.length === 0) await buscarPacientes()
-      const listaPacientes = usePacientesStore.getState().pacientes
-
-      const url = idPaciente && idPaciente !== 'todos' 
-        ? `${API_URL}/?paciente_id=${idPaciente}` 
-        : `${API_URL}/`
+      const url = idPaciente && idPaciente !== 'todos'
+        ? `http://localhost:8000/vacinas/paciente/${idPaciente}`
+        : 'http://localhost:8000/vacinas/'
       
       const response = await axios.get(url)
-      const vacinasMapeadas: Vacina[] = response.data.map((v: any) => {
-        const paciente = listaPacientes.find(pac => pac.id === v.paciente_id)
-        return {
-          id: v.id,
-          paciente_id: v.paciente_id,
-          paciente: paciente?.nomeCompleto || 'Desconhecido',
-          vacina: v.vacina,
-          data_aplicacao: v.data_aplicacao,
-          lote: v.lote,
-          proxima_dose: v.proxima_dose
-        }
-      })
-      
-      set({ vacinas: vacinasMapeadas, carregando: false })
+      const vacinasMapeadas: RegistroVacina[] = response.data.map((r: any) => ({
+        id: r.id,
+        idPaciente: r.paciente_id,
+        vacina: r.vacina,
+        dose: r.dose,
+        dataAplicacao: r.data_aplicacao,
+        proximaDose: r.proxima_dose,
+        status: r.status as 'concluida' | 'pendente' | 'atrasada'
+      }))
+      set({ registros: vacinasMapeadas, carregando: false })
     } catch (error) {
       set({ erro: 'Falha ao buscar vacinas', carregando: false })
     }
   },
 
-  criarVacina: async (dados) => {
+  cadastrarVacina: async (dados) => {
     set({ carregando: true, erro: null })
     try {
-      await axios.post(`${API_URL}/`, dados)
-      await get().buscarVacinas(get().filtroPaciente)
+      const payload = {
+        paciente_id: dados.idPaciente,
+        vacina: dados.vacina,
+        dose: dados.dose,
+        data_aplicacao: dados.dataAplicacao,
+        proxima_dose: dados.proximaDose
+      }
+      await axios.post('http://localhost:8000/vacinas/', payload)
+      await get().buscarVacinas()
+      return true
     } catch (error) {
-      set({ erro: 'Falha ao registrar vacina', carregando: false })
-      throw error
+      set({ erro: 'Falha ao cadastrar vacina', carregando: false })
+      return false
     }
-  },
-
-  vacinasFiltradas: () => {
-    const { vacinas, filtroPaciente } = get()
-    return vacinas.filter(v => {
-      return filtroPaciente === 'todos' || v.paciente_id === filtroPaciente
-    })
-  },
+  }
 }))
 
 export default useVacinasStore

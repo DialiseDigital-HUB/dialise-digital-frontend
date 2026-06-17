@@ -1,95 +1,79 @@
 import { create } from 'zustand'
 import axios from 'axios'
-import usePacientesStore from './usePacientesStore'
 
 export interface Prescricao {
   id: string
-  paciente_id: string
-  paciente?: string
-  medicacao: string
-  dose: string
-  via: string
+  idPaciente: string
+  tipo: 'Hemodiálise' | 'Medicamento' | 'Dieta'
+  descricao: string
+  dataInicio: string
   frequencia: string
-  data_fim: string | null
-  status: 'ativa' | 'encerrada' | 'suspensa'
+  dataFim?: string
+  status: 'ativa' | 'suspensa' | 'concluida'
   indicacao?: string
-  resultado_cultura?: string
+  resultadoCultura?: string
 }
 
 interface EstadoPrescricoes {
-  prescricoes: Prescricao[]
-  filtroPaciente: string
+  registros: Prescricao[]
   carregando: boolean
   erro: string | null
-  definirFiltroPaciente: (id: string) => void
   buscarPrescricoes: (idPaciente?: string) => Promise<void>
-  criarPrescricao: (dados: Omit<Prescricao, 'id' | 'paciente' | 'status'>) => Promise<void>
-  prescricoesFiltradas: () => Prescricao[]
+  cadastrarPrescricao: (dados: Omit<Prescricao, 'id' | 'status'>) => Promise<boolean>
 }
 
-const API_URL = 'http://localhost:8000/prescricoes'
-
 const usePrescricoesStore = create<EstadoPrescricoes>((set, get) => ({
-  prescricoes: [],
-  filtroPaciente: 'todos',
+  registros: [],
   carregando: false,
   erro: null,
-
-  definirFiltroPaciente: id => set({ filtroPaciente: id }),
 
   buscarPrescricoes: async (idPaciente?: string) => {
     set({ carregando: true, erro: null })
     try {
-      const { pacientes, buscarPacientes } = usePacientesStore.getState()
-      if (pacientes.length === 0) await buscarPacientes()
-      const listaPacientes = usePacientesStore.getState().pacientes
-
-      const url = idPaciente && idPaciente !== 'todos' 
-        ? `${API_URL}/?paciente_id=${idPaciente}` 
-        : `${API_URL}/`
+      const url = idPaciente && idPaciente !== 'todos'
+        ? `http://localhost:8000/prescricoes/paciente/${idPaciente}`
+        : 'http://localhost:8000/prescricoes/'
       
       const response = await axios.get(url)
-      const prescricoesMapeadas: Prescricao[] = response.data.map((p: any) => {
-        const paciente = listaPacientes.find(pac => pac.id === p.paciente_id)
-        return {
-          id: p.id,
-          paciente_id: p.paciente_id,
-          paciente: paciente?.nomeCompleto || 'Desconhecido',
-          medicacao: p.medicacao,
-          dose: p.dose,
-          via: p.via,
-          frequencia: p.frequencia,
-          data_fim: p.data_fim,
-          status: p.status,
-          indicacao: p.indicacao,
-          resultado_cultura: p.resultado_cultura
-        }
-      })
-      
-      set({ prescricoes: prescricoesMapeadas, carregando: false })
+      const prescricoesMapeadas: Prescricao[] = response.data.map((r: any) => ({
+        id: r.id,
+        idPaciente: r.paciente_id,
+        tipo: r.tipo as 'Hemodiálise' | 'Medicamento' | 'Dieta',
+        descricao: r.descricao,
+        dataInicio: r.data_inicio,
+        frequencia: r.frequencia,
+        dataFim: r.data_fim,
+        status: r.status as 'ativa' | 'suspensa' | 'concluida',
+        indicacao: r.indicacao,
+        resultadoCultura: r.resultado_cultura
+      }))
+      set({ registros: prescricoesMapeadas, carregando: false })
     } catch (error) {
       set({ erro: 'Falha ao buscar prescrições', carregando: false })
     }
   },
 
-  criarPrescricao: async (dados) => {
+  cadastrarPrescricao: async (dados) => {
     set({ carregando: true, erro: null })
     try {
-      await axios.post(`${API_URL}/`, dados)
-      // Recarrega as prescrições para o paciente atual (ou todas se for o caso)
-      await get().buscarPrescricoes(get().filtroPaciente)
+      const payload = {
+        paciente_id: dados.idPaciente,
+        tipo: dados.tipo,
+        descricao: dados.descricao,
+        data_inicio: dados.dataInicio,
+        frequencia: dados.frequencia,
+        data_fim: dados.dataFim,
+        indicacao: dados.indicacao,
+        resultado_cultura: dados.resultadoCultura
+      }
+      await axios.post('http://localhost:8000/prescricoes/', payload)
+      await get().buscarPrescricoes()
+      return true
     } catch (error) {
-      set({ erro: 'Falha ao criar prescrição', carregando: false })
-      throw error
+      set({ erro: 'Falha ao cadastrar prescrição', carregando: false })
+      return false
     }
-  },
-
-  prescricoesFiltradas: () => {
-    const { prescricoes, filtroPaciente } = get()
-    return prescricoes.filter(p => {
-      return filtroPaciente === 'todos' || p.paciente_id === filtroPaciente
-    })
-  },
+  }
 }))
 
 export default usePrescricoesStore

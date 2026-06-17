@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import usePacientesStore from '../../store/usePacientesStore'
-import useSolicitacoesExameStore from '../../store/useSolicitacoesExameStore'
+import useSolicitacoesExamesStore from '../../store/useSolicitacoesExamesStore'
 import useToastStore from '../../store/useToastStore'
 import Card from '../../components/ui/Card/Card'
 import Modal from '../../components/ui/Modal/Modal'
@@ -34,12 +34,16 @@ const opcoesPeriodicidade = [
 const varianteStatus: Record<string, 'ok' | 'warn' | 'err'> = {
   pendente: 'warn',
   coletado: 'ok',
+  solicitado: 'warn',
+  resultado_disponivel: 'ok',
   cancelado: 'err',
 }
 
 const rotuloStatus: Record<string, string> = {
   pendente: 'Pendente',
+  solicitado: 'Solicitado',
   coletado: 'Coletado',
+  resultado_disponivel: 'Com Resultado',
   cancelado: 'Cancelado',
 }
 
@@ -62,9 +66,7 @@ export default function SolicitacaoExames() {
   const [form, setForm] = useState<FormState>(formInicial)
 
   const pacientes = usePacientesStore(s => s.pacientes)
-  const buscarSolicitacoes = useSolicitacoesExameStore(s => s.buscarSolicitacoes)
-  const solicitacoes = useSolicitacoesExameStore(s => s.solicitacoesFiltradas())
-  const criarSolicitacao = useSolicitacoesExameStore(s => s.criarSolicitacao)
+  const { registros, buscarSolicitacoes, cadastrarSolicitacao } = useSolicitacoesExamesStore()
   const adicionarToast = useToastStore(s => s.adicionarToast)
 
   useEffect(() => {
@@ -72,6 +74,12 @@ export default function SolicitacaoExames() {
   }, [buscarSolicitacoes])
 
   const opcoesPacientes = pacientes.map(p => ({ valor: p.id, rotulo: p.nomeCompleto }))
+
+  const mapaPacientes = useMemo(() => {
+    const mapa: Record<string, string> = {}
+    pacientes.forEach(p => mapa[p.id] = p.nomeCompleto)
+    return mapa
+  }, [pacientes])
 
   const atualizar = (campo: keyof FormState) => (valor: string) =>
     setForm(prev => ({ ...prev, [campo]: valor }))
@@ -83,18 +91,22 @@ export default function SolicitacaoExames() {
 
   const aoSalvar = async (e: React.FormEvent) => {
     e.preventDefault()
-    try {
-      const exameNome = form.exame === 'Outros' ? form.exameOutro : form.exame
-      await criarSolicitacao({
-        paciente_id: form.pacienteId,
-        exame: exameNome,
-        periodicidade: form.periodicidade || undefined,
-        data_solicitacao: new Date().toISOString().split('T')[0]
-      })
+    
+    const exameNome = form.exame === 'Outros' ? form.exameOutro : form.exame
+
+    const sucesso = await cadastrarSolicitacao({
+      idPaciente: form.pacienteId,
+      tipoExame: exameNome,
+      dataSolicitacao: new Date().toISOString().split('T')[0],
+      medicoSolicitante: 'Dr. Associado', // Simulação de médico logado
+      prioridade: 'rotina'
+    })
+
+    if (sucesso) {
       adicionarToast('Exame solicitado com sucesso!', 'sucesso')
       aoFechar()
-    } catch (err) {
-      adicionarToast('Erro ao solicitar exame', 'erro')
+    } else {
+      adicionarToast('Erro ao solicitar exame.', 'erro')
     }
   }
 
@@ -110,26 +122,26 @@ export default function SolicitacaoExames() {
         </Botao>
       </div>
 
-      <Card semPadding icone={<Icone nome="exames" tamanho={14} />} titulo={`${solicitacoes.length} solicitações`}>
+      <Card semPadding icone={<Icone nome="exames" tamanho={14} />} titulo={`${registros.length} solicitações`}>
         <table className="solicitacao-exames__tabela">
           <thead>
             <tr>
               <th>Paciente</th>
               <th>Exame</th>
-              <th>Periodicidade</th>
+              <th>Prioridade</th>
               <th>Data Solicitação</th>
               <th>Status</th>
             </tr>
           </thead>
           <tbody>
-            {solicitacoes.map(s => (
+            {registros.map(s => (
               <tr key={s.id} className={`solicitacao-exames__linha solicitacao-exames__linha--${s.status}`}>
-                <td className="solicitacao-exames__td-paciente">{s.paciente}</td>
-                <td className="solicitacao-exames__td-exame">{s.exame}</td>
-                <td>{s.periodicidade}</td>
-                <td className="solicitacao-exames__td-data">{new Date(s.data_solicitacao).toLocaleDateString()}</td>
+                <td className="solicitacao-exames__td-paciente">{mapaPacientes[s.idPaciente] || 'Desconhecido'}</td>
+                <td className="solicitacao-exames__td-exame">{s.tipoExame}</td>
+                <td>{s.prioridade}</td>
+                <td className="solicitacao-exames__td-data">{s.dataSolicitacao}</td>
                 <td>
-                  <Badge variante={varianteStatus[s.status] || 'warn'}>{rotuloStatus[s.status] || s.status}</Badge>
+                  <Badge variante={varianteStatus[s.status] || 'ok'}>{rotuloStatus[s.status] || s.status}</Badge>
                 </td>
               </tr>
             ))}

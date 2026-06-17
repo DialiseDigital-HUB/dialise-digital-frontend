@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import usePacientesStore from '../../store/usePacientesStore'
 import useVacinasStore from '../../store/useVacinasStore'
 import useToastStore from '../../store/useToastStore'
@@ -37,9 +37,7 @@ export default function Vacinas() {
   const [form, setForm] = useState<FormState>(formInicial)
 
   const pacientes = usePacientesStore(s => s.pacientes)
-  const buscarVacinas = useVacinasStore(s => s.buscarVacinas)
-  const vacinas = useVacinasStore(s => s.vacinasFiltradas())
-  const criarVacina = useVacinasStore(s => s.criarVacina)
+  const { registros, buscarVacinas, cadastrarVacina } = useVacinasStore()
   const adicionarToast = useToastStore(s => s.adicionarToast)
 
   useEffect(() => {
@@ -47,6 +45,12 @@ export default function Vacinas() {
   }, [buscarVacinas])
 
   const opcoesPacientes = pacientes.map(p => ({ valor: p.id, rotulo: p.nomeCompleto }))
+
+  const mapaPacientes = useMemo(() => {
+    const mapa: Record<string, string> = {}
+    pacientes.forEach(p => mapa[p.id] = p.nomeCompleto)
+    return mapa
+  }, [pacientes])
 
   const atualizar = (campo: keyof FormState) => (valor: string) =>
     setForm(prev => ({ ...prev, [campo]: valor }))
@@ -58,17 +62,20 @@ export default function Vacinas() {
 
   const aoSalvar = async (e: React.FormEvent) => {
     e.preventDefault()
-    try {
-      await criarVacina({
-        paciente_id: form.pacienteId,
-        vacina: form.vacina,
-        data_aplicacao: form.data,
-        lote: form.lote || undefined
-      })
+    
+    const sucesso = await cadastrarVacina({
+      idPaciente: form.pacienteId,
+      vacina: form.vacina,
+      dose: 'Única', // Simplificação para a tela
+      dataAplicacao: form.data,
+      // Lote não está no nosso model/schema atualmente (mas pode ser adicionado depois, ignorando por hora)
+    })
+
+    if (sucesso) {
       adicionarToast('Vacina registrada com sucesso!', 'sucesso')
       aoFechar()
-    } catch (err) {
-      adicionarToast('Erro ao registrar vacina', 'erro')
+    } else {
+      adicionarToast('Erro ao registrar vacina.', 'erro')
     }
   }
 
@@ -84,25 +91,25 @@ export default function Vacinas() {
         </Botao>
       </div>
 
-      <Card semPadding icone={<Icone nome="saude" tamanho={14} />} titulo={`${vacinas.length} registros`}>
+      <Card semPadding icone={<Icone nome="saude" tamanho={14} />} titulo={`${registros.length} registros`}>
         <table className="vacinas__tabela">
           <thead>
             <tr>
               <th>Paciente</th>
               <th>Vacina</th>
+              <th>Dose</th>
               <th>Data</th>
-              <th>Lote</th>
               <th>Próxima Dose</th>
             </tr>
           </thead>
           <tbody>
-            {vacinas.map(v => (
+            {registros.map(v => (
               <tr key={v.id}>
-                <td className="vacinas__td-paciente">{v.paciente}</td>
+                <td className="vacinas__td-paciente">{mapaPacientes[v.idPaciente] || 'Desconhecido'}</td>
                 <td className="vacinas__td-vacina">{v.vacina}</td>
-                <td className="vacinas__td-data">{new Date(v.data_aplicacao).toLocaleDateString()}</td>
-                <td className="vacinas__td-lote">{v.lote || '—'}</td>
-                <td className="vacinas__td-data">{v.proxima_dose ? new Date(v.proxima_dose).toLocaleDateString() : '—'}</td>
+                <td>{v.dose}</td>
+                <td className="vacinas__td-data">{v.dataAplicacao}</td>
+                <td className="vacinas__td-data">{v.proximaDose ?? '—'}</td>
               </tr>
             ))}
           </tbody>

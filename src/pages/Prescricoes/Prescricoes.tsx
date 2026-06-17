@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import usePacientesStore from '../../store/usePacientesStore'
 import usePrescricoesStore from '../../store/usePrescricoesStore'
 import useToastStore from '../../store/useToastStore'
@@ -44,13 +44,13 @@ const opcoesTipoDataFim = [
 
 const varianteStatus: Record<string, 'ok' | 'warn' | 'err'> = {
   ativa: 'ok',
-  encerrada: 'err',
+  concluida: 'err',
   suspensa: 'warn',
 }
 
 const rotuloStatus: Record<string, string> = {
   ativa: 'Ativa',
-  encerrada: 'Encerrada',
+  concluida: 'Concluída',
   suspensa: 'Suspensa',
 }
 
@@ -63,8 +63,6 @@ interface FormState {
   frequencia: string
   tipoDataFim: string
   dataFim: string
-  indicacao: string
-  resultado_cultura: string
 }
 
 const formInicial: FormState = {
@@ -76,8 +74,6 @@ const formInicial: FormState = {
   frequencia: '',
   tipoDataFim: 'indeterminada',
   dataFim: '',
-  indicacao: '',
-  resultado_cultura: '',
 }
 
 export default function Prescricoes() {
@@ -85,9 +81,7 @@ export default function Prescricoes() {
   const [form, setForm] = useState<FormState>(formInicial)
 
   const pacientes = usePacientesStore(s => s.pacientes)
-  const buscarPrescricoes = usePrescricoesStore(s => s.buscarPrescricoes)
-  const prescricoes = usePrescricoesStore(s => s.prescricoesFiltradas())
-  const criarPrescricao = usePrescricoesStore(s => s.criarPrescricao)
+  const { registros, buscarPrescricoes, cadastrarPrescricao } = usePrescricoesStore()
   const adicionarToast = useToastStore(s => s.adicionarToast)
 
   useEffect(() => {
@@ -95,6 +89,13 @@ export default function Prescricoes() {
   }, [buscarPrescricoes])
 
   const opcoesPacientes = pacientes.map(p => ({ valor: p.id, rotulo: p.nomeCompleto }))
+
+  // Helper para mapear idPaciente para Nome
+  const mapaPacientes = useMemo(() => {
+    const mapa: Record<string, string> = {}
+    pacientes.forEach(p => mapa[p.id] = p.nomeCompleto)
+    return mapa
+  }, [pacientes])
 
   const atualizar = (campo: keyof FormState) => (valor: string) =>
     setForm(prev => ({ ...prev, [campo]: valor }))
@@ -106,21 +107,23 @@ export default function Prescricoes() {
 
   const aoSalvar = async (e: React.FormEvent) => {
     e.preventDefault()
-    try {
-      await criarPrescricao({
-        paciente_id: form.pacienteId,
-        medicacao: form.medicacao,
-        dose: `${form.dose} ${form.unidade}`,
-        via: form.via,
-        frequencia: form.frequencia,
-        data_fim: form.tipoDataFim === 'determinada' ? form.dataFim : null,
-        indicacao: form.indicacao || undefined,
-        resultado_cultura: form.resultado_cultura || undefined
-      })
+    
+    const descricaoCompleta = `${form.medicacao} ${form.dose}${form.unidade} - ${form.via}`
+    
+    const sucesso = await cadastrarPrescricao({
+      idPaciente: form.pacienteId,
+      tipo: 'Medicamento',
+      descricao: descricaoCompleta,
+      frequencia: form.frequencia,
+      dataInicio: new Date().toISOString().split('T')[0],
+      dataFim: form.tipoDataFim === 'determinada' ? form.dataFim : undefined
+    })
+
+    if (sucesso) {
       adicionarToast('Prescrição registrada com sucesso!', 'sucesso')
       aoFechar()
-    } catch (err) {
-      adicionarToast('Erro ao registrar prescrição', 'erro')
+    } else {
+      adicionarToast('Erro ao registrar prescrição.', 'erro')
     }
   }
 
@@ -136,36 +139,24 @@ export default function Prescricoes() {
         </Botao>
       </div>
 
-      <Card semPadding icone={<Icone nome="medicamento" tamanho={14} />} titulo={`${prescricoes.length} prescrições`}>
+      <Card semPadding icone={<Icone nome="medicamento" tamanho={14} />} titulo={`${registros.length} prescrições`}>
         <table className="prescricoes__tabela">
           <thead>
             <tr>
               <th>Paciente</th>
-              <th>Medicação</th>
-              <th>Dose</th>
-              <th>Via</th>
+              <th>Descrição</th>
               <th>Frequência</th>
               <th>Data Fim</th>
               <th>Status</th>
             </tr>
           </thead>
           <tbody>
-            {prescricoes.map(p => (
+            {registros.map(p => (
               <tr key={p.id} className={`prescricoes__linha prescricoes__linha--${p.status}`}>
-                <td className="prescricoes__td-paciente">{p.paciente}</td>
-                <td className="prescricoes__td-medicacao">
-                  <div className="prescricoes__medicacao-nome">{p.medicacao}</div>
-                  {p.indicacao && (
-                    <div className="prescricoes__medicacao-contexto">
-                      <strong>Indicação:</strong> {p.indicacao}
-                      {p.resultado_cultura && <><br/><strong>Cultura:</strong> {p.resultado_cultura}</>}
-                    </div>
-                  )}
-                </td>
-                <td className="prescricoes__td-dose">{p.dose}</td>
-                <td>{p.via}</td>
+                <td className="prescricoes__td-paciente">{mapaPacientes[p.idPaciente] || 'Desconhecido'}</td>
+                <td className="prescricoes__td-medicacao">{p.descricao}</td>
                 <td>{p.frequencia}</td>
-                <td className="prescricoes__td-data">{p.data_fim ? new Date(p.data_fim).toLocaleDateString() : 'Indeterminada'}</td>
+                <td className="prescricoes__td-data">{p.dataFim ?? 'Indeterminada'}</td>
                 <td>
                   <Badge variante={varianteStatus[p.status] || 'ok'}>{rotuloStatus[p.status] || p.status}</Badge>
                 </td>
@@ -252,20 +243,6 @@ export default function Prescricoes() {
               aoAlterar={atualizar('dataFim')}
             />
           )}
-          <Input
-            id="prescricao-indicacao"
-            label="Indicação (Motivo)"
-            valor={form.indicacao}
-            aoAlterar={atualizar('indicacao')}
-            placeholder="Ex: Pneumonia"
-          />
-          <Input
-            id="prescricao-cultura"
-            label="Resultado de Cultura (Opcional)"
-            valor={form.resultado_cultura}
-            aoAlterar={atualizar('resultado_cultura')}
-            placeholder="Ex: MRSA sensível a Vancomicina"
-          />
         </form>
       </Modal>
     </div>
