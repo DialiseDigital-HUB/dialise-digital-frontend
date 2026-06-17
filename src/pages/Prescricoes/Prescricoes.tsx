@@ -90,7 +90,6 @@ export default function Prescricoes() {
 
   const opcoesPacientes = pacientes.map(p => ({ valor: p.id, rotulo: p.nomeCompleto }))
 
-  // Helper para mapear idPaciente para Nome
   const mapaPacientes = useMemo(() => {
     const mapa: Record<string, string> = {}
     pacientes.forEach(p => mapa[p.id] = p.nomeCompleto)
