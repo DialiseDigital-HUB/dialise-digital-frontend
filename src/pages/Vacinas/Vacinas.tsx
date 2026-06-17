@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import usePacientesStore from '../../store/usePacientesStore'
+import useVacinasStore from '../../store/useVacinasStore'
 import useToastStore from '../../store/useToastStore'
 import Card from '../../components/ui/Card/Card'
 import Modal from '../../components/ui/Modal/Modal'
@@ -8,42 +9,6 @@ import Input from '../../components/ui/Input/Input'
 import Select from '../../components/ui/Select/Select'
 import Icone from '../../components/ui/Icone/Icone'
 import './Vacinas.css'
-
-interface RegistroVacina {
-  id: string
-  paciente: string
-  vacina: string
-  data: string
-  lote: string
-  proximaDose: string | null
-}
-
-const vacinasMock: RegistroVacina[] = [
-  {
-    id: '1',
-    paciente: 'Maria Silva Santos',
-    vacina: 'Hepatite B',
-    data: '10/01/2026',
-    lote: 'HB-2026-0041',
-    proximaDose: '10/07/2026',
-  },
-  {
-    id: '2',
-    paciente: 'João Pedro Oliveira',
-    vacina: 'Influenza',
-    data: '15/03/2026',
-    lote: 'FLU-2026-1122',
-    proximaDose: '15/03/2027',
-  },
-  {
-    id: '3',
-    paciente: 'Ana Beatriz Costa',
-    vacina: 'Pneumocócica',
-    data: '02/05/2026',
-    lote: 'PNE-2026-0089',
-    proximaDose: null,
-  },
-]
 
 const opcoesVacinas = [
   { valor: 'Hepatite B', rotulo: 'Hepatite B' },
@@ -72,7 +37,14 @@ export default function Vacinas() {
   const [form, setForm] = useState<FormState>(formInicial)
 
   const pacientes = usePacientesStore(s => s.pacientes)
+  const buscarVacinas = useVacinasStore(s => s.buscarVacinas)
+  const vacinas = useVacinasStore(s => s.vacinasFiltradas())
+  const criarVacina = useVacinasStore(s => s.criarVacina)
   const adicionarToast = useToastStore(s => s.adicionarToast)
+
+  useEffect(() => {
+    buscarVacinas()
+  }, [buscarVacinas])
 
   const opcoesPacientes = pacientes.map(p => ({ valor: p.id, rotulo: p.nomeCompleto }))
 
@@ -84,10 +56,20 @@ export default function Vacinas() {
     setForm(formInicial)
   }
 
-  const aoSalvar = (e: React.FormEvent) => {
+  const aoSalvar = async (e: React.FormEvent) => {
     e.preventDefault()
-    adicionarToast('Vacina registrada com sucesso!', 'sucesso')
-    aoFechar()
+    try {
+      await criarVacina({
+        paciente_id: form.pacienteId,
+        vacina: form.vacina,
+        data_aplicacao: form.data,
+        lote: form.lote || undefined
+      })
+      adicionarToast('Vacina registrada com sucesso!', 'sucesso')
+      aoFechar()
+    } catch (err) {
+      adicionarToast('Erro ao registrar vacina', 'erro')
+    }
   }
 
   return (
@@ -102,7 +84,7 @@ export default function Vacinas() {
         </Botao>
       </div>
 
-      <Card semPadding icone={<Icone nome="saude" tamanho={14} />} titulo={`${vacinasMock.length} registros`}>
+      <Card semPadding icone={<Icone nome="saude" tamanho={14} />} titulo={`${vacinas.length} registros`}>
         <table className="vacinas__tabela">
           <thead>
             <tr>
@@ -114,13 +96,13 @@ export default function Vacinas() {
             </tr>
           </thead>
           <tbody>
-            {vacinasMock.map(v => (
+            {vacinas.map(v => (
               <tr key={v.id}>
                 <td className="vacinas__td-paciente">{v.paciente}</td>
                 <td className="vacinas__td-vacina">{v.vacina}</td>
-                <td className="vacinas__td-data">{v.data}</td>
-                <td className="vacinas__td-lote">{v.lote}</td>
-                <td className="vacinas__td-data">{v.proximaDose ?? '—'}</td>
+                <td className="vacinas__td-data">{new Date(v.data_aplicacao).toLocaleDateString()}</td>
+                <td className="vacinas__td-lote">{v.lote || '—'}</td>
+                <td className="vacinas__td-data">{v.proxima_dose ? new Date(v.proxima_dose).toLocaleDateString() : '—'}</td>
               </tr>
             ))}
           </tbody>
