@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import usePacientesStore from '../../store/usePacientesStore'
+import usePrescricoesStore from '../../store/usePrescricoesStore'
 import useToastStore from '../../store/useToastStore'
 import Card from '../../components/ui/Card/Card'
 import Modal from '../../components/ui/Modal/Modal'
@@ -9,54 +10,6 @@ import Select from '../../components/ui/Select/Select'
 import Badge from '../../components/ui/Badge/Badge'
 import Icone from '../../components/ui/Icone/Icone'
 import './Prescricoes.css'
-
-interface Prescricao {
-  id: string
-  paciente: string
-  medicacao: string
-  dose: string
-  via: string
-  frequencia: string
-  dataFim: string | null
-  status: 'ativa' | 'encerrada' | 'suspensa'
-  indicacao?: string
-  resultado_cultura?: string
-}
-
-const prescricoesMock: Prescricao[] = [
-  {
-    id: '1',
-    paciente: 'Maria Silva Santos',
-    medicacao: 'Eritropoetina',
-    dose: '4000 UI',
-    via: 'Subcutânea',
-    frequencia: '12/12h',
-    dataFim: '30/06/2026',
-    status: 'ativa',
-  },
-  {
-    id: '2',
-    paciente: 'João Pedro Oliveira',
-    medicacao: 'Carbonato de Cálcio',
-    dose: '500 mg',
-    via: 'Oral',
-    frequencia: '8/8h',
-    dataFim: null,
-    status: 'ativa',
-  },
-  {
-    id: '3',
-    paciente: 'Ana Beatriz Costa',
-    medicacao: 'Vancomicina',
-    dose: '1 g',
-    via: 'Intravenosa',
-    frequencia: 'Dose única',
-    dataFim: '20/06/2026',
-    status: 'encerrada',
-    indicacao: 'Infecção de CVC',
-    resultado_cultura: 'S. aureus MRSA, sensível a Vancomicina'
-  },
-]
 
 const opcoesUnidade = [
   { valor: 'mcg', rotulo: 'mcg' },
@@ -89,13 +42,13 @@ const opcoesTipoDataFim = [
   { valor: 'determinada', rotulo: 'Determinada' },
 ]
 
-const varianteStatus: Record<Prescricao['status'], 'ok' | 'warn' | 'err'> = {
+const varianteStatus: Record<string, 'ok' | 'warn' | 'err'> = {
   ativa: 'ok',
   encerrada: 'err',
   suspensa: 'warn',
 }
 
-const rotuloStatus: Record<Prescricao['status'], string> = {
+const rotuloStatus: Record<string, string> = {
   ativa: 'Ativa',
   encerrada: 'Encerrada',
   suspensa: 'Suspensa',
@@ -132,7 +85,14 @@ export default function Prescricoes() {
   const [form, setForm] = useState<FormState>(formInicial)
 
   const pacientes = usePacientesStore(s => s.pacientes)
+  const buscarPrescricoes = usePrescricoesStore(s => s.buscarPrescricoes)
+  const prescricoes = usePrescricoesStore(s => s.prescricoesFiltradas())
+  const criarPrescricao = usePrescricoesStore(s => s.criarPrescricao)
   const adicionarToast = useToastStore(s => s.adicionarToast)
+
+  useEffect(() => {
+    buscarPrescricoes()
+  }, [buscarPrescricoes])
 
   const opcoesPacientes = pacientes.map(p => ({ valor: p.id, rotulo: p.nomeCompleto }))
 
@@ -144,10 +104,24 @@ export default function Prescricoes() {
     setForm(formInicial)
   }
 
-  const aoSalvar = (e: React.FormEvent) => {
+  const aoSalvar = async (e: React.FormEvent) => {
     e.preventDefault()
-    adicionarToast('Prescrição registrada com sucesso!', 'sucesso')
-    aoFechar()
+    try {
+      await criarPrescricao({
+        paciente_id: form.pacienteId,
+        medicacao: form.medicacao,
+        dose: `${form.dose} ${form.unidade}`,
+        via: form.via,
+        frequencia: form.frequencia,
+        data_fim: form.tipoDataFim === 'determinada' ? form.dataFim : null,
+        indicacao: form.indicacao || undefined,
+        resultado_cultura: form.resultado_cultura || undefined
+      })
+      adicionarToast('Prescrição registrada com sucesso!', 'sucesso')
+      aoFechar()
+    } catch (err) {
+      adicionarToast('Erro ao registrar prescrição', 'erro')
+    }
   }
 
   return (
@@ -162,7 +136,7 @@ export default function Prescricoes() {
         </Botao>
       </div>
 
-      <Card semPadding icone={<Icone nome="medicamento" tamanho={14} />} titulo={`${prescricoesMock.length} prescrições`}>
+      <Card semPadding icone={<Icone nome="medicamento" tamanho={14} />} titulo={`${prescricoes.length} prescrições`}>
         <table className="prescricoes__tabela">
           <thead>
             <tr>
@@ -176,7 +150,7 @@ export default function Prescricoes() {
             </tr>
           </thead>
           <tbody>
-            {prescricoesMock.map(p => (
+            {prescricoes.map(p => (
               <tr key={p.id} className={`prescricoes__linha prescricoes__linha--${p.status}`}>
                 <td className="prescricoes__td-paciente">{p.paciente}</td>
                 <td className="prescricoes__td-medicacao">
@@ -191,9 +165,9 @@ export default function Prescricoes() {
                 <td className="prescricoes__td-dose">{p.dose}</td>
                 <td>{p.via}</td>
                 <td>{p.frequencia}</td>
-                <td className="prescricoes__td-data">{p.dataFim ?? 'Indeterminada'}</td>
+                <td className="prescricoes__td-data">{p.data_fim ? new Date(p.data_fim).toLocaleDateString() : 'Indeterminada'}</td>
                 <td>
-                  <Badge variante={varianteStatus[p.status]}>{rotuloStatus[p.status]}</Badge>
+                  <Badge variante={varianteStatus[p.status] || 'ok'}>{rotuloStatus[p.status] || p.status}</Badge>
                 </td>
               </tr>
             ))}
