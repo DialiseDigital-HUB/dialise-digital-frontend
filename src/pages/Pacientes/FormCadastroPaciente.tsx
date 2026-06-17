@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import Input from '../../components/ui/Input/Input'
 import Select from '../../components/ui/Select/Select'
+import Botao from '../../components/ui/Button/Button'
 import useUsuariosStore from '../../store/useUsuariosStore'
 
 interface FormCadastroPacienteProps {
@@ -52,9 +53,9 @@ export default function FormCadastroPaciente({ idForm, aoSubmeter }: FormCadastr
   return (
     <form id={idForm} onSubmit={handleSubmit} className="detalhe-paciente__grid" style={{ gap: '1rem', marginTop: '1rem' }}>
       <div style={{ gridColumn: '1 / -1', display: 'flex', justifyContent: 'flex-end', marginBottom: '-0.5rem' }}>
-        <button type="button" onClick={preencherDebug} style={{ padding: '0.25rem 0.75rem', fontSize: '0.8rem', background: '#e2e8f0', border: 'none', borderRadius: '4px', cursor: 'pointer', color: '#475569' }}>
+        <Botao variante="ghost" type="button" onClick={preencherDebug} tamanho="sm">
           Preencher Debug
-        </button>
+        </Botao>
       </div>
       <div style={{ gridColumn: '1 / -1' }}>
         <Input 

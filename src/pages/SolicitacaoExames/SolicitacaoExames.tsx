@@ -89,6 +89,16 @@ export default function SolicitacaoExames() {
     setForm(formInicial)
   }
 
+  const preencherDebug = () => {
+    const pacienteMockId = pacientes.length > 0 ? pacientes[0].id : ''
+    setForm({
+      pacienteId: pacienteMockId,
+      exame: 'Hemograma',
+      exameOutro: '',
+      periodicidade: 'Mensal'
+    })
+  }
+
   const aoSalvar = async (e: React.FormEvent) => {
     e.preventDefault()
     
@@ -155,10 +165,15 @@ export default function SolicitacaoExames() {
         tamanho="md"
         aoFechar={aoFechar}
         rodape={
-          <>
-            <Botao variante="ghost" onClick={aoFechar}>Cancelar</Botao>
-            <Botao variante="primary" tipo="submit" form="form-solicitacao-exame">Salvar</Botao>
-          </>
+          <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+            <Botao variante="ghost" onClick={preencherDebug} type="button" tamanho="sm">
+              Preencher Debug
+            </Botao>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <Botao variante="ghost" onClick={aoFechar}>Cancelar</Botao>
+              <Botao variante="primary" tipo="submit" form="form-solicitacao-exame">Salvar</Botao>
+            </div>
+          </div>
         }
       >
         <form id="form-solicitacao-exame" onSubmit={aoSalvar} className="solicitacao-exames__form">
