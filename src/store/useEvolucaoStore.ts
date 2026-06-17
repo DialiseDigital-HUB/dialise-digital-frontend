@@ -208,7 +208,7 @@ const useEvolucaoStore = create<EstadoEvolucao>((set, get) => ({
     try {
       const payload = {
         patient_id: idPacienteAtivo,
-        medico_id: "123e4567-e89b-12d3-a456-426614174000",
+        medico_id: "85f0764a-213e-4ed1-a9fe-9f9ba1f1e1b2", // Médico Associado
         drc_etiologia: "Não informada",
         texto_evolucao: dados.evolucaoClinica || "Sem evolução",
         ktv: parseFloat(dados.ktv || '0'),
