@@ -38,7 +38,7 @@ const useHistoricoStore = create<EstadoHistorico>((set, get) => ({
     set({ carregando: true, erro: null })
     try {
       const url = idPaciente && idPaciente !== 'todos'
-        ? `http://localhost:8000/evolucoes/?paciente_id=${idPaciente}`
+        ? `http://localhost:8000/evolucoes/?patient_id=${idPaciente}`
         : 'http://localhost:8000/evolucoes/'
       const response = await axios.get(url)
       

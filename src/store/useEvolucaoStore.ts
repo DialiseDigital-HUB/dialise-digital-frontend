@@ -136,13 +136,13 @@ const useEvolucaoStore = create<EstadoEvolucao>((set, get) => ({
   buscarEvolucaoAnterior: async (idPaciente: string) => {
     set({ carregando: true, erro: null })
     try {
-      const response = await axios.get(`http://localhost:8000/evolucoes?paciente_id=${idPaciente}`)
+      const response = await axios.get(`http://localhost:8000/evolucoes?patient_id=${idPaciente}`)
       if (response.data && response.data.length > 0) {
         const evo = response.data[0]
         set({
           dados: {
             mesReferencia: evo.mes_referencia || evo.mesReferencia || '',
-            evolucaoClinica: evo.evolucao_clinica || evo.evolucaoClinica || '',
+            evolucaoClinica: evo.texto_evolucao || evo.evolucao_clinica || evo.evolucaoClinica || '',
             ktv: evo.ktv || '',
             acessoData: evo.acesso_data || evo.acessoData || '',
             acessosPrevios: evo.acessos_previos || evo.acessosPrevios || '',
@@ -207,19 +207,20 @@ const useEvolucaoStore = create<EstadoEvolucao>((set, get) => ({
     set({ carregando: true, erro: null, sucesso: false })
     try {
       const payload = {
-        paciente_id: idPacienteAtivo,
+        patient_id: idPacienteAtivo,
+        medico_id: "123e4567-e89b-12d3-a456-426614174000",
         mes_referencia: dados.mesReferencia,
-        evolucao_clinica: dados.evolucaoClinica,
-        ktv: dados.ktv,
+        texto_evolucao: dados.evolucaoClinica,
+        ktv: parseFloat(dados.ktv || '0'),
         acesso_data: dados.acessoData,
         acessos_previos: dados.acessosPrevios,
-        peso_seco: dados.pesoSeco,
-        tempo_sessao: dados.tempoSessao,
+        peso_seco: parseFloat(dados.pesoSeco || '0'),
+        tempo_sessao: parseFloat(dados.tempoSessao || '0'),
         heparina_utilizada: dados.heparinaUtilizada,
-        fbs: dados.fbs,
-        fbd: dados.fbd,
-        sodio: dados.sodio,
-        bic: dados.bic,
+        fbs: parseFloat(dados.fbs || '0'),
+        fbd: parseFloat(dados.fbd || '0'),
+        sodio: parseFloat(dados.sodio || '0'),
+        bic: parseFloat(dados.bic || '0'),
         perfis_outros: dados.perfisOutros,
         usando_ferro_ev: dados.usandoFerroEv,
         usando_epo: dados.usandoEpo,
@@ -238,20 +239,20 @@ const useEvolucaoStore = create<EstadoEvolucao>((set, get) => ({
         complicacoes_cardiovasculares: dados.complicacoesCardiovasculares,
         complicacoes_acesso_vascular: dados.complicacoesAcessoVascular,
         exames_complementares: dados.examesComplementares,
-        hemoglobina: dados.hemoglobina,
-        calcio: dados.calcio,
-        ferritina: dados.ferritina,
+        hemoglobina: parseFloat(dados.hemoglobina || '0'),
+        calcio: parseFloat(dados.calcio || '0'),
+        ferritina: parseFloat(dados.ferritina || '0'),
         anti_hiv: dados.antiHiv,
-        ct: dados.ct,
-        hematocrito: dados.hematocrito,
-        fosforo: dados.fosforo,
-        paratormonio: dados.paratormonio,
-        potassio: dados.potassio,
+        ct: parseFloat(dados.ct || '0'),
+        hematocrito: parseFloat(dados.hematocrito || '0'),
+        fosforo: parseFloat(dados.fosforo || '0'),
+        paratormonio: parseFloat(dados.paratormonio || '0'),
+        potassio: parseFloat(dados.potassio || '0'),
         pa: dados.pa,
-        fc: dados.fc,
-        altura: dados.altura,
-        peso_atual: dados.pesoAtual,
-        imc: dados.imc,
+        fc: parseInt(dados.fc || '0', 10),
+        altura: parseFloat(dados.altura || '0'),
+        peso_atual: parseFloat(dados.pesoAtual || '0'),
+        imc: parseFloat(dados.imc || '0'),
         acv: dados.acv,
         ar: dados.ar,
         ext: dados.ext,
