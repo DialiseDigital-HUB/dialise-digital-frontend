@@ -38,7 +38,7 @@ const useHistoricoStore = create<EstadoHistorico>((set, get) => ({
     set({ carregando: true, erro: null })
     try {
       const url = idPaciente && idPaciente !== 'todos'
-        ? `http://localhost:8000/evolucoes/?paciente_id=${idPaciente}`
+        ? `http://localhost:8000/evolucoes/?patient_id=${idPaciente}`
         : 'http://localhost:8000/evolucoes/'
       const response = await axios.get(url)
       
@@ -54,12 +54,12 @@ const useHistoricoStore = create<EstadoHistorico>((set, get) => ({
 
         return {
           id: e.id,
-          idPaciente: e.paciente_id,
-          mes: e.mes_referencia || 'Mês indefinido',
+          idPaciente: e.patient_id || e.paciente_id,
+          mes: e.data_criacao ? new Date(e.data_criacao).toISOString().slice(0, 7) : (e.mes_referencia || 'Mês indefinido'),
           ktv: ktvVal,
-          peso: parseFloat(e.peso_atual || e.peso || '0'),
-          hemoglobina: parseFloat(e.hemoglobina || '0'),
-          fosforo: parseFloat(e.fosforo || '0'),
+          peso: parseFloat(e.peso || e.peso_atual || '0'),
+          hemoglobina: parseFloat(e.exames_dados_json?.hemoglobina || e.hemoglobina || '0'),
+          fosforo: parseFloat(e.exames_dados_json?.fosforo || e.fosforo || '0'),
           severidade,
           resumo: e.texto_evolucao || 'Evolução registrada.',
           medico: e.medico_id ? 'Médico Associado' : 'Não informado'
