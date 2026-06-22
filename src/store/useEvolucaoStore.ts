@@ -2,6 +2,7 @@
 
 import { create } from 'zustand'
 import axios from 'axios'
+import usePacientesStore from './usePacientesStore'
 
 export interface DadosEvolucao {
   mesReferencia: string
@@ -206,9 +207,12 @@ const useEvolucaoStore = create<EstadoEvolucao>((set, get) => ({
 
     set({ carregando: true, erro: null, sucesso: false })
     try {
+      const pacienteAtivo = usePacientesStore.getState().pacientes.find(p => p.id === idPacienteAtivo)
+      const medicoIdDinamico = pacienteAtivo?.medicoAssistenteId || "93605c32-2e1c-4909-aef5-924af8015e00"
+
       const payload = {
         patient_id: idPacienteAtivo,
-        medico_id: "85f0764a-213e-4ed1-a9fe-9f9ba1f1e1b2", // Médico Associado
+        medico_id: medicoIdDinamico,
         drc_etiologia: "Não informada",
         texto_evolucao: dados.evolucaoClinica || "Sem evolução",
         ktv: parseFloat(dados.ktv || '0'),

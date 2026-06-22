@@ -9,6 +9,7 @@ export interface Paciente {
   sexo: 'M' | 'F'
   turno: string
   medico: string
+  medicoAssistenteId?: string
   diagnostico: string
   acessoVascular: string
   ktv: number
@@ -51,6 +52,7 @@ const usePacientesStore = create<EstadoPacientes>((set, get) => ({
           sexo: p.sexo || 'M',
           turno: p.turno,
           medico: p.medico || 'Dr. Associado',
+          medicoAssistenteId: p.medico_assistente_id,
           diagnostico: p.diagnostico || 'Sem diagnóstico',
           acessoVascular: p.acesso_vascular || 'N/A',
           ktv: p.ktv || 0,

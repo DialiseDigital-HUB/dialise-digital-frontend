@@ -1,5 +1,7 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import useNavegacaoStore from '../../store/useNavegacaoStore'
+import useDashboardStore, { type AlertaEnriquecido } from '../../store/useDashboardStore'
+import usePacientesStore from '../../store/usePacientesStore'
 import Card from '../../components/ui/Card/Card'
 import Badge from '../../components/ui/Badge/Badge'
 import AlertItem from '../../components/ui/AlertItem/AlertItem'
@@ -7,49 +9,6 @@ import ProgressBar from '../../components/ui/ProgressBar/ProgressBar'
 import Icone from '../../components/ui/Icone/Icone'
 import Modal from '../../components/ui/Modal/Modal'
 import './Dashboard.css'
-
-const statCards = [
-  { id: 'pacientes', variante: 'ok',      icone: 'pacientes'  as const, label: 'Pacientes Ativos',  valor: 48, sub: '↑ 2 neste mês'           },
-  { id: 'exames',    variante: 'warn',    icone: 'exame_lab'  as const, label: 'Exames Pendentes',  valor: 12, sub: '3 vencidos há > 30 dias' },
-  { id: 'evolucao',  variante: 'danger',  icone: 'medicamento' as const, label: 'Antibióticos',     valor: 5,  sub: '2 finalizam esta semana'  },
-  { id: 'evolucao',  variante: 'warn',    icone: 'lme'        as const, label: 'LME p/ Renovar',    valor: 3,  sub: 'Vencimento em 15 dias'    },
-]
-
-type AcaoAlerta = { rotulo: string; rota: ReturnType<typeof useNavegacaoStore.getState>['paginaAtiva']; primario?: boolean }
-
-const alertas = [
-  { 
-    severidade: 'danger' as const, icone: 'medicamento' as const, titulo: 'Antibiótico vence amanhã', sub: 'Maria Luiza Santos · Vancomicina iniciada 13/06', 
-    pacienteId: '22222222-2222-4222-8222-222222222222', 
-    acoes: [{ rotulo: 'Renovar Vancomicina', rota: 'prescricoes', primario: true }, { rotulo: 'Suspender', rota: 'pacientes' }] as AcaoAlerta[]
-  },
-  { 
-    severidade: 'danger' as const, icone: 'exame_lab'   as const, titulo: 'PTH sem coleta há 4 meses', sub: 'Carlos Ferreira · Último: Fev/25 (trimestral)', 
-    pacienteId: '33333333-3333-4333-8333-333333333333', 
-    acoes: [{ rotulo: 'Solicitar Exame', rota: 'solicitacao-exames', primario: true }] as AcaoAlerta[]
-  },
-  { 
-    severidade: 'warn'   as const, icone: 'lme'         as const, titulo: 'LME de Sevelamer vence em 12 dias', sub: 'Ana Paula Rodrigues · Precisa de renovação', 
-    pacienteId: '44444444-4444-4444-8444-444444444444', 
-    acoes: [{ rotulo: 'Renovar LME', rota: 'lme', primario: true }] as AcaoAlerta[]
-  },
-  { 
-    severidade: 'warn'   as const, icone: 'exame_lab'   as const, titulo: 'Hepatite B — reforço pendente', sub: 'Pedro Alves Costa · Anti-HBs < 10 UI/L', 
-    pacienteId: '55555555-5555-4555-8555-555555555555', 
-    acoes: [{ rotulo: 'Nova Vacina', rota: 'vacinas', primario: true }] as AcaoAlerta[]
-  },
-  { 
-    severidade: 'info'   as const, icone: 'internacao'  as const, titulo: 'Internação no mês — alta recente', sub: 'João Silva · Alta em 10/06 · Monitorar acesso', 
-    pacienteId: '11111111-1111-4111-8111-111111111111', 
-    acoes: [{ rotulo: 'Verificar Prontuário', rota: 'historico', primario: true }] as AcaoAlerta[]
-  },
-]
-
-const progressos = [
-  { label: 'Evoluções preenchidas',     atual: 36, total: 48, variante: 'primary' as const, tooltip: 'Refere-se ao check-in e nota clínica obrigatória do mês atual' },
-  { label: 'Exames mensais OK',         atual: 41, total: 48, variante: 'mint'    as const, tooltip: 'Pacientes com exames laboratoriais do mês vigentes' },
-  { label: 'Inscritos para transplante', atual: 18, total: 48, variante: 'warn'  as const, tooltip: 'Pacientes ativos na fila de doação do SNT' },
-]
 
 const complicacoes = [
   { tipo: 'Infecciosas',      casos: 3, variante: 'err'  as const },
@@ -59,16 +18,91 @@ const complicacoes = [
 ]
 
 export default function Dashboard() {
-  const navegar = useNavegacaoStore(state => state.navegar)
-  const navegarComContexto = useNavegacaoStore(state => state.navegarComContexto)
-  const [alertaAberto, setAlertaAberto] = useState<typeof alertas[0] | null>(null)
+  const navegar           = useNavegacaoStore(s => s.navegar)
+  const navegarComContexto = useNavegacaoStore(s => s.navegarComContexto)
+
+  const carregarDashboard   = useDashboardStore(s => s.carregarDashboard)
+  const resolverAlerta      = useDashboardStore(s => s.resolverAlerta)
+  const alertasEnriquecidos = useDashboardStore(s => s.alertasEnriquecidos)
+  const kpis                = useDashboardStore(s => s.kpis)
+  const carregando          = useDashboardStore(s => s.carregando)
+
+  const totalPacientes = usePacientesStore(s => s.pacientes.length)
+
+  const [alertaAberto, setAlertaAberto] = useState<AlertaEnriquecido | null>(null)
+
+  useEffect(() => {
+    carregarDashboard()
+  }, [carregarDashboard])
+
+  const dadosKpi     = kpis()
+  const listaAlertas = alertasEnriquecidos()
+
+  const statCards = [
+    {
+      id: 'pacientes',
+      variante: 'ok' as const,
+      icone: 'pacientes' as const,
+      label: 'Pacientes Ativos',
+      valor: totalPacientes,
+      sub: `${totalPacientes} no sistema`,
+    },
+    {
+      id: 'prescricoes',
+      variante: 'danger' as const,
+      icone: 'medicamento' as const,
+      label: 'Alertas Críticos',
+      valor: dadosKpi.totalAlertasDanger,
+      sub: `${dadosKpi.totalAlertasDanger} urgentes`,
+    },
+    {
+      id: 'pacientes',
+      variante: 'warn' as const,
+      icone: 'lme' as const,
+      label: 'Alertas de Atenção',
+      valor: dadosKpi.totalAlertasWarn,
+      sub: `${dadosKpi.totalAlertasWarn} pendentes`,
+    },
+    {
+      id: 'pacientes',
+      variante: 'neutral' as const,
+      icone: 'exame_lab' as const,
+      label: 'Inscritos Transplante',
+      valor: dadosKpi.inscritosTransplante,
+      sub: `${dadosKpi.inscritosTransplante} na fila`,
+    },
+  ]
+
+  const progressos = [
+    {
+      label:   'Evoluções preenchidas',
+      atual:   dadosKpi.evolucoesConcluidas,
+      total:   totalPacientes || 1,
+      variante: 'primary' as const,
+      tooltip: 'Pacientes com ao menos uma evolução registrada no mês',
+    },
+    {
+      label:   'Inscritos para transplante',
+      atual:   dadosKpi.inscritosTransplante,
+      total:   totalPacientes || 1,
+      variante: 'warn' as const,
+      tooltip: 'Pacientes ativos na fila de doação do SNT',
+    },
+  ]
+
+  const iconeAlerta = (tipo: string) => {
+    const mapa: Record<string, string> = {
+      exame: 'exame_lab', lme: 'lme', antibiotico: 'medicamento', vacina: 'saude', internacao: 'internacao',
+    }
+    return (mapa[tipo.toLowerCase()] ?? 'alerta') as Parameters<typeof Icone>[0]['nome']
+  }
 
   return (
     <div className="dashboard">
       <div className="dashboard__stats">
         {statCards.map(card => (
-          <div 
-            key={card.label} 
+          <div
+            key={card.label}
             className={`dash-stat dash-stat--${card.variante} clickable`}
             onClick={() => navegar(card.id as any)}
             title={`Ver detalhes em ${card.label}`}
@@ -85,20 +119,26 @@ export default function Dashboard() {
 
       <div className="dashboard__grid-principal">
         <Card titulo="Alertas Prioritários" icone={<Icone nome="alerta" tamanho={14} />} elevated>
-          {alertas.map((alerta, i) => (
+          {carregando && <div style={{ padding: '16px', color: 'var(--gray-500)', fontSize: '13px' }}>Carregando alertas...</div>}
+          {!carregando && listaAlertas.length === 0 && (
+            <div style={{ padding: '24px', textAlign: 'center', color: 'var(--gray-500)', fontSize: '13px' }}>
+              Nenhum alerta ativo no momento.
+            </div>
+          )}
+          {listaAlertas.map(alerta => (
             <AlertItem
-              key={i}
+              key={alerta.id}
               severidade={alerta.severidade}
-              icone={<Icone nome={alerta.icone} tamanho={14} />}
+              icone={<Icone nome={iconeAlerta(alerta.tipo_alerta)} tamanho={14} />}
               titulo={alerta.titulo}
-              sub={alerta.sub}
+              sub={`${alerta.nomePaciente} · ${alerta.descricao}`}
               onClick={() => setAlertaAberto(alerta)}
             />
           ))}
         </Card>
 
         <div className="dashboard__grid-direita">
-          <Card titulo="Evoluções — Junho/25" icone={<Icone nome="grafico" tamanho={14} />}>
+          <Card titulo="Indicadores do Mês" icone={<Icone nome="grafico" tamanho={14} />}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               {progressos.map(p => (
                 <ProgressBar
@@ -113,7 +153,7 @@ export default function Dashboard() {
             </div>
           </Card>
 
-          <Card titulo="Complicações — Junho/25" icone={<Icone nome="saude" tamanho={14} />} semPadding>
+          <Card titulo="Complicações — Mês Atual" icone={<Icone nome="saude" tamanho={14} />} semPadding>
             <table className="complicacoes-tabela">
               <thead>
                 <tr>
@@ -142,35 +182,47 @@ export default function Dashboard() {
         rodape={
           <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', width: '100%' }}>
             <button className="botao botao--secundario" onClick={() => setAlertaAberto(null)}>Fechar</button>
-            {alertaAberto?.acoes.map(acao => (
-              <button 
-                key={acao.rotulo}
-                className={`botao ${acao.primario ? 'botao--primario' : 'botao--secundario'}`} 
+            <button
+              className="botao botao--secundario"
+              onClick={async () => {
+                if (!alertaAberto) return
+                await resolverAlerta(alertaAberto.id)
+                setAlertaAberto(null)
+              }}
+            >
+              Marcar como Resolvido
+            </button>
+            {alertaAberto && (
+              <button
+                className="botao botao--primario"
                 onClick={() => {
+                  if (!alertaAberto) return
                   setAlertaAberto(null)
-                  navegarComContexto(acao.rota, alertaAberto.pacienteId)
+                  navegarComContexto(alertaAberto.rotaAcao as any, alertaAberto.patient_id)
                 }}
               >
-                {acao.rotulo}
+                Ir para Paciente
               </button>
-            ))}
+            )}
           </div>
         }
       >
         {alertaAberto && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <div style={{ 
-                display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                width: '40px', height: '40px', borderRadius: '8px', 
+              <div style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                width: '40px', height: '40px', borderRadius: '8px',
                 background: alertaAberto.severidade === 'danger' ? 'var(--red-light)' : alertaAberto.severidade === 'warn' ? '#FFFBEB' : 'var(--teal-pale)',
-                color: alertaAberto.severidade === 'danger' ? 'var(--red)' : alertaAberto.severidade === 'warn' ? 'var(--amber)' : 'var(--teal-sea)'
+                color: alertaAberto.severidade === 'danger' ? 'var(--red)' : alertaAberto.severidade === 'warn' ? 'var(--amber)' : 'var(--teal-sea)',
               }}>
-                <Icone nome={alertaAberto.icone} tamanho={20} />
+                <Icone nome={iconeAlerta(alertaAberto.tipo_alerta)} tamanho={20} />
               </div>
               <div>
                 <h4 style={{ margin: 0, fontSize: '14px', color: 'var(--gray-900)' }}>{alertaAberto.titulo}</h4>
-                <p style={{ margin: 0, fontSize: '13px', color: 'var(--gray-500)', marginTop: '4px' }}>{alertaAberto.sub}</p>
+                <p style={{ margin: 0, fontSize: '13px', color: 'var(--gray-500)', marginTop: '4px' }}>
+                  {alertaAberto.nomePaciente} · {alertaAberto.descricao}
+                </p>
               </div>
             </div>
           </div>
