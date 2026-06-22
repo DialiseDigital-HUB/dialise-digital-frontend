@@ -8,6 +8,8 @@ import Botao from '../../components/ui/Button/Button'
 import usePacientesStore from '../../store/usePacientesStore'
 import useEvolucaoStore from '../../store/useEvolucaoStore'
 import useNavegacaoStore from '../../store/useNavegacaoStore'
+import useDashboardStore from '../../store/useDashboardStore'
+import useToastStore from '../../store/useToastStore'
 
 const secoesFormulario = [
   { id: 'sec-evolucao',    titulo: '3. Evolução' },
@@ -24,6 +26,10 @@ const secoesFormulario = [
 
 export default function Evolucao() {
   const pacientes         = usePacientesStore(s => s.pacientes)
+  const buscarPacientes   = usePacientesStore(s => s.buscarPacientes)
+  const carregarDashboard = useDashboardStore(s => s.carregarDashboard)
+  const adicionarToast    = useToastStore(s => s.adicionarToast)
+  const navegar           = useNavegacaoStore(s => s.navegar)
   const { idPacienteAtivo, dados, definirPaciente, atualizarCampo, resetar, preencherParaDebug, salvarEvolucao, buscarEvolucaoAnterior } = useEvolucaoStore()
   const [modalConfirmacao, setModalConfirmacao] = useState(false)
 
@@ -123,6 +129,9 @@ export default function Evolucao() {
                 setModalConfirmacao(false)
                 await salvarEvolucao()
                 resetar()
+                await Promise.all([buscarPacientes(), carregarDashboard()])
+                adicionarToast('Evolução registrada com sucesso!', 'sucesso')
+                navegar('pacientes')
               }}
             >
               Confirmar Registro

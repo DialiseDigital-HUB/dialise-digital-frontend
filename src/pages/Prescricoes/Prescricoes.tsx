@@ -1,7 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import usePacientesStore from '../../store/usePacientesStore'
 import usePrescricoesStore from '../../store/usePrescricoesStore'
-import useDashboardStore, { type AlertaEnriquecido } from '../../store/useDashboardStore'
 import useToastStore from '../../store/useToastStore'
 import Card from '../../components/ui/Card/Card'
 import Modal from '../../components/ui/Modal/Modal'
@@ -69,21 +68,29 @@ export default function Prescricoes() {
   const [modalAberto, setModalAberto] = useState(false)
   const [form, setForm] = useState<FormState>(FORM_INICIAL)
 
-  const pacientes     = usePacientesStore(s => s.pacientes)
-  const { registros, buscarPrescricoes, cadastrarPrescricao } = usePrescricoesStore()
-  const adicionarToast = useToastStore(s => s.adicionarToast)
+  const pacientes          = usePacientesStore(s => s.pacientes)
+  const registros          = usePrescricoesStore(s => s.registros)
+  const filtroStatus       = usePrescricoesStore(s => s.filtroStatus)
+  const buscarPrescricoes  = usePrescricoesStore(s => s.buscarPrescricoes)
+  const cadastrarPrescricao = usePrescricoesStore(s => s.cadastrarPrescricao)
+  const definirFiltroStatus = usePrescricoesStore(s => s.definirFiltroStatus)
+  const adicionarToast     = useToastStore(s => s.adicionarToast)
 
-  const alertasEnriquecidos = useDashboardStore(s => s.alertasEnriquecidos)
-  const carregarDashboard   = useDashboardStore(s => s.carregarDashboard)
+  const listaPrescricoes = useMemo(() => {
+    const hoje = new Date().toISOString().split('T')[0]
+    const comStatusEfetivo = registros.map(r => ({
+      ...r,
+      status: r.dataFim && r.dataFim < hoje && r.status === 'ativa'
+        ? 'encerrada' as const
+        : r.status,
+    }))
+    if (filtroStatus === 'todos') return comStatusEfetivo
+    return comStatusEfetivo.filter(r => r.status === filtroStatus)
+  }, [registros, filtroStatus])
 
   useEffect(() => {
     buscarPrescricoes()
-    carregarDashboard()
-  }, [buscarPrescricoes, carregarDashboard])
-
-  const alertasMedicamento: AlertaEnriquecido[] = alertasEnriquecidos().filter(
-    a => ['antibiotico', 'medicamento', 'lme'].includes(a.tipo_alerta.toLowerCase())
-  )
+  }, [buscarPrescricoes])
 
   const opcoesPacientes = pacientes.map(p => ({ valor: p.id, rotulo: p.nomeCompleto }))
 
@@ -148,21 +155,24 @@ export default function Prescricoes() {
         </Botao>
       </div>
 
-      {alertasMedicamento.length > 0 && (
-        <Card titulo="Alertas de Medicamentos" icone={<Icone nome="medicamento" tamanho={14} />} elevated>
-          {alertasMedicamento.map(alerta => (
-            <AlertItem
-              key={alerta.id}
-              severidade={alerta.severidade}
-              icone={<Icone nome="medicamento" tamanho={14} />}
-              titulo={alerta.titulo}
-              sub={`${alerta.nomePaciente} · ${alerta.descricao}`}
-            />
-          ))}
-        </Card>
-      )}
-
-      <Card semPadding icone={<Icone nome="medicamento" tamanho={14} />} titulo={`${registros.length} prescrições`}>
+      <Card
+        semPadding
+        icone={<Icone nome="medicamento" tamanho={14} />}
+        titulo={`${listaPrescricoes.length} prescrições`}
+        acoes={
+          <select
+            className="prescricoes__filtro-select"
+            value={filtroStatus}
+            onChange={e => definirFiltroStatus(e.target.value)}
+            style={{ height: '32px', borderRadius: '6px', border: '1px solid var(--gray-200)', padding: '0 12px', background: 'white', color: 'var(--gray-600)', fontSize: '13px', marginLeft: '16px' }}
+          >
+            <option value="todos">Todas</option>
+            <option value="ativa">Ativas</option>
+            <option value="suspensa">Suspensas</option>
+            <option value="encerrada">Encerradas</option>
+          </select>
+        }
+      >
         <table className="prescricoes__tabela">
           <thead>
             <tr>
@@ -175,14 +185,14 @@ export default function Prescricoes() {
             </tr>
           </thead>
           <tbody>
-            {registros.length === 0 && (
+            {listaPrescricoes.length === 0 && (
               <tr>
                 <td colSpan={6} style={{ textAlign: 'center', padding: '32px', color: 'var(--gray-400)', fontSize: '13px' }}>
-                  Nenhuma prescrição registrada.
+                  Nenhuma prescrição encontrada.
                 </td>
               </tr>
             )}
-            {registros.map(p => (
+            {listaPrescricoes.map(p => (
               <tr key={p.id} className={`prescricoes__linha prescricoes__linha--${p.status}`}>
                 <td className="prescricoes__td-paciente">{mapaPacientes[p.pacienteId] || 'Desconhecido'}</td>
                 <td className="prescricoes__td-medicacao">{p.medicacao}</td>

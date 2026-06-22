@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import usePacientesStore from '../../store/usePacientesStore'
 import useNavegacaoStore from '../../store/useNavegacaoStore'
 import useEvolucaoStore from '../../store/useEvolucaoStore'
@@ -13,20 +13,18 @@ import Icone from '../../components/ui/Icone/Icone'
 import FormCadastroPaciente from './FormCadastroPaciente'
 import './Pacientes.css'
 
-const ktvHistorico = [
-  { mes: 'Jan', valor: 1.3 },
-  { mes: 'Fev', valor: 0.8 },
-  { mes: 'Mar', valor: 1.4 },
-  { mes: 'Abr', valor: 1.2 },
-  { mes: 'Mai', valor: 1.3 },
-  { mes: 'Jun', valor: 1.4 },
-]
-
 const rotuloStatus: Record<string, string> = {
-  ok: 'Completo', warn: 'Pendente', err: 'Incompleto',
+  ok: 'Completa', warn: 'Completa (Alerta)', err: 'Pendente',
 }
 
 function DetalheModal({ paciente }: { paciente: Paciente }) {
+  const buscarHistoricoKtv = useEvolucaoStore(s => s.buscarHistoricoKtv)
+  const [historicoKtv, setHistoricoKtv] = useState<{ mes: string; valor: number }[]>([])
+
+  useEffect(() => {
+    buscarHistoricoKtv(paciente.id).then(setHistoricoKtv)
+  }, [paciente.id, buscarHistoricoKtv])
+
   return (
     <>
       <div className="detalhe-paciente__secao">Identificação</div>
@@ -49,27 +47,31 @@ function DetalheModal({ paciente }: { paciente: Paciente }) {
       </div>
 
       <div className="detalhe-paciente__secao">Kt/V — Últimos 6 meses</div>
-      <div className="detalhe-paciente__ktv-chart">
-        {ktvHistorico.map(ponto => {
-          const corOk = ponto.valor >= 1.2
-          return (
-            <div key={ponto.mes} className="detalhe-paciente__ktv-barra-wrapper">
-              <span className="detalhe-paciente__ktv-valor" style={{ color: corOk ? 'var(--teal-sea)' : 'var(--red)' }}>
-                {ponto.valor}
-              </span>
-              <div
-                className="detalhe-paciente__ktv-barra"
-                style={{
-                  height: `${ponto.valor * 35}px`,
-                  background: corOk ? 'var(--teal-light)' : '#FEE2E2',
-                  borderTop: `3px solid ${corOk ? 'var(--teal-sea)' : 'var(--red)'}`,
-                }}
-              />
-              <span className="detalhe-paciente__ktv-mes">{ponto.mes}</span>
-            </div>
-          )
-        })}
-      </div>
+      {historicoKtv.length === 0 ? (
+        <div style={{ padding: '16px', color: 'var(--gray-400)', fontSize: '13px' }}>Nenhuma evolução registrada.</div>
+      ) : (
+        <div className="detalhe-paciente__ktv-chart">
+          {historicoKtv.map(ponto => {
+            const corOk = ponto.valor >= 1.2
+            return (
+              <div key={ponto.mes} className="detalhe-paciente__ktv-barra-wrapper">
+                <span className="detalhe-paciente__ktv-valor" style={{ color: corOk ? 'var(--teal-sea)' : 'var(--red)' }}>
+                  {ponto.valor.toFixed(1)}
+                </span>
+                <div
+                  className="detalhe-paciente__ktv-barra"
+                  style={{
+                    height: `${ponto.valor * 35}px`,
+                    background: corOk ? 'var(--teal-light)' : '#FEE2E2',
+                    borderTop: `3px solid ${corOk ? 'var(--teal-sea)' : 'var(--red)'}`,
+                  }}
+                />
+                <span className="detalhe-paciente__ktv-mes">{ponto.mes}</span>
+              </div>
+            )
+          })}
+        </div>
+      )}
     </>
   )
 }
@@ -85,7 +87,10 @@ export default function Pacientes() {
   const modalCadastro        = useNavegacaoStore(s => s.modalCadastroPacienteAberto)
   const fecharModalCadastro  = useNavegacaoStore(s => s.fecharModalCadastro)
   const cadastrarPaciente    = usePacientesStore(s => s.cadastrarPaciente)
+  const editarPaciente       = usePacientesStore(s => s.editarPaciente)
   const adicionarToast       = useToastStore(s => s.adicionarToast)
+
+  const [modalEdicao, setModalEdicao] = useState(false)
 
   const handleCadastro = async (dados: any) => {
     const sucesso = await cadastrarPaciente(dados)
@@ -119,23 +124,47 @@ export default function Pacientes() {
     navegar('evolucao')
   }
 
+  const handleEdicao = async (dados: any) => {
+    if (!pacienteSelecionado) return
+    const sucesso = await editarPaciente(pacienteSelecionado.id, dados)
+    if (sucesso) {
+      setModalEdicao(false)
+      adicionarToast('Paciente atualizado com sucesso!', 'sucesso')
+    } else {
+      adicionarToast('Erro ao atualizar paciente.', 'erro')
+    }
+  }
+
   return (
     <div className="pacientes">
       <Card
         titulo={`Pacientes — ${lista.length} encontrado${lista.length !== 1 ? 's' : ''}`}
         icone={<Icone nome="pacientes" tamanho={14} />}
         acoes={
-          <div className="pacientes__busca-wrapper">
-            <span className="pacientes__busca-icone">
-              <Icone nome="exames" tamanho={14} />
-            </span>
-            <input
-              className="pacientes__busca"
-              type="text"
-              placeholder="Buscar por nome ou prontuário…"
-              value={termoBusca}
-              onChange={e => definirBusca(e.target.value)}
-            />
+          <div className="pacientes__busca-wrapper" style={{ display: 'flex', gap: '8px' }}>
+            <div className="pacientes__busca-input-container" style={{ position: 'relative', flex: 1 }}>
+              <span className="pacientes__busca-icone" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }}>
+                <Icone nome="exames" tamanho={14} />
+              </span>
+              <input
+                className="pacientes__busca"
+                type="text"
+                placeholder="Buscar por nome ou prontuário…"
+                value={termoBusca}
+                onChange={e => definirBusca(e.target.value)}
+                style={{ paddingLeft: '32px', width: '100%', height: '36px', borderRadius: '6px', border: '1px solid var(--gray-200)' }}
+              />
+            </div>
+            <select
+              className="pacientes__filtro-select"
+              value={usePacientesStore(s => s.filtroAvancado)}
+              onChange={e => usePacientesStore.getState().definirFiltroAvancado(e.target.value)}
+              style={{ height: '36px', borderRadius: '6px', border: '1px solid var(--gray-200)', padding: '0 12px', background: 'white', color: 'var(--gray-600)', fontSize: '13px' }}
+            >
+              <option value="todos">Todos os Pacientes</option>
+              <option value="transplante">Fila de Transplante</option>
+              <option value="pendente_evolucao">Pendente de Evolução</option>
+            </select>
           </div>
         }
         semPadding
@@ -154,7 +183,6 @@ export default function Pacientes() {
                 <th>Turno</th>
                 <th>Médico</th>
                 <th>Kt/V</th>
-                <th>Evolução</th>
                 <th>Status</th>
               </tr>
             </thead>
@@ -181,11 +209,6 @@ export default function Pacientes() {
                     </span>
                   </td>
                   <td>
-                    <Badge variante={paciente.ktv >= 1.2 ? 'ok' : 'err'} comDot>
-                      {paciente.ktv >= 1.2 ? 'Adequado' : 'Kt/V baixo'}
-                    </Badge>
-                  </td>
-                  <td>
                     <Badge variante={paciente.statusEvolucao}>
                       {rotuloStatus[paciente.statusEvolucao]}
                     </Badge>
@@ -204,6 +227,7 @@ export default function Pacientes() {
         rodape={
           <>
             <Botao variante="ghost" onClick={aoFecharModal}>Fechar</Botao>
+            <Botao variante="ghost" onClick={() => setModalEdicao(true)}>Editar</Botao>
             <Botao
               variante="primary"
               onClick={() => pacienteSelecionado && aoNovaEvolucao(pacienteSelecionado)}
@@ -228,6 +252,27 @@ export default function Pacientes() {
         }
       >
         <FormCadastroPaciente idForm="form-cadastro-paciente" aoSubmeter={handleCadastro} />
+      </Modal>
+
+      <Modal
+        aberto={modalEdicao}
+        titulo={`Editar — ${pacienteSelecionado?.nomeCompleto ?? ''}`}
+        aoFechar={() => setModalEdicao(false)}
+        rodape={
+          <>
+            <Botao variante="ghost" onClick={() => setModalEdicao(false)}>Cancelar</Botao>
+            <Botao variante="primary" form="form-edicao-paciente" type="submit">Salvar Alterações</Botao>
+          </>
+        }
+      >
+        {pacienteSelecionado && (
+          <FormCadastroPaciente
+            idForm="form-edicao-paciente"
+            aoSubmeter={handleEdicao}
+            modoEdicao
+            dadosIniciais={pacienteSelecionado}
+          />
+        )}
       </Modal>
     </div>
   )

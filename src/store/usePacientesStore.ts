@@ -21,19 +21,23 @@ export interface Paciente {
 interface EstadoPacientes {
   pacientes: Paciente[]
   termoBusca: string
+  filtroAvancado: string
   pacienteSelecionado: Paciente | null
   carregando: boolean
   erro: string | null
   buscarPacientes: () => Promise<void>
   definirBusca: (termo: string) => void
+  definirFiltroAvancado: (filtro: string) => void
   selecionarPaciente: (paciente: Paciente | null) => void
   pacientesFiltrados: () => Paciente[]
   cadastrarPaciente: (dados: any) => Promise<boolean>
+  editarPaciente: (id: string, dados: any) => Promise<boolean>
 }
 
 const usePacientesStore = create<EstadoPacientes>((set, get) => ({
   pacientes: [],
   termoBusca: '',
+  filtroAvancado: 'todos',
   pacienteSelecionado: null,
   carregando: false,
   erro: null,
@@ -79,17 +83,38 @@ const usePacientesStore = create<EstadoPacientes>((set, get) => ({
     }
   },
 
+  editarPaciente: async (id, dados) => {
+    set({ carregando: true, erro: null })
+    try {
+      await axios.patch(`http://localhost:8000/pacientes/${id}`, dados)
+      await get().buscarPacientes()
+      return true
+    } catch {
+      set({ erro: 'Falha ao atualizar paciente', carregando: false })
+      return false
+    }
+  },
+
   definirBusca: termo => set({ termoBusca: termo }),
+  definirFiltroAvancado: filtro => set({ filtroAvancado: filtro }),
   selecionarPaciente: paciente => set({ pacienteSelecionado: paciente }),
 
   pacientesFiltrados: () => {
-    const { pacientes, termoBusca } = get()
+    const { pacientes, termoBusca, filtroAvancado } = get()
     const termo = termoBusca.toLowerCase().trim()
-    if (!termo) return pacientes
-    return pacientes.filter(p =>
-      p.nomeCompleto.toLowerCase().includes(termo) ||
-      p.prontuario.toLowerCase().includes(termo)
-    )
+    
+    return pacientes.filter(p => {
+      const matchTexto = !termo || 
+        p.nomeCompleto.toLowerCase().includes(termo) ||
+        p.prontuario.toLowerCase().includes(termo)
+        
+      if (!matchTexto) return false
+      
+      if (filtroAvancado === 'transplante') return p.inscritoTransplante
+      if (filtroAvancado === 'pendente_evolucao') return p.statusEvolucao === 'err'
+      
+      return true
+    })
   },
 }))
 

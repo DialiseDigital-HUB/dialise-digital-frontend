@@ -28,14 +28,18 @@ export interface NovaPrescricao {
 
 interface EstadoPrescricoes {
   registros: Prescricao[]
+  filtroStatus: string
   carregando: boolean
   erro: string | null
   buscarPrescricoes: (idPaciente?: string) => Promise<void>
+  definirFiltroStatus: (status: string) => void
+  prescricoesFiltradas: () => Prescricao[]
   cadastrarPrescricao: (dados: NovaPrescricao) => Promise<boolean>
 }
 
 const usePrescricoesStore = create<EstadoPrescricoes>((set, get) => ({
   registros: [],
+  filtroStatus: 'todos',
   carregando: false,
   erro: null,
 
@@ -63,6 +67,14 @@ const usePrescricoesStore = create<EstadoPrescricoes>((set, get) => ({
     } catch {
       set({ erro: 'Falha ao buscar prescrições', carregando: false })
     }
+  },
+
+  definirFiltroStatus: (status) => set({ filtroStatus: status }),
+
+  prescricoesFiltradas: () => {
+    const { registros, filtroStatus } = get()
+    if (filtroStatus === 'todos') return registros
+    return registros.filter(r => r.status === filtroStatus)
   },
 
   cadastrarPrescricao: async (dados) => {

@@ -114,8 +114,9 @@ interface EstadoEvolucao {
   buscarEvolucaoAnterior: (idPaciente: string) => Promise<void>
   salvarEvolucao: () => Promise<void>
   atualizarCampo: <C extends keyof DadosEvolucao>(campo: C, valor: DadosEvolucao[C]) => void
-  preencherParaDebug: () => void // Apenas para debug/testes
+  preencherParaDebug: () => void
   resetar: () => void
+  buscarHistoricoKtv: (idPaciente: string) => Promise<{ mes: string; valor: number }[]>
 }
 
 const useEvolucaoStore = create<EstadoEvolucao>((set, get) => ({
@@ -299,6 +300,21 @@ const useEvolucaoStore = create<EstadoEvolucao>((set, get) => ({
         conduta: 'Manter prescrição dialítica atual.',
       },
     })),
+
+  buscarHistoricoKtv: async (idPaciente: string) => {
+    try {
+      const response = await axios.get(`http://localhost:8000/evolucoes/paciente/${idPaciente}`)
+      const evolucoes: any[] = response.data
+      return evolucoes
+        .slice(-6)
+        .map(e => ({
+          mes: e.mes_referencia?.slice(0, 7) ?? '',
+          valor: parseFloat(e.ktv) || 0,
+        }))
+    } catch {
+      return []
+    }
+  },
 
   resetar: () => set({ idPacienteAtivo: null, dados: estadoInicial, erro: null, sucesso: false }),
 }))

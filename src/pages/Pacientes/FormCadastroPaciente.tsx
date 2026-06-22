@@ -3,26 +3,29 @@ import Input from '../../components/ui/Input/Input'
 import Select from '../../components/ui/Select/Select'
 import Botao from '../../components/ui/Button/Button'
 import useUsuariosStore from '../../store/useUsuariosStore'
+import type { Paciente } from '../../store/usePacientesStore'
 
 interface FormCadastroPacienteProps {
   idForm: string
   aoSubmeter: (dados: any) => void
+  modoEdicao?: boolean
+  dadosIniciais?: Paciente
 }
 
-export default function FormCadastroPaciente({ idForm, aoSubmeter }: FormCadastroPacienteProps) {
+export default function FormCadastroPaciente({ idForm, aoSubmeter, modoEdicao = false, dadosIniciais }: FormCadastroPacienteProps) {
   const { usuarios, buscarUsuarios } = useUsuariosStore()
 
   useEffect(() => {
     buscarUsuarios()
   }, [buscarUsuarios])
 
-  const [prontuario, setProntuario] = useState('')
-  const [nome, setNome] = useState('')
+  const [prontuario, setProntuario]         = useState(dadosIniciais?.prontuario || '')
+  const [nome, setNome]                     = useState(dadosIniciais?.nomeCompleto || '')
   const [dataNascimento, setDataNascimento] = useState('')
-  const [sexo, setSexo] = useState('')
-  const [turno, setTurno] = useState('')
-  const [medico, setMedico] = useState('')
-  const [diagnostico, setDiagnostico] = useState('')
+  const [sexo, setSexo]                     = useState(dadosIniciais?.sexo || '')
+  const [turno, setTurno]                   = useState(dadosIniciais?.turno || '')
+  const [medico, setMedico]                 = useState(dadosIniciais?.medicoAssistenteId || '')
+  const [diagnostico, setDiagnostico]       = useState(dadosIniciais?.diagnostico || '')
 
   const medicosOpcoes = usuarios
     .filter(u => u.ativo)
@@ -30,18 +33,29 @@ export default function FormCadastroPaciente({ idForm, aoSubmeter }: FormCadastr
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    aoSubmeter({
-      prontuario: prontuario,
-      nome_completo: nome,
-      data_nascimento: dataNascimento,
-      sexo: sexo,
-      turno: turno,
-      medico_assistente_id: medico || null,
-      diagnostico: diagnostico
-    })
+    if (modoEdicao) {
+      aoSubmeter({
+        nome_completo:       nome,
+        sexo:                sexo,
+        turno:               turno,
+        medico_assistente_id: medico || null,
+        diagnostico:         diagnostico,
+      })
+    } else {
+      aoSubmeter({
+        prontuario:           prontuario,
+        nome_completo:        nome,
+        data_nascimento:      dataNascimento,
+        sexo:                 sexo,
+        turno:                turno,
+        medico_assistente_id: medico || null,
+        diagnostico:          diagnostico,
+      })
+    }
   }
 
   const preencherDebug = () => {
+    if (modoEdicao) return
     setProntuario(String(Math.floor(Math.random() * 90000) + 10000))
     setNome('Paciente Mockado de Teste')
     setDataNascimento('1975-08-15')
@@ -52,86 +66,93 @@ export default function FormCadastroPaciente({ idForm, aoSubmeter }: FormCadastr
 
   return (
     <form id={idForm} onSubmit={handleSubmit} className="detalhe-paciente__grid" style={{ gap: '1rem', marginTop: '1rem' }}>
-      <div style={{ gridColumn: '1 / -1', display: 'flex', justifyContent: 'flex-end', marginBottom: '-0.5rem' }}>
-        <Botao variante="ghost" type="button" onClick={preencherDebug} tamanho="sm">
-          Preencher Debug
-        </Botao>
-      </div>
+      {!modoEdicao && (
+        <div style={{ gridColumn: '1 / -1', display: 'flex', justifyContent: 'flex-end', marginBottom: '-0.5rem' }}>
+          <Botao variante="ghost" type="button" onClick={preencherDebug} tamanho="sm">
+            Preencher Debug
+          </Botao>
+        </div>
+      )}
+
       <div style={{ gridColumn: '1 / -1' }}>
-        <Input 
-          id="nome" 
-          label="Nome Completo *" 
-          valor={nome} 
-          aoAlterar={setNome} 
-          placeholder="Nome do paciente" 
-        />
-      </div>
-      
-      <div>
-        <Input 
-          id="prontuario" 
-          label="Prontuário *" 
-          valor={prontuario} 
-          aoAlterar={setProntuario} 
-          placeholder="Ex: 12345" 
+        <Input
+          id="nome"
+          label="Nome Completo *"
+          valor={nome}
+          aoAlterar={setNome}
+          placeholder="Nome do paciente"
         />
       </div>
 
-      <div>
-        <Input 
-          id="data_nascimento" 
-          label="Data de Nascimento *" 
-          type="date"
-          valor={dataNascimento} 
-          aoAlterar={setDataNascimento} 
-        />
-      </div>
+      {!modoEdicao && (
+        <>
+          <div>
+            <Input
+              id="prontuario"
+              label="Prontuário *"
+              valor={prontuario}
+              aoAlterar={setProntuario}
+              placeholder="Ex: 12345"
+            />
+          </div>
+
+          <div>
+            <Input
+              id="data_nascimento"
+              label="Data de Nascimento *"
+              type="date"
+              valor={dataNascimento}
+              aoAlterar={setDataNascimento}
+            />
+          </div>
+        </>
+      )}
 
       <div>
-        <Select 
-          id="sexo" 
-          label="Gênero *" 
-          valor={sexo} 
-          aoAlterar={setSexo} 
+        <Select
+          id="sexo"
+          label="Gênero *"
+          valor={sexo}
+          aoAlterar={setSexo}
           opcoes={[
             { rotulo: 'Masculino', valor: 'M' },
             { rotulo: 'Feminino', valor: 'F' }
-          ]} 
+          ]}
         />
       </div>
 
       <div>
-        <Select 
-          id="turno" 
-          label="Turno de Diálise *" 
-          valor={turno} 
-          aoAlterar={setTurno} 
+        <Select
+          id="turno"
+          label="Turno de Diálise *"
+          valor={turno}
+          aoAlterar={setTurno}
           opcoes={[
             { rotulo: 'Manhã', valor: 'Manhã' },
             { rotulo: 'Tarde', valor: 'Tarde' },
             { rotulo: 'Noite', valor: 'Noite' }
-          ]} 
+          ]}
         />
       </div>
 
       <div style={{ gridColumn: '1 / -1' }}>
-        <Select 
-          id="medico" 
-          label="Médico Responsável" 
-          valor={medico} 
-          aoAlterar={setMedico} 
+        <Select
+          id="medico"
+          label="Médico Responsável"
+          valor={medico}
+          aoAlterar={setMedico}
           opcoes={medicosOpcoes}
           placeholder="Selecione um médico (Opcional)"
         />
       </div>
 
       <div style={{ gridColumn: '1 / -1' }}>
-        <Input 
-          id="diagnostico" 
-          label="Diagnóstico Base *" 
-          valor={diagnostico} 
-          aoAlterar={setDiagnostico} 
-          placeholder="Ex: DRC estágio 5 secundária a HAS" 
+        <Input
+          id="diagnostico"
+          label="Diagnóstico Base *"
+          valor={diagnostico}
+          aoAlterar={setDiagnostico}
+          placeholder="Ex: DRC estágio 5 secundária a HAS"
         />
       </div>
     </form>
