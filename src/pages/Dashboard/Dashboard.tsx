@@ -10,13 +10,6 @@ import Icone from '../../components/ui/Icone/Icone'
 import Modal from '../../components/ui/Modal/Modal'
 import './Dashboard.css'
 
-const complicacoes = [
-  { tipo: 'Infecciosas',      casos: 3, variante: 'err'  as const },
-  { tipo: 'Cardiovasculares', casos: 2, variante: 'warn' as const },
-  { tipo: 'Acesso Vascular',  casos: 2, variante: 'warn' as const },
-  { tipo: 'Transfusões',      casos: 1, variante: 'info' as const },
-]
-
 export default function Dashboard() {
   const navegar           = useNavegacaoStore(s => s.navegar)
   const navegarComContexto = useNavegacaoStore(s => s.navegarComContexto)
@@ -26,6 +19,7 @@ export default function Dashboard() {
   const alertasEnriquecidos = useDashboardStore(s => s.alertasEnriquecidos)
   const kpis                = useDashboardStore(s => s.kpis)
   const carregando          = useDashboardStore(s => s.carregando)
+  const estatisticas        = useDashboardStore(s => s.estatisticasComplicacoes)
 
   const totalPacientes = usePacientesStore(s => s.pacientes.length)
 
@@ -37,6 +31,13 @@ export default function Dashboard() {
 
   const dadosKpi     = kpis()
   const listaAlertas = alertasEnriquecidos()
+
+  const complicacoesList = [
+    { tipo: 'Infecciosas',      casos: estatisticas.infecciosas,      variante: 'err'  as const },
+    { tipo: 'Cardiovasculares', casos: estatisticas.cardiovasculares, variante: 'warn' as const },
+    { tipo: 'Acesso Vascular',  casos: estatisticas.acesso_vascular,  variante: 'warn' as const },
+    { tipo: 'Transfusões',      casos: estatisticas.transfusoes,      variante: 'info' as const },
+  ]
 
   const statCards = [
     {
@@ -162,7 +163,7 @@ export default function Dashboard() {
                 </tr>
               </thead>
               <tbody>
-                {complicacoes.map(c => (
+                {complicacoesList.map(c => (
                   <tr key={c.tipo}>
                     <td>{c.tipo}</td>
                     <td><Badge variante={c.variante}>{c.casos}</Badge></td>
