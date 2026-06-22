@@ -115,3 +115,28 @@
   grid-template-columns: 2fr 1fr;
   gap: 12px;
 }
+
+.prescricoes__form-linha--check {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  grid-template-columns: unset;
+}
+
+.prescricoes__check-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--gray-700);
+  cursor: pointer;
+  user-select: none;
+}
+
+.prescricoes__check-label input[type='checkbox'] {
+  accent-color: var(--teal-sea);
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
+}
+

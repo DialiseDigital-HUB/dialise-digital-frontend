@@ -1,17 +1,29 @@
 import { create } from 'zustand'
 import axios from 'axios'
 
+const API_BASE = 'http://localhost:8000'
+
 export interface Prescricao {
   id: string
-  idPaciente: string
-  tipo: 'Hemodiálise' | 'Medicamento' | 'Dieta'
-  descricao: string
-  dataInicio: string
+  pacienteId: string
+  medicacao: string
+  dose: string
+  via: string
   frequencia: string
   dataFim?: string
-  status: 'ativa' | 'suspensa' | 'concluida'
+  status: 'ativa' | 'suspensa' | 'encerrada'
   indicacao?: string
   resultadoCultura?: string
+}
+
+export interface NovaPrescricao {
+  pacienteId: string
+  medicacao: string
+  dose: string
+  via: string
+  frequencia: string
+  dataFim?: string
+  indicacao?: string
 }
 
 interface EstadoPrescricoes {
@@ -19,7 +31,7 @@ interface EstadoPrescricoes {
   carregando: boolean
   erro: string | null
   buscarPrescricoes: (idPaciente?: string) => Promise<void>
-  cadastrarPrescricao: (dados: Omit<Prescricao, 'id' | 'status'>) => Promise<boolean>
+  cadastrarPrescricao: (dados: NovaPrescricao) => Promise<boolean>
 }
 
 const usePrescricoesStore = create<EstadoPrescricoes>((set, get) => ({
@@ -31,24 +43,24 @@ const usePrescricoesStore = create<EstadoPrescricoes>((set, get) => ({
     set({ carregando: true, erro: null })
     try {
       const url = idPaciente && idPaciente !== 'todos'
-        ? `http://localhost:8000/prescricoes/paciente/${idPaciente}`
-        : 'http://localhost:8000/prescricoes/'
-      
-      const response = await axios.get(url)
-      const prescricoesMapeadas: Prescricao[] = response.data.map((r: any) => ({
-        id: r.id,
-        idPaciente: r.paciente_id,
-        tipo: r.tipo as 'Hemodiálise' | 'Medicamento' | 'Dieta',
-        descricao: r.descricao,
-        dataInicio: r.data_inicio,
-        frequencia: r.frequencia,
-        dataFim: r.data_fim,
-        status: r.status as 'ativa' | 'suspensa' | 'concluida',
-        indicacao: r.indicacao,
-        resultadoCultura: r.resultado_cultura
+        ? `${API_BASE}/prescricoes/paciente/${idPaciente}`
+        : `${API_BASE}/prescricoes/`
+
+      const { data } = await axios.get(url)
+      const mapeadas: Prescricao[] = data.map((r: any) => ({
+        id:              r.id,
+        pacienteId:      r.paciente_id,
+        medicacao:       r.medicacao,
+        dose:            r.dose,
+        via:             r.via,
+        frequencia:      r.frequencia,
+        dataFim:         r.data_fim ?? undefined,
+        status:          r.status as 'ativa' | 'suspensa' | 'encerrada',
+        indicacao:       r.indicacao ?? undefined,
+        resultadoCultura: r.resultado_cultura ?? undefined,
       }))
-      set({ registros: prescricoesMapeadas, carregando: false })
-    } catch (error) {
+      set({ registros: mapeadas, carregando: false })
+    } catch {
       set({ erro: 'Falha ao buscar prescrições', carregando: false })
     }
   },
@@ -57,23 +69,22 @@ const usePrescricoesStore = create<EstadoPrescricoes>((set, get) => ({
     set({ carregando: true, erro: null })
     try {
       const payload = {
-        paciente_id: dados.idPaciente,
-        tipo: dados.tipo,
-        descricao: dados.descricao,
-        data_inicio: dados.dataInicio,
-        frequencia: dados.frequencia,
-        data_fim: dados.dataFim,
-        indicacao: dados.indicacao,
-        resultado_cultura: dados.resultadoCultura
+        paciente_id:      dados.pacienteId,
+        medicacao:        dados.medicacao,
+        dose:             dados.dose,
+        via:              dados.via,
+        frequencia:       dados.frequencia,
+        data_fim:         dados.dataFim ?? null,
+        indicacao:        dados.indicacao ?? null,
       }
-      await axios.post('http://localhost:8000/prescricoes/', payload)
+      await axios.post(`${API_BASE}/prescricoes/`, payload)
       await get().buscarPrescricoes()
       return true
-    } catch (error) {
+    } catch {
       set({ erro: 'Falha ao cadastrar prescrição', carregando: false })
       return false
     }
-  }
+  },
 }))
 
 export default usePrescricoesStore
