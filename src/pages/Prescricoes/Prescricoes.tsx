@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import usePacientesStore from '../../store/usePacientesStore'
 import usePrescricoesStore from '../../store/usePrescricoesStore'
+import useDashboardStore, { type AlertaEnriquecido } from '../../store/useDashboardStore'
 import useToastStore from '../../store/useToastStore'
 import Card from '../../components/ui/Card/Card'
 import Modal from '../../components/ui/Modal/Modal'
@@ -9,127 +10,122 @@ import Input from '../../components/ui/Input/Input'
 import Select from '../../components/ui/Select/Select'
 import Badge from '../../components/ui/Badge/Badge'
 import Icone from '../../components/ui/Icone/Icone'
+import AlertItem from '../../components/ui/AlertItem/AlertItem'
 import './Prescricoes.css'
 
-const opcoesUnidade = [
-  { valor: 'mcg', rotulo: 'mcg' },
-  { valor: 'mg', rotulo: 'mg' },
-  { valor: 'g', rotulo: 'g' },
-  { valor: 'ml', rotulo: 'ml' },
-  { valor: 'UI', rotulo: 'UI' },
+const OPCOES_VIA = [
+  { valor: 'Oral',          rotulo: 'Oral' },
+  { valor: 'Intravenosa',   rotulo: 'Intravenosa (IV)' },
+  { valor: 'Subcutânea',    rotulo: 'Subcutânea (SC)' },
+  { valor: 'Intramuscular', rotulo: 'Intramuscular (IM)' },
+  { valor: 'Inalatória',    rotulo: 'Inalatória' },
 ]
 
-const opcoesVia = [
-  { valor: 'Oral', rotulo: 'Oral' },
-  { valor: 'Intravenosa', rotulo: 'Intravenosa' },
-  { valor: 'Subcutânea', rotulo: 'Subcutânea' },
-  { valor: 'Intramuscular', rotulo: 'Intramuscular' },
-  { valor: 'Inalatória', rotulo: 'Inalatória' },
-]
-
-const opcoesFrequencia = [
+const OPCOES_FREQUENCIA = [
   { valor: 'Dose única', rotulo: 'Dose única' },
-  { valor: '24/24h', rotulo: '24/24h' },
-  { valor: '12/12h', rotulo: '12/12h' },
-  { valor: '8/8h', rotulo: '8/8h' },
-  { valor: '6/6h', rotulo: '6/6h' },
-  { valor: '4/4h', rotulo: '4/4h' },
-  { valor: 'SOS', rotulo: 'SOS' },
+  { valor: '24/24h',     rotulo: '24/24h (1x/dia)' },
+  { valor: '12/12h',     rotulo: '12/12h (2x/dia)' },
+  { valor: '8/8h',       rotulo: '8/8h (3x/dia)' },
+  { valor: '6/6h',       rotulo: '6/6h (4x/dia)' },
+  { valor: '4/4h',       rotulo: '4/4h (6x/dia)' },
+  { valor: 'SOS',        rotulo: 'SOS (se necessário)' },
 ]
 
-const opcoesTipoDataFim = [
-  { valor: 'indeterminada', rotulo: 'Indeterminada' },
-  { valor: 'determinada', rotulo: 'Determinada' },
-]
-
-const varianteStatus: Record<string, 'ok' | 'warn' | 'err'> = {
-  ativa: 'ok',
-  concluida: 'err',
-  suspensa: 'warn',
+const VARIANTE_STATUS: Record<string, 'ok' | 'warn' | 'err'> = {
+  ativa:     'ok',
+  encerrada: 'err',
+  suspensa:  'warn',
 }
 
-const rotuloStatus: Record<string, string> = {
-  ativa: 'Ativa',
-  concluida: 'Concluída',
-  suspensa: 'Suspensa',
+const ROTULO_STATUS: Record<string, string> = {
+  ativa:     'Ativa',
+  encerrada: 'Encerrada',
+  suspensa:  'Suspensa',
 }
 
 interface FormState {
-  pacienteId: string
-  medicacao: string
-  dose: string
-  unidade: string
-  via: string
-  frequencia: string
-  tipoDataFim: string
-  dataFim: string
+  pacienteId:  string
+  medicacao:   string
+  dose:        string
+  via:         string
+  frequencia:  string
+  temDataFim:  boolean
+  dataFim:     string
+  indicacao:   string
 }
 
-const formInicial: FormState = {
-  pacienteId: '',
-  medicacao: '',
-  dose: '',
-  unidade: 'mg',
-  via: '',
-  frequencia: '',
-  tipoDataFim: 'indeterminada',
-  dataFim: '',
+const FORM_INICIAL: FormState = {
+  pacienteId:  '',
+  medicacao:   '',
+  dose:        '',
+  via:         '',
+  frequencia:  '',
+  temDataFim:  false,
+  dataFim:     '',
+  indicacao:   '',
 }
 
 export default function Prescricoes() {
   const [modalAberto, setModalAberto] = useState(false)
-  const [form, setForm] = useState<FormState>(formInicial)
+  const [form, setForm] = useState<FormState>(FORM_INICIAL)
 
-  const pacientes = usePacientesStore(s => s.pacientes)
+  const pacientes     = usePacientesStore(s => s.pacientes)
   const { registros, buscarPrescricoes, cadastrarPrescricao } = usePrescricoesStore()
   const adicionarToast = useToastStore(s => s.adicionarToast)
 
+  const alertasEnriquecidos = useDashboardStore(s => s.alertasEnriquecidos)
+  const carregarDashboard   = useDashboardStore(s => s.carregarDashboard)
+
   useEffect(() => {
     buscarPrescricoes()
-  }, [buscarPrescricoes])
+    carregarDashboard()
+  }, [buscarPrescricoes, carregarDashboard])
+
+  const alertasMedicamento: AlertaEnriquecido[] = alertasEnriquecidos().filter(
+    a => ['antibiotico', 'medicamento', 'lme'].includes(a.tipo_alerta.toLowerCase())
+  )
 
   const opcoesPacientes = pacientes.map(p => ({ valor: p.id, rotulo: p.nomeCompleto }))
 
   const mapaPacientes = useMemo(() => {
     const mapa: Record<string, string> = {}
-    pacientes.forEach(p => mapa[p.id] = p.nomeCompleto)
+    pacientes.forEach(p => { mapa[p.id] = p.nomeCompleto })
     return mapa
   }, [pacientes])
 
-  const atualizar = (campo: keyof FormState) => (valor: string) =>
+  const atualizar = (campo: keyof FormState) => (valor: string | boolean) =>
     setForm(prev => ({ ...prev, [campo]: valor }))
 
   const aoFechar = () => {
     setModalAberto(false)
-    setForm(formInicial)
+    setForm(FORM_INICIAL)
   }
 
   const preencherDebug = () => {
     const pacienteMockId = pacientes.length > 0 ? pacientes[0].id : ''
     setForm({
-      pacienteId: pacienteMockId,
-      medicacao: 'Vancomicina',
-      dose: '1',
-      unidade: 'g',
-      via: 'Intravenosa',
-      frequencia: '12/12h',
-      tipoDataFim: 'indeterminada',
-      dataFim: ''
+      pacienteId:  pacienteMockId,
+      medicacao:   'Vancomicina',
+      dose:        '1g',
+      via:         'Intravenosa',
+      frequencia:  '12/12h',
+      temDataFim:  true,
+      dataFim:     new Date(Date.now() + 14 * 86400000).toISOString().split('T')[0],
+      indicacao:   'Infecção de CVC',
     })
   }
 
   const aoSalvar = async (e: React.FormEvent) => {
     e.preventDefault()
-    
-    const descricaoCompleta = `${form.medicacao} ${form.dose}${form.unidade} - ${form.via}`
-    
+
     const sucesso = await cadastrarPrescricao({
-      idPaciente: form.pacienteId,
-      tipo: 'Medicamento',
-      descricao: descricaoCompleta,
-      frequencia: form.frequencia,
-      dataInicio: new Date().toISOString().split('T')[0],
-      dataFim: form.tipoDataFim === 'determinada' ? form.dataFim : undefined
+      pacienteId:  form.pacienteId,
+      medicacao:   form.medicacao,
+      dose:        form.dose,
+      via:         form.via,
+      frequencia:  form.frequencia,
+      dataFim:     form.temDataFim ? form.dataFim : undefined,
+      indicacao:   form.indicacao || undefined,
     })
 
     if (sucesso) {
@@ -152,26 +148,51 @@ export default function Prescricoes() {
         </Botao>
       </div>
 
+      {alertasMedicamento.length > 0 && (
+        <Card titulo="Alertas de Medicamentos" icone={<Icone nome="medicamento" tamanho={14} />} elevated>
+          {alertasMedicamento.map(alerta => (
+            <AlertItem
+              key={alerta.id}
+              severidade={alerta.severidade}
+              icone={<Icone nome="medicamento" tamanho={14} />}
+              titulo={alerta.titulo}
+              sub={`${alerta.nomePaciente} · ${alerta.descricao}`}
+            />
+          ))}
+        </Card>
+      )}
+
       <Card semPadding icone={<Icone nome="medicamento" tamanho={14} />} titulo={`${registros.length} prescrições`}>
         <table className="prescricoes__tabela">
           <thead>
             <tr>
               <th>Paciente</th>
-              <th>Descrição</th>
+              <th>Medicação</th>
+              <th>Dose / Via</th>
               <th>Frequência</th>
               <th>Data Fim</th>
               <th>Status</th>
             </tr>
           </thead>
           <tbody>
+            {registros.length === 0 && (
+              <tr>
+                <td colSpan={6} style={{ textAlign: 'center', padding: '32px', color: 'var(--gray-400)', fontSize: '13px' }}>
+                  Nenhuma prescrição registrada.
+                </td>
+              </tr>
+            )}
             {registros.map(p => (
               <tr key={p.id} className={`prescricoes__linha prescricoes__linha--${p.status}`}>
-                <td className="prescricoes__td-paciente">{mapaPacientes[p.idPaciente] || 'Desconhecido'}</td>
-                <td className="prescricoes__td-medicacao">{p.descricao}</td>
+                <td className="prescricoes__td-paciente">{mapaPacientes[p.pacienteId] || 'Desconhecido'}</td>
+                <td className="prescricoes__td-medicacao">{p.medicacao}</td>
+                <td>{p.dose} · {p.via}</td>
                 <td>{p.frequencia}</td>
                 <td className="prescricoes__td-data">{p.dataFim ?? 'Indeterminada'}</td>
                 <td>
-                  <Badge variante={varianteStatus[p.status] || 'ok'}>{rotuloStatus[p.status] || p.status}</Badge>
+                  <Badge variante={VARIANTE_STATUS[p.status] || 'ok'}>
+                    {ROTULO_STATUS[p.status] || p.status}
+                  </Badge>
                 </td>
               </tr>
             ))}
@@ -186,9 +207,7 @@ export default function Prescricoes() {
         aoFechar={aoFechar}
         rodape={
           <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
-            <Botao variante="ghost" onClick={preencherDebug} type="button" tamanho="sm">
-              Preencher Debug
-            </Botao>
+            <Botao variante="ghost" onClick={preencherDebug} type="button" tamanho="sm">Preencher Debug</Botao>
             <div style={{ display: 'flex', gap: '8px' }}>
               <Botao variante="ghost" onClick={aoFechar}>Cancelar</Botao>
               <Botao variante="primary" tipo="submit" form="form-prescricao">Salvar</Botao>
@@ -212,47 +231,50 @@ export default function Prescricoes() {
             aoAlterar={atualizar('medicacao')}
             placeholder="Ex: Vancomicina"
           />
+          <Input
+            id="prescricao-indicacao"
+            label="Indicação clínica"
+            valor={form.indicacao}
+            aoAlterar={atualizar('indicacao')}
+            placeholder="Ex: Infecção de CVC"
+          />
           <div className="prescricoes__form-linha">
             <Input
               id="prescricao-dose"
               label="Dose"
-              type="number"
               valor={form.dose}
               aoAlterar={atualizar('dose')}
-              placeholder="0"
+              placeholder="Ex: 1g"
             />
             <Select
-              id="prescricao-unidade"
-              label="Unidade"
-              valor={form.unidade}
-              aoAlterar={atualizar('unidade')}
-              opcoes={opcoesUnidade}
+              id="prescricao-via"
+              label="Via"
+              valor={form.via}
+              aoAlterar={atualizar('via')}
+              opcoes={OPCOES_VIA}
+              placeholder="Selecione..."
             />
           </div>
-          <Select
-            id="prescricao-via"
-            label="Via"
-            valor={form.via}
-            aoAlterar={atualizar('via')}
-            opcoes={opcoesVia}
-            placeholder="Selecione a via..."
-          />
           <Select
             id="prescricao-frequencia"
             label="Frequência"
             valor={form.frequencia}
             aoAlterar={atualizar('frequencia')}
-            opcoes={opcoesFrequencia}
+            opcoes={OPCOES_FREQUENCIA}
             placeholder="Selecione a frequência..."
           />
-          <Select
-            id="prescricao-tipo-data-fim"
-            label="Data Fim"
-            valor={form.tipoDataFim}
-            aoAlterar={atualizar('tipoDataFim')}
-            opcoes={opcoesTipoDataFim}
-          />
-          {form.tipoDataFim === 'determinada' && (
+          <div className="prescricoes__form-linha prescricoes__form-linha--check">
+            <label htmlFor="prescricao-tem-data-fim" className="prescricoes__check-label">
+              <input
+                id="prescricao-tem-data-fim"
+                type="checkbox"
+                checked={form.temDataFim}
+                onChange={e => atualizar('temDataFim')(e.target.checked)}
+              />
+              Definir data de término
+            </label>
+          </div>
+          {form.temDataFim && (
             <Input
               id="prescricao-data-fim"
               label="Data de encerramento"

@@ -45,8 +45,16 @@ function resolverRota(tipo: string): string {
   return MAPA_ROTA[tipo.toLowerCase()] ?? 'pacientes'
 }
 
+interface EstatisticasComplicacoes {
+  infecciosas: number
+  cardiovasculares: number
+  acesso_vascular: number
+  transfusoes: number
+}
+
 interface EstadoDashboard {
   alertas: AlertaApi[]
+  estatisticasComplicacoes: EstatisticasComplicacoes
   carregando: boolean
   erro: string | null
   carregarDashboard: () => Promise<void>
@@ -63,16 +71,24 @@ interface EstadoDashboard {
 
 const useDashboardStore = create<EstadoDashboard>((set, get) => ({
   alertas:    [],
+  estatisticasComplicacoes: { infecciosas: 0, cardiovasculares: 0, acesso_vascular: 0, transfusoes: 0 },
   carregando: false,
   erro:       null,
 
   carregarDashboard: async () => {
     set({ carregando: true, erro: null })
     try {
-      const { data } = await axios.get<AlertaApi[]>(`${API_BASE}/alertas/`)
-      set({ alertas: data, carregando: false })
+      const [resAlertas, resEstats] = await Promise.all([
+        axios.get<AlertaApi[]>(`${API_BASE}/alertas/`),
+        axios.get<EstatisticasComplicacoes>(`${API_BASE}/evolucoes/estatisticas/mes-atual`)
+      ])
+      set({ 
+        alertas: resAlertas.data, 
+        estatisticasComplicacoes: resEstats.data,
+        carregando: false 
+      })
     } catch {
-      set({ erro: 'Falha ao carregar alertas', carregando: false })
+      set({ erro: 'Falha ao carregar dashboard', carregando: false })
     }
   },
 
