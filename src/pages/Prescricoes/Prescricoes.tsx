@@ -101,6 +101,20 @@ export default function Prescricoes() {
     setForm(FORM_INICIAL)
   }
 
+  const preencherDebug = () => {
+    const pacienteMockId = pacientes.length > 0 ? pacientes[0].id : ''
+    setForm({
+      pacienteId:  pacienteMockId,
+      medicacao:   'Vancomicina',
+      dose:        '1g',
+      via:         'Intravenosa',
+      frequencia:  '12/12h',
+      temDataFim:  true,
+      dataFim:     new Date(Date.now() + 14 * 86400000).toISOString().split('T')[0],
+      indicacao:   'Infecção de CVC',
+    })
+  }
+
   const aoSalvar = async (e: React.FormEvent) => {
     e.preventDefault()
 
@@ -192,9 +206,12 @@ export default function Prescricoes() {
         tamanho="md"
         aoFechar={aoFechar}
         rodape={
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', width: '100%' }}>
-            <Botao variante="ghost" onClick={aoFechar}>Cancelar</Botao>
-            <Botao variante="primary" tipo="submit" form="form-prescricao">Salvar</Botao>
+          <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+            <Botao variante="ghost" onClick={preencherDebug} type="button" tamanho="sm">Preencher Debug</Botao>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <Botao variante="ghost" onClick={aoFechar}>Cancelar</Botao>
+              <Botao variante="primary" tipo="submit" form="form-prescricao">Salvar</Botao>
+            </div>
           </div>
         }
       >
