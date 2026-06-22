@@ -9,7 +9,6 @@ import Input from '../../components/ui/Input/Input'
 import Select from '../../components/ui/Select/Select'
 import Badge from '../../components/ui/Badge/Badge'
 import Icone from '../../components/ui/Icone/Icone'
-import AlertItem from '../../components/ui/AlertItem/AlertItem'
 import './Prescricoes.css'
 
 const OPCOES_VIA = [
