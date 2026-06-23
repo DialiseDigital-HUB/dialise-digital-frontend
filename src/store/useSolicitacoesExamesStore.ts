@@ -53,6 +53,7 @@ const useSolicitacoesExamesStore = create<EstadoSolicitacoes>((set, get) => ({
       const payload = {
         paciente_id: dados.idPaciente,
         tipo_exame: dados.tipoExame,
+        periodicidade: dados.periodicidade,
         data_solicitacao: dados.dataSolicitacao,
         medico_solicitante: dados.medicoSolicitante,
         prioridade: dados.prioridade
