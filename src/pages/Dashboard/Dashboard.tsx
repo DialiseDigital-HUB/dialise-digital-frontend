@@ -52,7 +52,6 @@ export default function Dashboard() {
       refAlertas.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
     }, 50)
   }
-
   const statCards = [
     {
       label:    'Pacientes Ativos',

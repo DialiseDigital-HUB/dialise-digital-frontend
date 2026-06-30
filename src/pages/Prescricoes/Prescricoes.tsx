@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import usePacientesStore from '../../store/usePacientesStore'
 import usePrescricoesStore from '../../store/usePrescricoesStore'
+import useDashboardStore from '../../store/useDashboardStore'
 import useToastStore from '../../store/useToastStore'
 import Card from '../../components/ui/Card/Card'
 import Modal from '../../components/ui/Modal/Modal'
@@ -87,9 +88,13 @@ export default function Prescricoes() {
     return comStatusEfetivo.filter(r => r.status === filtroStatus)
   }, [registros, filtroStatus])
 
+
+  const carregarDashboard   = useDashboardStore(s => s.carregarDashboard)
+
   useEffect(() => {
     buscarPrescricoes()
-  }, [buscarPrescricoes])
+    carregarDashboard()
+  }, [buscarPrescricoes, carregarDashboard])
 
   const opcoesPacientes = pacientes.map(p => ({ valor: p.id, rotulo: p.nomeCompleto }))
 
