@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import useNavegacaoStore from '../../store/useNavegacaoStore'
 import useDashboardStore, { type AlertaEnriquecido } from '../../store/useDashboardStore'
 import usePacientesStore from '../../store/usePacientesStore'
@@ -22,7 +22,10 @@ export default function Dashboard() {
   const estatisticas        = useDashboardStore(s => s.estatisticasComplicacoes)
 
   const totalPacientes = usePacientesStore(s => s.pacientes.length)
+  const definirFiltroAvancado = usePacientesStore(s => s.definirFiltroAvancado)
 
+  const refAlertas = useRef<HTMLDivElement>(null)
+  const [filtroSeveridade, setFiltroSeveridade] = useState<'todos' | 'danger' | 'warn'>('todos')
   const [alertaAberto, setAlertaAberto] = useState<AlertaEnriquecido | null>(null)
 
   useEffect(() => {
@@ -39,38 +42,48 @@ export default function Dashboard() {
     { tipo: 'Transfusões',      casos: estatisticas.transfusoes,      variante: 'info' as const },
   ]
 
+  const listaAlertasFiltrada = filtroSeveridade === 'todos'
+    ? listaAlertas
+    : listaAlertas.filter(a => a.severidade === filtroSeveridade)
+
+  const focarAlertas = (severidade: 'danger' | 'warn') => {
+    setFiltroSeveridade(severidade)
+    setTimeout(() => {
+      refAlertas.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 50)
+  }
   const statCards = [
     {
-      id: 'pacientes',
+      label:    'Pacientes Ativos',
       variante: 'ok' as const,
-      icone: 'pacientes' as const,
-      label: 'Pacientes Ativos',
-      valor: totalPacientes,
-      sub: `${totalPacientes} no sistema`,
+      icone:    'pacientes' as const,
+      valor:    totalPacientes,
+      sub:      `${totalPacientes} no sistema`,
+      onClick:  () => navegar('pacientes'),
     },
     {
-      id: 'prescricoes',
+      label:    'Alertas Críticos',
       variante: 'danger' as const,
-      icone: 'medicamento' as const,
-      label: 'Alertas Críticos',
-      valor: dadosKpi.totalAlertasDanger,
-      sub: `${dadosKpi.totalAlertasDanger} urgentes`,
+      icone:    'medicamento' as const,
+      valor:    dadosKpi.totalAlertasDanger,
+      sub:      `${dadosKpi.totalAlertasDanger} urgentes`,
+      onClick:  () => focarAlertas('danger'),
     },
     {
-      id: 'pacientes',
+      label:    'Alertas de Atenção',
       variante: 'warn' as const,
-      icone: 'lme' as const,
-      label: 'Alertas de Atenção',
-      valor: dadosKpi.totalAlertasWarn,
-      sub: `${dadosKpi.totalAlertasWarn} pendentes`,
+      icone:    'lme' as const,
+      valor:    dadosKpi.totalAlertasWarn,
+      sub:      `${dadosKpi.totalAlertasWarn} pendentes`,
+      onClick:  () => focarAlertas('warn'),
     },
     {
-      id: 'pacientes',
+      label:    'Inscritos Transplante',
       variante: 'neutral' as const,
-      icone: 'exame_lab' as const,
-      label: 'Inscritos Transplante',
-      valor: dadosKpi.inscritosTransplante,
-      sub: `${dadosKpi.inscritosTransplante} na fila`,
+      icone:    'exame_lab' as const,
+      valor:    dadosKpi.inscritosTransplante,
+      sub:      `${dadosKpi.inscritosTransplante} na fila`,
+      onClick:  () => { definirFiltroAvancado('transplante'); navegar('pacientes') },
     },
   ]
 
@@ -105,8 +118,8 @@ export default function Dashboard() {
           <div
             key={card.label}
             className={`dash-stat dash-stat--${card.variante} clickable`}
-            onClick={() => navegar(card.id as any)}
-            title={`Ver detalhes em ${card.label}`}
+            onClick={card.onClick}
+            title={card.label}
           >
             <span className="dash-stat__icone">
               <Icone nome={card.icone} tamanho={20} />
@@ -119,14 +132,29 @@ export default function Dashboard() {
       </div>
 
       <div className="dashboard__grid-principal">
-        <Card titulo="Alertas Prioritários" icone={<Icone nome="alerta" tamanho={14} />} elevated>
-          {carregando && <div style={{ padding: '16px', color: 'var(--gray-500)', fontSize: '13px' }}>Carregando alertas...</div>}
-          {!carregando && listaAlertas.length === 0 && (
-            <div style={{ padding: '24px', textAlign: 'center', color: 'var(--gray-500)', fontSize: '13px' }}>
-              Nenhum alerta ativo no momento.
-            </div>
-          )}
-          {listaAlertas.map(alerta => (
+        <div ref={refAlertas}>
+          <Card
+            titulo={filtroSeveridade === 'todos' ? 'Alertas Prioritários' : filtroSeveridade === 'danger' ? 'Alertas Críticos' : 'Alertas de Atenção'}
+            icone={<Icone nome="alerta" tamanho={14} />}
+            elevated
+            acoes={
+              filtroSeveridade !== 'todos' ? (
+                <button
+                  style={{ fontSize: '12px', color: 'var(--gray-500)', background: 'none', border: 'none', cursor: 'pointer', padding: '4px 8px' }}
+                  onClick={() => setFiltroSeveridade('todos')}
+                >
+                  Ver todos
+                </button>
+              ) : undefined
+            }
+          >
+            {carregando && <div style={{ padding: '16px', color: 'var(--gray-500)', fontSize: '13px' }}>Carregando alertas...</div>}
+            {!carregando && listaAlertasFiltrada.length === 0 && (
+              <div style={{ padding: '24px', textAlign: 'center', color: 'var(--gray-500)', fontSize: '13px' }}>
+                Nenhum alerta {filtroSeveridade !== 'todos' ? 'nessa categoria' : 'ativo no momento'}.
+              </div>
+            )}
+            {listaAlertasFiltrada.map(alerta => (
             <AlertItem
               key={alerta.id}
               severidade={alerta.severidade}
@@ -136,7 +164,8 @@ export default function Dashboard() {
               onClick={() => setAlertaAberto(alerta)}
             />
           ))}
-        </Card>
+          </Card>
+        </div>
 
         <div className="dashboard__grid-direita">
           <Card titulo="Indicadores do Mês" icone={<Icone nome="grafico" tamanho={14} />}>

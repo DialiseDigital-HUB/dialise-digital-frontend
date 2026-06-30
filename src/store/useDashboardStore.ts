@@ -125,7 +125,7 @@ const useDashboardStore = create<EstadoDashboard>((set, get) => ({
     const totalPacientes      = pacientes.length
     const totalAlertasDanger  = alertas.filter(a => resolverSeveridade(a.tipo_alerta) === 'danger').length
     const totalAlertasWarn    = alertas.filter(a => resolverSeveridade(a.tipo_alerta) === 'warn').length
-    const evolucoesConcluidas = pacientes.filter(p => p.statusEvolucao === 'ok').length
+    const evolucoesConcluidas = pacientes.filter(p => p.statusEvolucao === 'ok' || p.statusEvolucao === 'warn').length
     const inscritosTransplante = pacientes.filter(p => p.inscritoTransplante).length
 
     return { totalPacientes, totalAlertasDanger, totalAlertasWarn, evolucoesConcluidas, inscritosTransplante }
