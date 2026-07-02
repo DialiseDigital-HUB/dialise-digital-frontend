@@ -35,21 +35,21 @@ export default function FormCadastroPaciente({ idForm, aoSubmeter, modoEdicao = 
     e.preventDefault()
     if (modoEdicao) {
       aoSubmeter({
-        nome_completo:       nome,
+        nomeCompleto:        nome,
         sexo:                sexo,
         turno:               turno,
-        medico_assistente_id: medico || null,
+        medicoAssistenteId:  medico || null,
         diagnostico:         diagnostico,
       })
     } else {
       aoSubmeter({
-        prontuario:           prontuario,
-        nome_completo:        nome,
-        data_nascimento:      dataNascimento,
-        sexo:                 sexo,
-        turno:                turno,
-        medico_assistente_id: medico || null,
-        diagnostico:          diagnostico,
+        prontuario:          prontuario,
+        nomeCompleto:        nome,
+        dataNascimento:      dataNascimento,
+        sexo:                sexo,
+        turno:               turno,
+        medicoAssistenteId:  medico || null,
+        diagnostico:         diagnostico,
       })
     }
   }

@@ -51,21 +51,21 @@ const useCalendarioStore = create<EstadoCalendario>((set, get) => ({
 
   definirDia: dia => set({ diaSelecionado: dia }),
 
-  avancarMes: () =>
-    set(estado => {
-      const novoMes = estado.mesAtivo === 12 ? 1 : estado.mesAtivo + 1
-      const novoAno = estado.mesAtivo === 12 ? estado.anoAtivo + 1 : estado.anoAtivo
-      get().buscarEventosEAntibioticos()
-      return { mesAtivo: novoMes, anoAtivo: novoAno, diaSelecionado: null }
-    }),
+  avancarMes: () => {
+    const estado = get()
+    const novoMes = estado.mesAtivo === 12 ? 1 : estado.mesAtivo + 1
+    const novoAno = estado.mesAtivo === 12 ? estado.anoAtivo + 1 : estado.anoAtivo
+    set({ mesAtivo: novoMes, anoAtivo: novoAno, diaSelecionado: null })
+    get().buscarEventosEAntibioticos()
+  },
 
-  retrocederMes: () =>
-    set(estado => {
-      const novoMes = estado.mesAtivo === 1 ? 12 : estado.mesAtivo - 1
-      const novoAno = estado.mesAtivo === 1 ? estado.anoAtivo - 1 : estado.anoAtivo
-      get().buscarEventosEAntibioticos()
-      return { mesAtivo: novoMes, anoAtivo: novoAno, diaSelecionado: null }
-    }),
+  retrocederMes: () => {
+    const estado = get()
+    const novoMes = estado.mesAtivo === 1 ? 12 : estado.mesAtivo - 1
+    const novoAno = estado.mesAtivo === 1 ? estado.anoAtivo - 1 : estado.anoAtivo
+    set({ mesAtivo: novoMes, anoAtivo: novoAno, diaSelecionado: null })
+    get().buscarEventosEAntibioticos()
+  },
 
   buscarEventosEAntibioticos: async (idPaciente?: string) => {
     set({ carregando: true, erro: null })

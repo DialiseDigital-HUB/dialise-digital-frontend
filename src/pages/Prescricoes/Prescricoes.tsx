@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react'
 import usePacientesStore from '../../store/usePacientesStore'
 import usePrescricoesStore from '../../store/usePrescricoesStore'
 import useDashboardStore from '../../store/useDashboardStore'
+import useNavegacaoStore from '../../store/useNavegacaoStore'
 import useToastStore from '../../store/useToastStore'
 import Card from '../../components/ui/Card/Card'
 import Modal from '../../components/ui/Modal/Modal'
@@ -66,6 +67,7 @@ const FORM_INICIAL: FormState = {
 
 export default function Prescricoes() {
   const [modalAberto, setModalAberto] = useState(false)
+  const [modalConfirmacao, setModalConfirmacao] = useState<{aberto: boolean, acao: 'suspender' | 'concluir' | null, id: string | null}>({ aberto: false, acao: null, id: null })
   const [form, setForm] = useState<FormState>(FORM_INICIAL)
 
   const pacientes          = usePacientesStore(s => s.pacientes)
@@ -75,6 +77,8 @@ export default function Prescricoes() {
   const cadastrarPrescricao = usePrescricoesStore(s => s.cadastrarPrescricao)
   const definirFiltroStatus = usePrescricoesStore(s => s.definirFiltroStatus)
   const adicionarToast     = useToastStore(s => s.adicionarToast)
+  const pacienteEmFoco     = useNavegacaoStore(s => s.pacienteEmFoco)
+  const limparContexto     = useNavegacaoStore(s => s.limparContexto)
 
   const listaPrescricoes = useMemo(() => {
     const hoje = new Date().toISOString().split('T')[0]
@@ -84,9 +88,10 @@ export default function Prescricoes() {
         ? 'encerrada' as const
         : r.status,
     }))
-    if (filtroStatus === 'todos') return comStatusEfetivo
-    return comStatusEfetivo.filter(r => r.status === filtroStatus)
-  }, [registros, filtroStatus])
+    const porStatus = filtroStatus === 'todos' ? comStatusEfetivo : comStatusEfetivo.filter(r => r.status === filtroStatus)
+    if (pacienteEmFoco) return porStatus.filter(r => r.pacienteId === pacienteEmFoco)
+    return porStatus
+  }, [registros, filtroStatus, pacienteEmFoco])
 
 
   const carregarDashboard   = useDashboardStore(s => s.carregarDashboard)
@@ -94,7 +99,8 @@ export default function Prescricoes() {
   useEffect(() => {
     buscarPrescricoes()
     carregarDashboard()
-  }, [buscarPrescricoes, carregarDashboard])
+    return () => { limparContexto() }
+  }, [buscarPrescricoes, carregarDashboard, limparContexto])
 
   const opcoesPacientes = pacientes.map(p => ({ valor: p.id, rotulo: p.nomeCompleto }))
 
@@ -126,6 +132,9 @@ export default function Prescricoes() {
     })
   }
 
+  const suspenderPrescricao = usePrescricoesStore(s => s.suspenderPrescricao)
+  const concluirPrescricao = usePrescricoesStore(s => s.concluirPrescricao)
+
   const aoSalvar = async (e: React.FormEvent) => {
     e.preventDefault()
 
@@ -144,6 +153,35 @@ export default function Prescricoes() {
       aoFechar()
     } else {
       adicionarToast('Erro ao registrar prescrição.', 'erro')
+    }
+  }
+
+  const aoSuspender = (id: string) => {
+    setModalConfirmacao({ aberto: true, acao: 'suspender', id })
+  }
+
+  const aoConcluir = (id: string) => {
+    setModalConfirmacao({ aberto: true, acao: 'concluir', id })
+  }
+
+  const confirmarAcao = async () => {
+    if (!modalConfirmacao.id || !modalConfirmacao.acao) return
+    const id = modalConfirmacao.id
+    const acao = modalConfirmacao.acao
+    setModalConfirmacao({ aberto: false, acao: null, id: null })
+
+    if (acao === 'suspender') {
+      const sucesso = await suspenderPrescricao(id)
+      if (sucesso) {
+        adicionarToast('Prescrição suspensa.', 'sucesso')
+        carregarDashboard()
+      } else adicionarToast('Erro ao suspender.', 'erro')
+    } else {
+      const sucesso = await concluirPrescricao(id)
+      if (sucesso) {
+        adicionarToast('Prescrição concluída.', 'sucesso')
+        carregarDashboard()
+      } else adicionarToast('Erro ao concluir.', 'erro')
     }
   }
 
@@ -186,12 +224,13 @@ export default function Prescricoes() {
               <th>Frequência</th>
               <th>Data Fim</th>
               <th>Status</th>
+              <th>Ações</th>
             </tr>
           </thead>
           <tbody>
             {listaPrescricoes.length === 0 && (
               <tr>
-                <td colSpan={6} style={{ textAlign: 'center', padding: '32px', color: 'var(--gray-400)', fontSize: '13px' }}>
+                <td colSpan={7} style={{ textAlign: 'center', padding: '32px', color: 'var(--gray-400)', fontSize: '13px' }}>
                   Nenhuma prescrição encontrada.
                 </td>
               </tr>
@@ -207,6 +246,14 @@ export default function Prescricoes() {
                   <Badge variante={VARIANTE_STATUS[p.status] || 'ok'}>
                     {ROTULO_STATUS[p.status] || p.status}
                   </Badge>
+                </td>
+                <td>
+                  {p.status === 'ativa' && (
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <Botao variante="ghost" tamanho="sm" onClick={() => aoSuspender(p.id)}>Suspender</Botao>
+                      <Botao variante="primary" tamanho="sm" onClick={() => aoConcluir(p.id)}>Concluir</Botao>
+                    </div>
+                  )}
                 </td>
               </tr>
             ))}
@@ -298,6 +345,25 @@ export default function Prescricoes() {
             />
           )}
         </form>
+      </Modal>
+
+      <Modal
+        aberto={modalConfirmacao.aberto}
+        titulo={modalConfirmacao.acao === 'suspender' ? 'Suspender Prescrição' : 'Concluir Prescrição'}
+        tamanho="sm"
+        aoFechar={() => setModalConfirmacao({ aberto: false, acao: null, id: null })}
+        rodape={
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', width: '100%' }}>
+            <Botao variante="ghost" onClick={() => setModalConfirmacao({ aberto: false, acao: null, id: null })}>Cancelar</Botao>
+            <Botao variante="primary" onClick={confirmarAcao}>Confirmar</Botao>
+          </div>
+        }
+      >
+        <div style={{ padding: '8px 0', color: 'var(--gray-600)', fontSize: '14px' }}>
+          {modalConfirmacao.acao === 'suspender' 
+            ? 'Deseja realmente suspender esta prescrição?'
+            : 'Deseja marcar esta prescrição como concluída?'}
+        </div>
       </Modal>
     </div>
   )
