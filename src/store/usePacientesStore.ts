@@ -74,7 +74,16 @@ const usePacientesStore = create<EstadoPacientes>((set, get) => ({
   cadastrarPaciente: async (dados) => {
     set({ carregando: true, erro: null })
     try {
-      await axios.post('http://localhost:8000/pacientes/', dados)
+      const payload = {
+        prontuario:           dados.prontuario,
+        nome_completo:        dados.nomeCompleto,
+        data_nascimento:      dados.dataNascimento,
+        sexo:                 dados.sexo,
+        turno:                dados.turno,
+        medico_assistente_id: dados.medicoAssistenteId ?? null,
+        diagnostico:          dados.diagnostico ?? null,
+      }
+      await axios.post('http://localhost:8000/pacientes/', payload)
       await get().buscarPacientes()
       return true
     } catch (error) {
@@ -86,7 +95,15 @@ const usePacientesStore = create<EstadoPacientes>((set, get) => ({
   editarPaciente: async (id, dados) => {
     set({ carregando: true, erro: null })
     try {
-      await axios.patch(`http://localhost:8000/pacientes/${id}`, dados)
+      const payload = {
+        nome_completo:        dados.nomeCompleto ?? undefined,
+        data_nascimento:      dados.dataNascimento ?? undefined,
+        sexo:                 dados.sexo ?? undefined,
+        turno:                dados.turno ?? undefined,
+        medico_assistente_id: dados.medicoAssistenteId ?? undefined,
+        diagnostico:          dados.diagnostico ?? undefined,
+      }
+      await axios.patch(`http://localhost:8000/pacientes/${id}`, payload)
       await get().buscarPacientes()
       return true
     } catch {

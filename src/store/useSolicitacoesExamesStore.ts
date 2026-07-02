@@ -28,8 +28,8 @@ const useSolicitacoesExamesStore = create<EstadoSolicitacoes>((set, get) => ({
     set({ carregando: true, erro: null })
     try {
       const url = idPaciente && idPaciente !== 'todos'
-        ? `http://localhost:8000/solicitacoes_exame/paciente/${idPaciente}`
-        : 'http://localhost:8000/solicitacoes_exame/'
+        ? `http://localhost:8000/solicitacoes-exame/paciente/${idPaciente}`
+        : 'http://localhost:8000/solicitacoes-exame/'
       
       const response = await axios.get(url)
       const solicitacoesMapeadas: SolicitacaoExame[] = response.data.map((r: any) => ({
@@ -57,7 +57,7 @@ const useSolicitacoesExamesStore = create<EstadoSolicitacoes>((set, get) => ({
         medico_solicitante: dados.medicoSolicitante,
         prioridade: dados.prioridade
       }
-      await axios.post('http://localhost:8000/solicitacoes_exame/', payload)
+      await axios.post('http://localhost:8000/solicitacoes-exame/', payload)
       await get().buscarSolicitacoes()
       return true
     } catch (error) {
