@@ -22,6 +22,7 @@ interface FormState {
   pacienteId: string
   vacina: string
   data: string
+  proximaDose: string
   lote: string
 }
 
@@ -29,6 +30,7 @@ const formInicial: FormState = {
   pacienteId: '',
   vacina: '',
   data: '',
+  proximaDose: '',
   lote: '',
 }
 
@@ -66,6 +68,7 @@ export default function Vacinas() {
       pacienteId: pacienteMockId,
       vacina: 'Hepatite B',
       data: new Date().toISOString().split('T')[0],
+      proximaDose: new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0],
       lote: 'HB-2026-0041'
     })
   }
@@ -76,9 +79,9 @@ export default function Vacinas() {
     const sucesso = await cadastrarVacina({
       idPaciente: form.pacienteId,
       vacina: form.vacina,
-      dose: 'Única', // Simplificação para a tela
+      dose: 'Única',
       dataAplicacao: form.data,
-      // Lote não está no nosso model/schema atualmente (mas pode ser adicionado depois, ignorando por hora)
+      proximaDose: form.proximaDose || undefined
     })
 
     if (sucesso) {
@@ -160,13 +163,22 @@ export default function Vacinas() {
             opcoes={opcoesVacinas}
             placeholder="Selecione a vacina..."
           />
-          <Input
-            id="vacina-data"
-            label="Data de aplicação"
-            type="date"
-            valor={form.data}
-            aoAlterar={atualizar('data')}
-          />
+          <div style={{ display: 'flex', gap: '16px' }}>
+            <Input
+              id="vacina-data"
+              label="Data de aplicação"
+              type="date"
+              valor={form.data}
+              aoAlterar={atualizar('data')}
+            />
+            <Input
+              id="vacina-proxima-dose"
+              label="Próxima Dose (opcional)"
+              type="date"
+              valor={form.proximaDose}
+              aoAlterar={atualizar('proximaDose')}
+            />
+          </div>
           <Input
             id="vacina-lote"
             label="Lote"

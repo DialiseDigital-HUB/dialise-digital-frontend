@@ -1,6 +1,8 @@
 import { create } from 'zustand'
 import axios from 'axios'
 import usePacientesStore from './usePacientesStore'
+import usePrescricoesStore from './usePrescricoesStore'
+import useCalendarioStore from './useCalendarioStore'
 
 const API_BASE = 'http://localhost:8000'
 
@@ -98,6 +100,8 @@ const useDashboardStore = create<EstadoDashboard>((set, get) => ({
       set(estado => ({
         alertas: estado.alertas.filter(a => a.id !== alertaId),
       }))
+      await usePrescricoesStore.getState().buscarPrescricoes()
+      await useCalendarioStore.getState().buscarEventosEAntibioticos()
     } catch {
       set({ erro: 'Falha ao resolver alerta' })
     }

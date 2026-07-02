@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import axios from 'axios'
+import useCalendarioStore from './useCalendarioStore'
 
 const API_BASE = 'http://localhost:8000'
 
@@ -35,6 +36,8 @@ interface EstadoPrescricoes {
   definirFiltroStatus: (status: string) => void
   prescricoesFiltradas: () => Prescricao[]
   cadastrarPrescricao: (dados: NovaPrescricao) => Promise<boolean>
+  suspenderPrescricao: (id: string) => Promise<boolean>
+  concluirPrescricao: (id: string) => Promise<boolean>
 }
 
 const usePrescricoesStore = create<EstadoPrescricoes>((set, get) => ({
@@ -91,9 +94,34 @@ const usePrescricoesStore = create<EstadoPrescricoes>((set, get) => ({
       }
       await axios.post(`${API_BASE}/prescricoes/`, payload)
       await get().buscarPrescricoes()
+      await useCalendarioStore.getState().buscarEventosEAntibioticos()
       return true
     } catch {
       set({ erro: 'Falha ao cadastrar prescrição', carregando: false })
+      return false
+    }
+  },
+
+  suspenderPrescricao: async (id: string) => {
+    set({ carregando: true, erro: null })
+    try {
+      await axios.patch(`${API_BASE}/prescricoes/${id}/suspender`)
+      await get().buscarPrescricoes()
+      return true
+    } catch {
+      set({ erro: 'Falha ao suspender prescrição', carregando: false })
+      return false
+    }
+  },
+
+  concluirPrescricao: async (id: string) => {
+    set({ carregando: true, erro: null })
+    try {
+      await axios.patch(`${API_BASE}/prescricoes/${id}/concluir`)
+      await get().buscarPrescricoes()
+      return true
+    } catch {
+      set({ erro: 'Falha ao concluir prescrição', carregando: false })
       return false
     }
   },
