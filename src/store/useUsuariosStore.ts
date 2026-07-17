@@ -1,5 +1,8 @@
 import { create } from 'zustand'
 import type { Role } from './useAuthStore'
+import useAuthStore from './useAuthStore'
+
+const API = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000'
 
 export interface Usuario {
   id: string
@@ -18,43 +21,55 @@ interface EstadoUsuarios {
   criarUsuario: (novo: Omit<Usuario, 'id'>) => Promise<void>
 }
 
-// Mock inicial para visualização antes da API real estar pronta com RBAC
-const mockUsuarios: Usuario[] = [
-  { id: '1', nome_completo: 'Dr. Admin', crm: '11111-DF', email: 'admin@nefro.com', ativo: true, role: 'admin' },
-  { id: '2', nome_completo: 'Dr. Silva', crm: '22222-DF', email: 'medico@nefro.com', ativo: true, role: 'medico' },
-  { id: '3', nome_completo: 'Res. Costa', crm: '33333-DF', email: 'residente@nefro.com', ativo: true, role: 'residente' },
-  { id: '4', nome_completo: 'Enf. Souza', crm: '44444-DF', email: 'enfermeiro@nefro.com', ativo: true, role: 'enfermeiro' },
-]
-
 const useUsuariosStore = create<EstadoUsuarios>((set) => ({
-  usuarios: mockUsuarios,
+  usuarios: [],
   carregando: false,
   erro: null,
 
   buscarUsuarios: async () => {
-    // Para MVP RBAC desacoplado, mantemos os mocks até backend subir
-    // set({ carregando: true, erro: null })
-    // try {
-    //   const response = await axios.get('http://localhost:8000/usuarios/')
-    //   set({ usuarios: response.data, carregando: false })
-    // } catch (error) {
-    //   set({ erro: 'Falha ao buscar usuários da API', carregando: false })
-    // }
+    const token = useAuthStore.getState().usuario?.token
+    if (!token) return
+
+    set({ carregando: true, erro: null })
+    try {
+      const res = await fetch(`${API}/usuarios/`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      if (!res.ok) throw new Error()
+      const data: Usuario[] = await res.json()
+      set({ usuarios: data, carregando: false })
+    } catch {
+      set({ erro: 'Falha ao buscar usuários.', carregando: false })
+    }
   },
 
   criarUsuario: async (novo) => {
+    const token = useAuthStore.getState().usuario?.token
+    if (!token) return
+
     set({ carregando: true })
-    // Simula delay de rede
-    await new Promise(r => setTimeout(r, 600))
-    
-    const novoId = Math.random().toString(36).substr(2, 9)
-    const usuarioCompleto: Usuario = { ...novo, id: novoId }
-    
-    set(state => ({
-      usuarios: [...state.usuarios, usuarioCompleto],
-      carregando: false
-    }))
-  }
+    try {
+      const res = await fetch(`${API}/usuarios/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          nome_completo: novo.nome_completo,
+          crm: novo.crm,
+          email: novo.email,
+          senha: novo.crm,
+          role: novo.role,
+        }),
+      })
+      if (!res.ok) throw new Error()
+      const criado: Usuario = await res.json()
+      set(state => ({ usuarios: [...state.usuarios, criado], carregando: false }))
+    } catch {
+      set({ erro: 'Falha ao criar usuário.', carregando: false })
+    }
+  },
 }))
 
 export default useUsuariosStore

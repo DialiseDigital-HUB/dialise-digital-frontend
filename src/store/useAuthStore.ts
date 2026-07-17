@@ -1,5 +1,7 @@
 import { create } from 'zustand'
 
+const API = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000'
+
 type Role = 'admin' | 'medico' | 'residente' | 'enfermeiro'
 
 interface UsuarioAuth {
@@ -7,7 +9,8 @@ interface UsuarioAuth {
   nome: string
   email: string
   role: Role
-  precisaTrocarSenha?: boolean
+  precisaTrocarSenha: boolean
+  token: string
 }
 
 interface EstadoAuth {
@@ -21,25 +24,6 @@ interface EstadoAuth {
   atualizarSenhaTemporaria: (novaSenha: string) => Promise<void>
 }
 
-let credenciaisMock: Record<string, { senha: string; usuario: UsuarioAuth }> = {
-  'admin@nefro.com': {
-    senha: 'senha123',
-    usuario: { id: '1', nome: 'Dr. Admin', email: 'admin@nefro.com', role: 'admin' },
-  },
-  'medico@nefro.com': {
-    senha: 'senha123',
-    usuario: { id: '2', nome: 'Dr. Silva', email: 'medico@nefro.com', role: 'medico' },
-  },
-  'residente@nefro.com': {
-    senha: 'senha123',
-    usuario: { id: '3', nome: 'Res. Costa', email: 'residente@nefro.com', role: 'residente' },
-  },
-  'enfermeiro@nefro.com': {
-    senha: 'senha123',
-    usuario: { id: '4', nome: 'Enf. Souza', email: 'enfermeiro@nefro.com', role: 'enfermeiro' },
-  },
-}
-
 const useAuthStore = create<EstadoAuth>((set, get) => ({
   usuario: null,
   autenticado: false,
@@ -48,40 +32,86 @@ const useAuthStore = create<EstadoAuth>((set, get) => ({
 
   login: async (email, senha) => {
     set({ carregando: true, erro: null })
-    await new Promise(r => setTimeout(r, 600))
 
-    const registro = credenciaisMock[email]
-    if (!registro || registro.senha !== senha) {
-      set({ carregando: false, erro: 'E-mail ou senha inválidos.' })
-      return
+    try {
+      const formData = new URLSearchParams()
+      formData.append('username', email)
+      formData.append('password', senha)
+
+      const resToken = await fetch(`${API}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: formData.toString(),
+      })
+
+      if (!resToken.ok) {
+        set({ carregando: false, erro: 'E-mail ou senha inválidos.' })
+        return
+      }
+
+      const { access_token } = await resToken.json()
+
+      const resPerfil = await fetch(`${API}/usuarios/me`, {
+        headers: { Authorization: `Bearer ${access_token}` },
+      })
+
+      if (!resPerfil.ok) {
+        set({ carregando: false, erro: 'Falha ao carregar perfil do usuário.' })
+        return
+      }
+
+      const perfil = await resPerfil.json()
+
+      set({
+        carregando: false,
+        autenticado: true,
+        usuario: {
+          id: perfil.id,
+          nome: perfil.nome_completo,
+          email: perfil.email,
+          role: perfil.role as Role,
+          precisaTrocarSenha: perfil.precisa_trocar_senha,
+          token: access_token,
+        },
+      })
+    } catch {
+      set({ carregando: false, erro: 'Erro de conexão com o servidor.' })
     }
-
-    set({ carregando: false, autenticado: true, usuario: registro.usuario })
   },
 
   logout: () => set({ autenticado: false, usuario: null, erro: null }),
 
-  registrarCredencial: (email, senha, usuario) => {
-    credenciaisMock[email] = { senha, usuario }
-  },
+  registrarCredencial: () => {},
 
   atualizarSenhaTemporaria: async (novaSenha) => {
     const { usuario } = get()
     if (!usuario) return
 
     set({ carregando: true })
-    await new Promise(r => setTimeout(r, 800)) // delay mock DB
 
-    // Update the mock so next login works
-    credenciaisMock[usuario.email].senha = novaSenha
-    credenciaisMock[usuario.email].usuario.precisaTrocarSenha = false
+    try {
+      const res = await fetch(`${API}/auth/change-password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${usuario.token}`,
+        },
+        body: JSON.stringify({ nova_senha: novaSenha }),
+      })
 
-    // Update current session
-    set({
-      carregando: false,
-      usuario: { ...usuario, precisaTrocarSenha: false }
-    })
-  }
+      if (!res.ok) {
+        set({ carregando: false })
+        return
+      }
+
+      set({
+        carregando: false,
+        usuario: { ...usuario, precisaTrocarSenha: false },
+      })
+    } catch {
+      set({ carregando: false })
+    }
+  },
 }))
 
 export type { UsuarioAuth, Role }

@@ -53,12 +53,7 @@ const secoes: { label: string; itens: ItemNavegacao[]; role?: string }[] = [
   },
 ]
 
-const rotulosRole: Record<string, string> = {
-  admin:       'Administrador',
-  medico:      'Médico(a)',
-  residente:   'Residente',
-  enfermeiro:  'Enfermeiro(a)',
-}
+
 
 export default function Sidebar({ paginaAtiva, aoNavegar, totalAlertas = 0 }: SidebarProps) {
   const usuario = useAuthStore(s => s.usuario)
@@ -109,15 +104,9 @@ export default function Sidebar({ paginaAtiva, aoNavegar, totalAlertas = 0 }: Si
 
       <div className="sidebar__usuario">
         {usuario && (
-          <>
-            <div className="sidebar__usuario-info">
-              <div className="sidebar__usuario-nome">{usuario.nome}</div>
-              <div className="sidebar__usuario-role">{rotulosRole[usuario.role]}</div>
-            </div>
-            <button className="sidebar__logout" onClick={logout} title="Sair">
-              <Icone nome="sair" tamanho={14} />
-            </button>
-          </>
+          <button className="sidebar__logout" onClick={logout} title="Sair">
+            <Icone nome="sair" tamanho={14} />
+          </button>
         )}
       </div>
     </nav>

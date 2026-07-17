@@ -1,8 +1,6 @@
 import { useState } from 'react'
 import useUsuariosStore from '../../store/useUsuariosStore'
-import useAuthStore from '../../store/useAuthStore'
 import useToastStore from '../../store/useToastStore'
-import { gerarSenhaTemporaria } from '../../store/usePasswordStore'
 import type { Role } from '../../store/useAuthStore'
 import Card from '../../components/ui/Card/Card'
 import Botao from '../../components/ui/Button/Button'
@@ -19,11 +17,10 @@ const rotulosRole: Record<string, string> = {
 }
 
 export default function Equipe() {
-  const usuarios            = useUsuariosStore(s => s.usuarios)
-  const criarUsuario        = useUsuariosStore(s => s.criarUsuario)
-  const carregando          = useUsuariosStore(s => s.carregando)
-  const registrarCredencial = useAuthStore(s => s.registrarCredencial)
-  const adicionarToast      = useToastStore(s => s.adicionarToast)
+  const usuarios       = useUsuariosStore(s => s.usuarios)
+  const criarUsuario   = useUsuariosStore(s => s.criarUsuario)
+  const carregando     = useUsuariosStore(s => s.carregando)
+  const adicionarToast = useToastStore(s => s.adicionarToast)
 
   const [modalAberto, setModalAberto] = useState(false)
   const [novoNome, setNovoNome]       = useState('')
@@ -43,25 +40,13 @@ export default function Equipe() {
       ativo: true,
     })
 
-    // Gera a senha temporária e injeta no mock de auth
-    const senhaTemp = gerarSenhaTemporaria()
-    const novoIdMock = Math.random().toString(36).substr(2, 9) // match random id do usuarios store (mock)
-
-    registrarCredencial(novoEmail, senhaTemp, {
-      id: novoIdMock,
-      nome: novoNome,
-      email: novoEmail,
-      role: novaRole,
-      precisaTrocarSenha: true,
-    })
-
     setModalAberto(false)
     setNovoNome('')
     setNovoEmail('')
     setNovoCrm('')
     setNovaRole('medico')
 
-    adicionarToast(`Senha temporária: ${senhaTemp}`, 'sucesso')
+    adicionarToast(`Colaborador cadastrado. Senha provisória: ${novoCrm}`, 'sucesso')
   }
 
   return (
