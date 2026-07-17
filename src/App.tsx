@@ -11,10 +11,14 @@ import LME from './pages/LME/LME'
 import Prescricoes from './pages/Prescricoes/Prescricoes'
 import Vacinas from './pages/Vacinas/Vacinas'
 import SolicitacaoExames from './pages/SolicitacaoExames/SolicitacaoExames'
+import Login from './pages/Login/Login'
+import TrocarSenha from './pages/TrocarSenha/TrocarSenha'
+import Equipe from './pages/Equipe/Equipe'
 import Icone from './components/ui/Icone/Icone'
 import ToastContainer from './components/ui/Toast/Toast'
 import useNavegacaoStore from './store/useNavegacaoStore'
 import usePacientesStore from './store/usePacientesStore'
+import useAuthStore from './store/useAuthStore'
 import './index.css'
 
 const paginasDisponiveis: Record<string, React.ComponentType> = {
@@ -29,6 +33,7 @@ const paginasDisponiveis: Record<string, React.ComponentType> = {
   prescricoes:        Prescricoes,
   vacinas:            Vacinas,
   'solicitacao-exames': SolicitacaoExames,
+  equipe:     Equipe,
 }
 
 function PaginaAtual() {
@@ -56,11 +61,19 @@ function PaginaAtual() {
 }
 
 export default function App() {
+  const autenticado     = useAuthStore(s => s.autenticado)
+  const usuario         = useAuthStore(s => s.usuario)
   const buscarPacientes = usePacientesStore(s => s.buscarPacientes)
 
   useEffect(() => {
-    buscarPacientes()
-  }, [buscarPacientes])
+    // Busca pacientes apenas se autenticado e com senha definitiva
+    if (autenticado && !usuario?.precisaTrocarSenha) {
+      buscarPacientes()
+    }
+  }, [autenticado, usuario?.precisaTrocarSenha, buscarPacientes])
+
+  if (!autenticado) return <Login />
+  if (usuario?.precisaTrocarSenha) return <TrocarSenha />
 
   return (
     <Layout>

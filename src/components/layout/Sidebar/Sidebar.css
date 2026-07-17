@@ -167,3 +167,54 @@
   color: rgba(255, 255, 255, .22);
   line-height: 1.7;
 }
+
+.sidebar__usuario {
+  margin-top: auto;
+  padding: 14px 16px;
+  border-top: 1px solid rgba(255, 255, 255, .06);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sidebar__usuario-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.sidebar__usuario-nome {
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, .85);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sidebar__usuario-role {
+  font-size: 10px;
+  color: rgba(255, 255, 255, .35);
+  text-transform: uppercase;
+  letter-spacing: .8px;
+  margin-top: 2px;
+}
+
+.sidebar__logout {
+  background: rgba(255, 255, 255, .07);
+  border: 1px solid rgba(255, 255, 255, .1);
+  border-radius: var(--radius-xs);
+  color: rgba(255, 255, 255, .45);
+  cursor: pointer;
+  padding: 6px 8px;
+  display: flex;
+  align-items: center;
+  transition: var(--transition);
+  flex-shrink: 0;
+}
+
+.sidebar__logout:hover {
+  background: rgba(239, 68, 68, .15);
+  border-color: rgba(239, 68, 68, .3);
+  color: var(--red);
+}
+

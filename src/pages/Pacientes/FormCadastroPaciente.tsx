@@ -3,6 +3,7 @@ import Input from '../../components/ui/Input/Input'
 import Select from '../../components/ui/Select/Select'
 import Botao from '../../components/ui/Button/Button'
 import useUsuariosStore from '../../store/useUsuariosStore'
+import useAutoVinculacaoMedico from '../../hooks/useAutoVinculacaoMedico'
 import type { Paciente } from '../../store/usePacientesStore'
 
 interface FormCadastroPacienteProps {
@@ -26,6 +27,9 @@ export default function FormCadastroPaciente({ idForm, aoSubmeter, modoEdicao = 
   const [turno, setTurno]                   = useState(dadosIniciais?.turno || '')
   const [medico, setMedico]                 = useState(dadosIniciais?.medicoAssistenteId || '')
   const [diagnostico, setDiagnostico]       = useState(dadosIniciais?.diagnostico || '')
+
+  // Regra de autovinculação isolada
+  useAutoVinculacaoMedico(medico, setMedico, modoEdicao)
 
   const medicosOpcoes = usuarios
     .filter(u => u.ativo)
