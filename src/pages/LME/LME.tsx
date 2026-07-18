@@ -13,7 +13,6 @@ export default function LME() {
 
   const [pacienteAtivoId, setPacienteAtivoId] = useState<string | null>(null)
 
-  // Consumir Deep Link
   useEffect(() => {
     if (pacienteEmFoco) {
       setPacienteAtivoId(pacienteEmFoco)

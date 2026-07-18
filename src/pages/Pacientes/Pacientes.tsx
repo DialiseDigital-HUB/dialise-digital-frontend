@@ -94,7 +94,6 @@ export default function Pacientes() {
   const [modalEdicao, setModalEdicao] = useState(false)
 
   const handleCadastro = async (dados: any) => {
-    // Autovinculação silenciosa se for médico
     const usuarioLogado = useAuthStore.getState().usuario
     if (usuarioLogado?.role === 'medico') {
       dados.medicoAssistenteId = usuarioLogado.id

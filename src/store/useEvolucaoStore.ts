@@ -7,15 +7,12 @@ import usePacientesStore from './usePacientesStore'
 export interface DadosEvolucao {
   mesReferencia: string
 
-  // 3. Evolução
   evolucaoClinica: string
   ktv: string
 
-  // 4. Acesso vascular
   acessoData: string
   acessosPrevios: string
 
-  // 5. Prescrição diálise
   pesoSeco: string
   tempoSessao: string
   heparinaUtilizada: string
@@ -25,7 +22,6 @@ export interface DadosEvolucao {
   bic: string
   perfisOutros: string
 
-  // 6. Medicações de alto custo
   usandoFerroEv: boolean
   usandoEpo: boolean
   usandoSevelamer: boolean
@@ -33,13 +29,10 @@ export interface DadosEvolucao {
   usandoCalcitriol: boolean
   usandoCinacalcete: boolean
 
-  // 7. Medicamentos em uso
   medicamentosEmUso: string
 
-  // 8. Alergias
   alergias: string
 
-  // 9. Dados (Boolean)
   vacinouHepB: boolean
   imunizadoHepB: boolean
   inscritoTransplante: boolean
@@ -49,22 +42,18 @@ export interface DadosEvolucao {
   complicacoesCardiovasculares: boolean
   complicacoesAcessoVascular: boolean
 
-  // 10. Exames complementares
   examesComplementares: string
 
-  // 11. Exames Laboratoriais
   hemoglobina: string
   calcio: string
   ferritina: string
   antiHiv: string
   ct: string
-  // mantendo alguns úteis que já existiam
   hematocrito: string
   fosforo: string
   paratormonio: string
   potassio: string
 
-  // 12. Exame Físico
   pa: string
   fc: string
   altura: string
@@ -74,7 +63,6 @@ export interface DadosEvolucao {
   ar: string
   ext: string
 
-  // 13. Conduta
   conduta: string
 }
 
