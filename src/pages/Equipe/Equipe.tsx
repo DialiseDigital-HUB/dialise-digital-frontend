@@ -52,7 +52,6 @@ export default function Equipe() {
     setNovoCrm('')
     setNovaRole('medico')
 
-    // Toast indicando o sucesso, a duração extra não é mais tão necessária pois fica no card, mas mantemos por feedback visual.
     adicionarToast(`Colaborador cadastrado. Senha provisória: ${novoCrm}`, 'sucesso')
   }
 

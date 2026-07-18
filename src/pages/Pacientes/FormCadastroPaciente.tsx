@@ -28,7 +28,6 @@ export default function FormCadastroPaciente({ idForm, aoSubmeter, modoEdicao = 
   const [medico, setMedico]                 = useState(dadosIniciais?.medicoAssistenteId || '')
   const [diagnostico, setDiagnostico]       = useState(dadosIniciais?.diagnostico || '')
 
-  // Regra de autovinculação isolada
   useAutoVinculacaoMedico(medico, setMedico, modoEdicao)
 
   const medicosOpcoes = usuarios

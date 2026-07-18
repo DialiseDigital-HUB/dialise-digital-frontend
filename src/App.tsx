@@ -66,7 +66,6 @@ export default function App() {
   const logout          = useAuthStore(s => s.logout)
   const buscarPacientes = usePacientesStore(s => s.buscarPacientes)
 
-  // Guarda contra estado corrompido no localStorage
   useEffect(() => {
     if (autenticado && !usuario) {
       logout()

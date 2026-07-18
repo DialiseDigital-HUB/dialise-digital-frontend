@@ -38,7 +38,6 @@ export default function Evolucao() {
   const pacienteEmFoco = useNavegacaoStore(s => s.pacienteEmFoco)
   const limparContexto = useNavegacaoStore(s => s.limparContexto)
 
-  // Consumir Deep Link
   useEffect(() => {
     if (pacienteEmFoco) {
       definirPaciente(pacienteEmFoco)
