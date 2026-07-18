@@ -63,15 +63,23 @@ function PaginaAtual() {
 export default function App() {
   const autenticado     = useAuthStore(s => s.autenticado)
   const usuario         = useAuthStore(s => s.usuario)
+  const logout          = useAuthStore(s => s.logout)
   const buscarPacientes = usePacientesStore(s => s.buscarPacientes)
 
+  // Guarda contra estado corrompido no localStorage
   useEffect(() => {
-    // Busca pacientes apenas se autenticado e com senha definitiva
-    if (autenticado && !usuario?.precisaTrocarSenha) {
+    if (autenticado && !usuario) {
+      logout()
+    }
+  }, [autenticado, usuario, logout])
+
+  useEffect(() => {
+    if (autenticado && usuario && !usuario.precisaTrocarSenha) {
       buscarPacientes()
     }
   }, [autenticado, usuario?.precisaTrocarSenha, buscarPacientes])
 
+  if (autenticado && !usuario) return <Login />
   if (!autenticado) return <Login />
   if (usuario?.precisaTrocarSenha) return <TrocarSenha />
 

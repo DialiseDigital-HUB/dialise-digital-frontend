@@ -11,6 +11,7 @@ export interface Usuario {
   email: string
   ativo: boolean
   role: Role
+  precisa_trocar_senha: boolean
 }
 
 interface EstadoUsuarios {

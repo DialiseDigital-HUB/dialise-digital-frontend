@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import useUsuariosStore from '../../store/useUsuariosStore'
 import useToastStore from '../../store/useToastStore'
 import type { Role } from '../../store/useAuthStore'
@@ -19,8 +19,13 @@ const rotulosRole: Record<string, string> = {
 export default function Equipe() {
   const usuarios       = useUsuariosStore(s => s.usuarios)
   const criarUsuario   = useUsuariosStore(s => s.criarUsuario)
+  const buscarUsuarios = useUsuariosStore(s => s.buscarUsuarios)
   const carregando     = useUsuariosStore(s => s.carregando)
   const adicionarToast = useToastStore(s => s.adicionarToast)
+
+  useEffect(() => {
+    buscarUsuarios()
+  }, [])
 
   const [modalAberto, setModalAberto] = useState(false)
   const [novoNome, setNovoNome]       = useState('')
@@ -38,6 +43,7 @@ export default function Equipe() {
       crm: novoCrm,
       role: novaRole,
       ativo: true,
+      precisa_trocar_senha: true,
     })
 
     setModalAberto(false)
@@ -46,6 +52,7 @@ export default function Equipe() {
     setNovoCrm('')
     setNovaRole('medico')
 
+    // Toast indicando o sucesso, a duração extra não é mais tão necessária pois fica no card, mas mantemos por feedback visual.
     adicionarToast(`Colaborador cadastrado. Senha provisória: ${novoCrm}`, 'sucesso')
   }
 
@@ -60,6 +67,10 @@ export default function Equipe() {
       </div>
 
       <div className="equipe__grid">
+        {carregando && <p className="equipe__estado">Buscando colaboradores...</p>}
+        {!carregando && usuarios.length === 0 && (
+          <p className="equipe__estado">Nenhum colaborador cadastrado.</p>
+        )}
         {usuarios.map(u => (
           <Card key={u.id} className="equipe__card">
             <div className="equipe__card-topo">
@@ -80,6 +91,13 @@ export default function Equipe() {
                 {u.email}
               </div>
             </div>
+
+            {u.precisa_trocar_senha && (
+              <div style={{ marginTop: '12px', padding: '8px', backgroundColor: 'var(--yellow-light, #FFF3CD)', color: 'var(--yellow-dark, #856404)', borderRadius: '4px', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Icone nome="alerta" tamanho={14} />
+                <span>Senha provisória: <strong>{u.crm}</strong></span>
+              </div>
+            )}
           </Card>
         ))}
       </div>
