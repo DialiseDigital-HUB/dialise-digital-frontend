@@ -3,6 +3,7 @@ import usePacientesStore from '../../store/usePacientesStore'
 import useNavegacaoStore from '../../store/useNavegacaoStore'
 import useEvolucaoStore from '../../store/useEvolucaoStore'
 import useToastStore from '../../store/useToastStore'
+import useAuthStore from '../../store/useAuthStore'
 import type { Paciente } from '../../store/usePacientesStore'
 import Card from '../../components/ui/Card/Card'
 import Badge from '../../components/ui/Badge/Badge'
@@ -93,6 +94,13 @@ export default function Pacientes() {
   const [modalEdicao, setModalEdicao] = useState(false)
 
   const handleCadastro = async (dados: any) => {
+    // Autovinculação silenciosa se for médico
+    const usuarioLogado = useAuthStore.getState().usuario
+    if (usuarioLogado?.role === 'medico') {
+      dados.medicoAssistenteId = usuarioLogado.id
+      dados.medico = usuarioLogado.nome
+    }
+
     const sucesso = await cadastrarPaciente(dados)
     if (sucesso) {
       fecharModalCadastro()

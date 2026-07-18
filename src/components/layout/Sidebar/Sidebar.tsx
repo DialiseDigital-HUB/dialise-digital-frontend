@@ -1,8 +1,9 @@
 import Icone from '../../ui/Icone/Icone'
 import type { NomeIcone } from '../../ui/Icone/Icone'
+import useAuthStore from '../../../store/useAuthStore'
 import './Sidebar.css'
 
-type PaginaAtiva = 'dashboard' | 'pacientes' | 'evolucao' | 'calendario' | 'exames' | 'historico' | 'llm' | 'lme' | 'prescricoes' | 'vacinas' | 'solicitacao-exames'
+type PaginaAtiva = 'dashboard' | 'pacientes' | 'evolucao' | 'calendario' | 'exames' | 'historico' | 'llm' | 'lme' | 'prescricoes' | 'vacinas' | 'solicitacao-exames' | 'equipe'
 
 interface SidebarProps {
   paginaAtiva: PaginaAtiva
@@ -16,7 +17,7 @@ interface ItemNavegacao {
   icone: NomeIcone
 }
 
-const secoes: { label: string; itens: ItemNavegacao[] }[] = [
+const secoes: { label: string; itens: ItemNavegacao[]; role?: string }[] = [
   {
     label: 'Principal',
     itens: [
@@ -43,9 +44,21 @@ const secoes: { label: string; itens: ItemNavegacao[] }[] = [
       { id: 'llm', rotulo: 'Apoio LLM', icone: 'llm' },
     ],
   },
+  {
+    label: 'Administração',
+    role: 'admin',
+    itens: [
+      { id: 'equipe', rotulo: 'Gestão de Equipe', icone: 'saude' },
+    ],
+  },
 ]
 
+
+
 export default function Sidebar({ paginaAtiva, aoNavegar, totalAlertas = 0 }: SidebarProps) {
+  const usuario = useAuthStore(s => s.usuario)
+  const logout  = useAuthStore(s => s.logout)
+
   return (
     <nav className="sidebar">
       <div className="sidebar__logo">
@@ -61,34 +74,42 @@ export default function Sidebar({ paginaAtiva, aoNavegar, totalAlertas = 0 }: Si
         <div className="sidebar__logo-badge">MVP · Protótipo</div>
       </div>
 
-      {secoes.map(secao => (
-        <div key={secao.label} className="sidebar__secao">
-          <div className="sidebar__secao-label">{secao.label}</div>
-          {secao.itens.map(item => {
-            const exibeBadge = item.id === 'dashboard' && totalAlertas > 0
-            return (
-              <button
-                key={item.id}
-                className={`sidebar__item${paginaAtiva === item.id ? ' sidebar__item--ativo' : ''}`}
-                onClick={() => aoNavegar(item.id)}
-              >
-                <span className="sidebar__item-icone">
-                  <Icone nome={item.icone} tamanho={15} />
-                </span>
-                {item.rotulo}
-                {exibeBadge && (
-                  <span className="sidebar__item-badge">{totalAlertas}</span>
-                )}
-              </button>
-            )
-          })}
-        </div>
-      ))}
+      {secoes.map(secao => {
+        if (secao.role && usuario?.role !== secao.role) return null
 
-      <div className="sidebar__rodape">
-        Dados simulados · Uso acadêmico<br />
-        Residência Tec. em Saúde Digital
+        return (
+          <div key={secao.label} className="sidebar__secao">
+            <div className="sidebar__secao-label">{secao.label}</div>
+            {secao.itens.map(item => {
+              const exibeBadge = item.id === 'dashboard' && totalAlertas > 0
+              return (
+                <button
+                  key={item.id}
+                  className={`sidebar__item${paginaAtiva === item.id ? ' sidebar__item--ativo' : ''}`}
+                  onClick={() => aoNavegar(item.id)}
+                >
+                  <span className="sidebar__item-icone">
+                    <Icone nome={item.icone} tamanho={15} />
+                  </span>
+                  {item.rotulo}
+                  {exibeBadge && (
+                    <span className="sidebar__item-badge">{totalAlertas}</span>
+                  )}
+                </button>
+              )
+            })}
+          </div>
+        )
+      })}
+
+      <div className="sidebar__usuario">
+        {usuario && (
+          <button className="sidebar__logout" onClick={logout} title="Sair">
+            <Icone nome="sair" tamanho={14} />
+          </button>
+        )}
       </div>
     </nav>
   )
 }
+

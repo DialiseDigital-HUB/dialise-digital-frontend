@@ -1,0 +1,121 @@
+.login {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  width: 100%;
+  position: relative;
+  background: linear-gradient(135deg, var(--teal-deep) 0%, #012f3a 60%, #011e25 100%);
+}
+
+.login__fundo {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 60% 50% at 80% 20%, rgba(2, 195, 154, .10) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 60% at 10% 80%, rgba(2, 128, 144, .12) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.login__painel {
+  position: relative;
+  z-index: 1;
+  background: var(--white);
+  border-radius: var(--radius);
+  padding: 40px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  animation: fadeSlideUp .3s ease both;
+}
+
+.login__marca {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.login__marca-icone {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--teal-mint), var(--teal-sea));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(2, 195, 154, .35);
+}
+
+.login__marca-nome {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--gray-900);
+  letter-spacing: -.3px;
+}
+
+.login__marca-sub {
+  font-size: 10px;
+  color: var(--gray-500);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-top: 1px;
+}
+
+.login__cabecalho {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.login__titulo {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--gray-900);
+  letter-spacing: -.4px;
+}
+
+.login__descricao {
+  font-size: 13px;
+  color: var(--gray-500);
+  line-height: 1.5;
+}
+
+.login__form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.login__form .btn {
+  width: 100%;
+  margin-top: 4px;
+  height: 44px;
+  font-size: 14px;
+}
+
+.login__erro {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: var(--red-light);
+  border: 1px solid rgba(239, 68, 68, .25);
+  color: var(--red);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+}
+
+.login__aviso {
+  font-size: 11px;
+  color: var(--gray-500);
+  text-align: center;
+  line-height: 1.6;
+  border-top: 1px solid var(--gray-100);
+  padding-top: 16px;
+  margin-top: -8px;
+}

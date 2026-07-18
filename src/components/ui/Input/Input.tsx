@@ -3,7 +3,7 @@ import './Input.css'
 interface InputProps {
   label: string
   id: string
-  type?: 'text' | 'number' | 'date' | 'email'
+  type?: 'text' | 'number' | 'date' | 'email' | 'password'
   valor: string | number
   aoAlterar: (valor: string) => void
   placeholder?: string

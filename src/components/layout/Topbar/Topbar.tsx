@@ -1,12 +1,11 @@
 import { useEffect, useState } from 'react'
 import Botao from '../../ui/Button/Button'
+import useAuthStore from '../../../store/useAuthStore'
 import './Topbar.css'
 
 interface TopbarProps {
   tituloPagina: string
   subtituloPagina?: string
-  nomeUsuario?: string
-  cargoUsuario?: string
   aoNovaCriacao?: () => void
   labelAcaoPrimaria?: string
 }
@@ -33,19 +32,24 @@ const mapaSubtitulos: Record<string, string> = {
   lme:        'Componente Especializado da Assistência Farmacêutica (CEAF / SUS)',
 }
 
+const rotulosRole: Record<string, string> = {
+  admin:      'Administrador',
+  medico:     'Médico(a)',
+  residente:  'Residente',
+  enfermeiro: 'Enfermeiro(a)',
+}
+
 function extrairIniciais(nome: string): string {
   return nome.split(' ').slice(0, 2).map(p => p[0]).join('').toUpperCase()
 }
 
 export default function Topbar({
   tituloPagina,
-  nomeUsuario = 'Dr. Flávio',
-  cargoUsuario = 'Nefrologia',
   aoNovaCriacao,
   labelAcaoPrimaria,
 }: TopbarProps) {
+  const usuario    = useAuthStore(s => s.usuario)
   const [scrollado, setScrollado] = useState(false)
-
 
   useEffect(() => {
     const areaConteudo = document.querySelector('.layout__pagina')
@@ -56,9 +60,11 @@ export default function Topbar({
     return () => areaConteudo.removeEventListener('scroll', aoScroll)
   }, [])
 
-  const iniciais  = extrairIniciais(nomeUsuario)
-  const rotulo    = mapaRotulos[tituloPagina] ?? tituloPagina
-  const subtitulo = mapaSubtitulos[tituloPagina]
+  const nomeUsuario  = usuario?.nome ?? ''
+  const cargoUsuario = usuario?.role ? rotulosRole[usuario.role] : ''
+  const iniciais     = nomeUsuario ? extrairIniciais(nomeUsuario) : '--'
+  const rotulo       = mapaRotulos[tituloPagina] ?? tituloPagina
+  const subtitulo    = mapaSubtitulos[tituloPagina]
 
   return (
     <header className={`topbar${scrollado ? ' topbar--scrolled' : ''}`}>
