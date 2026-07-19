@@ -38,6 +38,15 @@ const paginasDisponiveis: Record<string, React.ComponentType> = {
 
 function PaginaAtual() {
   const paginaAtiva = useNavegacaoStore(s => s.paginaAtiva)
+  const navegar     = useNavegacaoStore(s => s.navegar)
+  const usuario     = useAuthStore(s => s.usuario)
+
+  useEffect(() => {
+    if (paginaAtiva === 'equipe' && usuario && usuario.role !== 'admin') {
+      navegar('dashboard')
+    }
+  }, [paginaAtiva, usuario, navegar])
+
   const Componente  = paginasDisponiveis[paginaAtiva]
 
   if (!Componente) {

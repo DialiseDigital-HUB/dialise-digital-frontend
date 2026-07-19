@@ -37,22 +37,26 @@ export default function Equipe() {
     e.preventDefault()
     if (!novoNome || !novoEmail || !novoCrm) return
 
-    await criarUsuario({
-      nome_completo: novoNome,
-      email: novoEmail,
-      crm: novoCrm,
-      role: novaRole,
-      ativo: true,
-      precisa_trocar_senha: true,
-    })
+    try {
+      await criarUsuario({
+        nome_completo: novoNome,
+        email: novoEmail,
+        crm: novoCrm,
+        role: novaRole,
+        ativo: true,
+        precisa_trocar_senha: true,
+      })
 
-    setModalAberto(false)
-    setNovoNome('')
-    setNovoEmail('')
-    setNovoCrm('')
-    setNovaRole('medico')
+      setModalAberto(false)
+      setNovoNome('')
+      setNovoEmail('')
+      setNovoCrm('')
+      setNovaRole('medico')
 
-    adicionarToast(`Colaborador cadastrado. Senha provisória: ${novoCrm}`, 'sucesso')
+      adicionarToast(`Colaborador cadastrado. Senha provisória: ${novoCrm}`, 'sucesso')
+    } catch (err: any) {
+      adicionarToast(err.message || 'Erro ao cadastrar colaborador.', 'erro')
+    }
   }
 
   return (
