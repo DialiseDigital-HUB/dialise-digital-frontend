@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import axios from 'axios'
+import api from '../lib/api'
 
 export interface RegistroVacina {
   id: string
@@ -28,10 +28,10 @@ const useVacinasStore = create<EstadoVacinas>((set, get) => ({
     set({ carregando: true, erro: null })
     try {
       const url = idPaciente && idPaciente !== 'todos'
-        ? `http://localhost:8000/vacinas/paciente/${idPaciente}`
-        : 'http://localhost:8000/vacinas/'
-      
-      const response = await axios.get(url)
+        ? `/vacinas/paciente/${idPaciente}`
+        : '/vacinas/'
+
+      const response = await api.get(url)
       const vacinasMapeadas: RegistroVacina[] = response.data.map((r: any) => ({
         id: r.id,
         idPaciente: r.paciente_id,
@@ -57,7 +57,7 @@ const useVacinasStore = create<EstadoVacinas>((set, get) => ({
         data_aplicacao: dados.dataAplicacao,
         proxima_dose: dados.proximaDose
       }
-      await axios.post('http://localhost:8000/vacinas/', payload)
+      await api.post('/vacinas/', payload)
       await get().buscarVacinas()
       return true
     } catch (error) {

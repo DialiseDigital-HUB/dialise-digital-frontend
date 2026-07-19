@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import axios from 'axios'
+import api from '../lib/api'
 import usePacientesStore from './usePacientesStore'
 
 export type PeriodicidadeExame = 'mensal' | 'trimestral' | 'semestral' | 'anual'
@@ -46,11 +46,11 @@ const useExamesStore = create<EstadoExames>((set, get) => ({
       if (pacientes.length === 0) await buscarPacientes()
       const listaPacientes = usePacientesStore.getState().pacientes
 
-      const url = idPaciente && idPaciente !== 'todos' 
-        ? `http://localhost:8000/exames/?paciente_id=${idPaciente}` 
-        : 'http://localhost:8000/exames/'
-      
-      const response = await axios.get(url)
+      const url = idPaciente && idPaciente !== 'todos'
+        ? `/exames/?paciente_id=${idPaciente}`
+        : '/exames/'
+
+      const response = await api.get(url)
       const examesMapeados: Exame[] = response.data.map((e: any) => {
         const paciente = listaPacientes.find(p => p.id === e.paciente_id)
         return {

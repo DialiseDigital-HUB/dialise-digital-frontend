@@ -1,8 +1,6 @@
 import { create } from 'zustand'
-import axios from 'axios'
+import api from '../lib/api'
 import useCalendarioStore from './useCalendarioStore'
-
-const API_BASE = 'http://localhost:8000'
 
 export interface Prescricao {
   id: string
@@ -50,10 +48,10 @@ const usePrescricoesStore = create<EstadoPrescricoes>((set, get) => ({
     set({ carregando: true, erro: null })
     try {
       const url = idPaciente && idPaciente !== 'todos'
-        ? `${API_BASE}/prescricoes/paciente/${idPaciente}`
-        : `${API_BASE}/prescricoes/`
+        ? `/prescricoes/paciente/${idPaciente}`
+        : '/prescricoes/'
 
-      const { data } = await axios.get(url)
+      const { data } = await api.get(url)
       const mapeadas: Prescricao[] = data.map((r: any) => ({
         id:              r.id,
         pacienteId:      r.paciente_id,
@@ -92,7 +90,7 @@ const usePrescricoesStore = create<EstadoPrescricoes>((set, get) => ({
         data_fim:         dados.dataFim ?? null,
         indicacao:        dados.indicacao ?? null,
       }
-      await axios.post(`${API_BASE}/prescricoes/`, payload)
+      await api.post('/prescricoes/', payload)
       await get().buscarPrescricoes()
       await useCalendarioStore.getState().buscarEventosEAntibioticos()
       return true
@@ -105,7 +103,7 @@ const usePrescricoesStore = create<EstadoPrescricoes>((set, get) => ({
   suspenderPrescricao: async (id: string) => {
     set({ carregando: true, erro: null })
     try {
-      await axios.patch(`${API_BASE}/prescricoes/${id}/suspender`)
+      await api.patch(`/prescricoes/${id}/suspender`)
       await get().buscarPrescricoes()
       return true
     } catch {
@@ -117,7 +115,7 @@ const usePrescricoesStore = create<EstadoPrescricoes>((set, get) => ({
   concluirPrescricao: async (id: string) => {
     set({ carregando: true, erro: null })
     try {
-      await axios.patch(`${API_BASE}/prescricoes/${id}/concluir`)
+      await api.patch(`/prescricoes/${id}/concluir`)
       await get().buscarPrescricoes()
       return true
     } catch {

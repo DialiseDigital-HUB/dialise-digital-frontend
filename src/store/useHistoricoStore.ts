@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import axios from 'axios'
+import api from '../lib/api'
 
 export type SeveridadeEvolucao = 'ok' | 'atencao' | 'critico'
 
@@ -38,9 +38,9 @@ const useHistoricoStore = create<EstadoHistorico>((set, get) => ({
     set({ carregando: true, erro: null })
     try {
       const url = idPaciente && idPaciente !== 'todos'
-        ? `http://localhost:8000/evolucoes/?patient_id=${idPaciente}`
-        : 'http://localhost:8000/evolucoes/'
-      const response = await axios.get(url)
+        ? `/evolucoes/?patient_id=${idPaciente}`
+        : '/evolucoes/'
+      const response = await api.get(url)
       
       const evolucoesMapeadas: EvolucaoHistorico[] = response.data.map((e: any) => {
         const ktvVal = parseFloat(e.ktv || '0')

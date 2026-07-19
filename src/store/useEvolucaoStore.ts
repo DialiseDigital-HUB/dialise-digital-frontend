@@ -1,7 +1,6 @@
 
-
 import { create } from 'zustand'
-import axios from 'axios'
+import api from '../lib/api'
 import usePacientesStore from './usePacientesStore'
 
 export interface DadosEvolucao {
@@ -126,7 +125,7 @@ const useEvolucaoStore = create<EstadoEvolucao>((set, get) => ({
   buscarEvolucaoAnterior: async (idPaciente: string) => {
     set({ carregando: true, erro: null })
     try {
-      const response = await axios.get(`http://localhost:8000/evolucoes?patient_id=${idPaciente}`)
+      const response = await api.get(`/evolucoes?patient_id=${idPaciente}`)
       if (response.data && response.data.length > 0) {
         const evo = response.data[0]
         set({
@@ -255,7 +254,7 @@ const useEvolucaoStore = create<EstadoEvolucao>((set, get) => ({
         texto_conduta: dados.conduta || "Manter prescrição"
       }
 
-      await axios.post('http://localhost:8000/evolucoes', payload)
+      await api.post('/evolucoes', payload)
       set({ carregando: false, sucesso: true })
     } catch (error) {
       set({ erro: 'Falha ao salvar evolução', carregando: false })
@@ -291,7 +290,7 @@ const useEvolucaoStore = create<EstadoEvolucao>((set, get) => ({
 
   buscarHistoricoKtv: async (idPaciente: string) => {
     try {
-      const response = await axios.get(`http://localhost:8000/evolucoes/paciente/${idPaciente}`)
+      const response = await api.get(`/evolucoes/paciente/${idPaciente}`)
       const evolucoes: any[] = response.data
       return evolucoes
         .slice(-6)

@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import axios from 'axios'
+import api from '../lib/api'
 import usePacientesStore from './usePacientesStore'
 
 export type TipoEvento = 'dialise' | 'antibiotico' | 'exame' | 'internacao' | 'retorno'
@@ -75,16 +75,16 @@ const useCalendarioStore = create<EstadoCalendario>((set, get) => ({
       if (pacientes.length === 0) await buscarPacientes()
       const listaPacientes = usePacientesStore.getState().pacientes
 
-      let urlEventos = `http://localhost:8000/calendario/eventos?mes=${mesAtivo}&ano=${anoAtivo}`
-      let urlAnti = `http://localhost:8000/calendario/antibioticos`
+      let urlEventos = `/calendario/eventos?mes=${mesAtivo}&ano=${anoAtivo}`
+      let urlAnti = `/calendario/antibioticos`
       if (idPaciente && idPaciente !== 'todos') {
         urlEventos += `&paciente_id=${idPaciente}`
         urlAnti += `?paciente_id=${idPaciente}`
       }
 
       const [resEventos, resAnti] = await Promise.all([
-        axios.get(urlEventos),
-        axios.get(urlAnti)
+        api.get(urlEventos),
+        api.get(urlAnti)
       ])
 
       const eventosMapeados: EventoCalendario[] = resEventos.data.map((e: any) => {

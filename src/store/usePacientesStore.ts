@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import axios from 'axios'
+import api from '../lib/api'
 
 export interface Paciente {
   id: string
@@ -45,7 +45,7 @@ const usePacientesStore = create<EstadoPacientes>((set, get) => ({
   buscarPacientes: async () => {
     set({ carregando: true, erro: null })
     try {
-      const response = await axios.get('http://localhost:8000/pacientes/resumo')
+      const response = await api.get('/pacientes/resumo')
       
       const pacientesMapeados: Paciente[] = response.data.map((p: any) => {
         return {
@@ -83,7 +83,7 @@ const usePacientesStore = create<EstadoPacientes>((set, get) => ({
         medico_assistente_id: dados.medicoAssistenteId ?? null,
         diagnostico:          dados.diagnostico ?? null,
       }
-      await axios.post('http://localhost:8000/pacientes/', payload)
+      await api.post('/pacientes/', payload)
       await get().buscarPacientes()
       return true
     } catch (error) {
@@ -103,7 +103,7 @@ const usePacientesStore = create<EstadoPacientes>((set, get) => ({
         medico_assistente_id: dados.medicoAssistenteId ?? undefined,
         diagnostico:          dados.diagnostico ?? undefined,
       }
-      await axios.patch(`http://localhost:8000/pacientes/${id}`, payload)
+      await api.patch(`/pacientes/${id}`, payload)
       await get().buscarPacientes()
       return true
     } catch {
