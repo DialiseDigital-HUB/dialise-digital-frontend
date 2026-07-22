@@ -51,10 +51,9 @@ function agruparEventos(eventos: EventoCalendario[]): Record<string, EventoCalen
 interface PainelEventosDiaProps {
   dia: number | null
   eventos: EventoCalendario[]
-  antibioticosCurso: AntibioticoCurso[]
 }
 
-export default function PainelEventosDia({ dia, eventos, antibioticosCurso }: PainelEventosDiaProps) {
+export default function PainelEventosDia({ dia, eventos }: PainelEventosDiaProps) {
   const navegarComContexto = useNavegacaoStore(state => state.navegarComContexto)
   const [eventoAberto, setEventoAberto] = useState<string | null>(null)
 
@@ -62,45 +61,11 @@ export default function PainelEventosDia({ dia, eventos, antibioticosCurso }: Pa
     navegarComContexto(acaoTipo[ev.tipo].pagina, ev.idPaciente)
   }
 
-  const aoClicarAntibioticoGlobal = (atb: AntibioticoCurso) => {
-    navegarComContexto('prescricoes', atb.idPaciente)
-  }
-
   if (!dia) {
     return (
       <div className="painel-eventos-dia">
-        <span className="painel-eventos-dia__titulo">Antibióticos em Curso</span>
-        {antibioticosCurso.length === 0 ? (
-          <p className="painel-eventos-dia__vazio">Nenhum antibiótico ativo no momento.</p>
-        ) : (
-          <ul className="painel-eventos-dia__lista">
-            {antibioticosCurso.map(atb => (
-              <li
-                key={atb.id}
-                className={`evento-item evento-item--antibiotico ${classeBadgeDias(atb.diasRestantes) === 'evento-badge--urgente' ? 'evento-item--urgente' : ''}`}
-                onClick={() => aoClicarAntibioticoGlobal(atb)}
-                title="Ver prescrições do paciente"
-              >
-                <div className="evento-item__cabecalho">
-                  <div className="evento-item__indicador" />
-                  <div className="evento-item__conteudo">
-                    <span className="evento-item__tipo">Antibiótico</span>
-                    <div className="evento-item__info">
-                      <strong>{atb.paciente}</strong>
-                      <span>{atb.medicamento}</span>
-                    </div>
-                    <div className="evento-item__periodo">
-                      <span className="evento-periodo__datas">{atb.dataInicio} → {atb.dataTermino}</span>
-                      <span className={`evento-badge ${classeBadgeDias(atb.diasRestantes)}`}>
-                        {atb.diasRestantes}d
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
+        <span className="painel-eventos-dia__titulo">Agenda</span>
+        <p className="painel-eventos-dia__vazio">Selecione um dia no calendário para ver os detalhes da agenda.</p>
       </div>
     )
   }

@@ -55,7 +55,6 @@ export default function Calendario() {
           <PainelEventosDia
             dia={diaSelecionado}
             eventos={eventosDodiaSelecionado}
-            antibioticosCurso={antibioticosCurso}
           />
         </aside>
       </div>

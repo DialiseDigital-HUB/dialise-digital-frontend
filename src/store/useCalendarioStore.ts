@@ -104,6 +104,21 @@ const useCalendarioStore = create<EstadoCalendario>((set, get) => ({
       const eventosMapeados: EventoCalendario[] = resEventos.data.map((e: any) => {
         const paciente = listaPacientes.find(p => p.id === e.paciente_id)
         const periodoAnti = antiPorEventoId[e.id]
+        
+        let dataInicio = e.data_inicio ?? periodoAnti?.dataInicio
+        let dataTermino = e.data_termino ?? periodoAnti?.dataTermino
+        let diasRestantes = e.dias_restantes ?? periodoAnti?.diasRestantes
+
+        if (e.tipo === 'antibiotico' && !dataInicio) {
+          // Fallback: Casar o antibiótico pelo id do paciente
+          const atb = resAnti.data.find((a: any) => a.paciente_id === e.paciente_id && (e.descricao.includes(a.medicamento) || a.medicamento.includes(e.descricao) || true))
+          if (atb) {
+            dataInicio = atb.data_inicio
+            dataTermino = atb.data_termino
+            diasRestantes = atb.dias_restantes
+          }
+        }
+
         return {
           id: e.id,
           idPaciente: e.paciente_id,
@@ -113,9 +128,9 @@ const useCalendarioStore = create<EstadoCalendario>((set, get) => ({
           tipo: e.tipo,
           descricao: e.descricao,
           paciente: paciente?.nomeCompleto,
-          dataInicio: e.data_inicio ?? periodoAnti?.dataInicio,
-          dataTermino: e.data_termino ?? periodoAnti?.dataTermino,
-          diasRestantes: e.dias_restantes ?? periodoAnti?.diasRestantes,
+          dataInicio,
+          dataTermino,
+          diasRestantes,
         }
       })
 
