@@ -167,8 +167,8 @@
   display: flex;
   align-items: flex-end;
   gap: 6px;
-  height: 56px;
-  margin-top: 8px;
+  height: 90px;
+  margin-top: 16px;
 }
 
 .detalhe-paciente__ktv-barra-wrapper {

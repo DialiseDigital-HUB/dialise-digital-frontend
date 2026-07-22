@@ -58,6 +58,14 @@ function DetalheModal({ paciente }: { paciente: Paciente }) {
         <div className="detalhe-paciente__ktv-chart">
           {historicoKtv.map(ponto => {
             const corOk = ponto.valor >= 1.2
+            
+            const LIMITE_MAXIMO_KTV = 5.0
+            const ALTURA_MAXIMA_BARRA_PX = 60
+            const alturaProporcional = Math.min(
+              (ponto.valor / LIMITE_MAXIMO_KTV) * ALTURA_MAXIMA_BARRA_PX,
+              ALTURA_MAXIMA_BARRA_PX
+            )
+
             return (
               <div key={ponto.mes} className="detalhe-paciente__ktv-barra-wrapper">
                 <span className="detalhe-paciente__ktv-valor" style={{ color: corOk ? 'var(--teal-sea)' : 'var(--red)' }}>
@@ -66,7 +74,7 @@ function DetalheModal({ paciente }: { paciente: Paciente }) {
                 <div
                   className="detalhe-paciente__ktv-barra"
                   style={{
-                    height: `${ponto.valor * 35}px`,
+                    height: `${alturaProporcional}px`,
                     background: corOk ? 'var(--teal-light)' : '#FEE2E2',
                     borderTop: `3px solid ${corOk ? 'var(--teal-sea)' : 'var(--red)'}`,
                   }}
@@ -97,7 +105,7 @@ export default function Pacientes() {
 
   const [modalEdicao, setModalEdicao] = useState(false)
 
-  const handleCadastro = async (dados: any) => {
+  const handleCadastro = async (dados: Partial<Paciente>) => {
     const usuarioLogado = useAuthStore.getState().usuario
     if (usuarioLogado?.role === 'medico') {
       dados.medicoAssistenteId = usuarioLogado.id
@@ -135,7 +143,7 @@ export default function Pacientes() {
     navegar('evolucao')
   }
 
-  const handleEdicao = async (dados: any) => {
+  const handleEdicao = async (dados: Partial<Paciente>) => {
     if (!pacienteSelecionado) return
     const sucesso = await editarPaciente(pacienteSelecionado.id, dados)
     if (sucesso) {
