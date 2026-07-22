@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import usePacientesStore from '../../../store/usePacientesStore'
 import type { Paciente } from '../../../store/usePacientesStore'
+import { buscarPacientes } from '../../../lib/busca'
 import Avatar from '../Avatar/Avatar'
 import './BuscaPaciente.css'
 
@@ -22,14 +23,7 @@ export default function BuscaPaciente({
   const pacientes     = usePacientesStore(s => s.pacientes)
   const pacienteAtivo = pacientes.find(p => p.id === idPacienteAtivo) ?? null
 
-  const termo = termoBusca.toLowerCase().trim()
-  const resultados = termo
-    ? pacientes.filter(
-        p =>
-          p.nomeCompleto.toLowerCase().includes(termo) ||
-          p.prontuario.toLowerCase().includes(termo)
-      )
-    : pacientes
+  const resultados = buscarPacientes(pacientes, termoBusca)
 
   const aoSelecionarInterno = (paciente: Paciente) => {
     aoSelecionar(paciente)

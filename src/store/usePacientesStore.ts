@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import api from '../lib/api'
+import { buscarPacientes } from '../lib/busca'
 
 export interface Paciente {
   id: string
@@ -126,15 +127,10 @@ const usePacientesStore = create<EstadoPacientes>((set, get) => ({
 
   pacientesFiltrados: () => {
     const { pacientes, termoBusca, filtroAvancado } = get()
-    const termo = termoBusca.toLowerCase().trim()
     
-    return pacientes.filter(p => {
-      const matchTexto = !termo || 
-        p.nomeCompleto.toLowerCase().includes(termo) ||
-        p.prontuario.toLowerCase().includes(termo)
-        
-      if (!matchTexto) return false
-      
+    const pacientesEncontrados = buscarPacientes(pacientes, termoBusca)
+    
+    return pacientesEncontrados.filter(p => {
       if (filtroAvancado === 'transplante') return p.inscritoTransplante
       if (filtroAvancado === 'pendente_evolucao') return p.statusEvolucao === 'err'
       
