@@ -13,6 +13,9 @@ export interface EventoCalendario {
   tipo: TipoEvento
   descricao: string
   paciente?: string
+  dataInicio?: string
+  dataTermino?: string
+  diasRestantes?: number
 }
 
 export interface AntibioticoCurso {
@@ -87,8 +90,20 @@ const useCalendarioStore = create<EstadoCalendario>((set, get) => ({
         api.get(urlAnti)
       ])
 
+      const antiPorEventoId: Record<string, { dataInicio: string; dataTermino: string; diasRestantes: number }> = {}
+      resAnti.data.forEach((a: any) => {
+        if (a.evento_id) {
+          antiPorEventoId[a.evento_id] = {
+            dataInicio: a.data_inicio,
+            dataTermino: a.data_termino,
+            diasRestantes: a.dias_restantes,
+          }
+        }
+      })
+
       const eventosMapeados: EventoCalendario[] = resEventos.data.map((e: any) => {
         const paciente = listaPacientes.find(p => p.id === e.paciente_id)
+        const periodoAnti = antiPorEventoId[e.id]
         return {
           id: e.id,
           idPaciente: e.paciente_id,
@@ -97,7 +112,10 @@ const useCalendarioStore = create<EstadoCalendario>((set, get) => ({
           ano: e.ano,
           tipo: e.tipo,
           descricao: e.descricao,
-          paciente: paciente?.nomeCompleto
+          paciente: paciente?.nomeCompleto,
+          dataInicio: e.data_inicio ?? periodoAnti?.dataInicio,
+          dataTermino: e.data_termino ?? periodoAnti?.dataTermino,
+          diasRestantes: e.dias_restantes ?? periodoAnti?.diasRestantes,
         }
       })
 

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import './PainelEventosDia.css'
-import type { EventoCalendario, TipoEvento } from '../../store/useCalendarioStore'
+import type { AntibioticoCurso, EventoCalendario, TipoEvento } from '../../store/useCalendarioStore'
 import useNavegacaoStore from '../../store/useNavegacaoStore'
 
 const rotuloTipo: Record<TipoEvento, string> = {
@@ -27,12 +27,34 @@ const acaoTipo: Record<TipoEvento, { rotulo: string; pagina: 'evolucao' | 'lme' 
   retorno:    { rotulo: 'Abrir Evolução', pagina: 'evolucao' },
 }
 
-interface PainelEventosDiaProps {
-  dia: number
-  eventos: EventoCalendario[]
+const LIMIAR_URGENTE = 3
+const LIMIAR_ATENCAO = 7
+
+function classeBadgeDias(diasRestantes: number) {
+  if (diasRestantes <= LIMIAR_URGENTE) return 'evento-badge--urgente'
+  if (diasRestantes <= LIMIAR_ATENCAO) return 'evento-badge--atencao'
+  return 'evento-badge--ok'
 }
 
-export default function PainelEventosDia({ dia, eventos }: PainelEventosDiaProps) {
+function agruparEventos(eventos: EventoCalendario[]): Record<string, EventoCalendario[]> {
+  return eventos.reduce((acc, ev) => {
+    const grupo = ev.tipo === 'dialise'     ? 'Diálises'
+                : ev.tipo === 'antibiotico' ? 'LMEs / Antibióticos'
+                : ev.tipo === 'retorno'     ? 'Consultas / Retornos'
+                : 'Outros (Exames, Internações)'
+    if (!acc[grupo]) acc[grupo] = []
+    acc[grupo].push(ev)
+    return acc
+  }, {} as Record<string, EventoCalendario[]>)
+}
+
+interface PainelEventosDiaProps {
+  dia: number | null
+  eventos: EventoCalendario[]
+  antibioticosCurso: AntibioticoCurso[]
+}
+
+export default function PainelEventosDia({ dia, eventos, antibioticosCurso }: PainelEventosDiaProps) {
   const navegarComContexto = useNavegacaoStore(state => state.navegarComContexto)
   const [eventoAberto, setEventoAberto] = useState<string | null>(null)
 
@@ -40,16 +62,47 @@ export default function PainelEventosDia({ dia, eventos }: PainelEventosDiaProps
     navegarComContexto(acaoTipo[ev.tipo].pagina, ev.idPaciente)
   }
 
-  const agruparEventos = (eventos: EventoCalendario[]) => {
-    return eventos.reduce((acc, ev) => {
-      const grupo = ev.tipo === 'dialise' ? 'Diálises' 
-                  : ev.tipo === 'antibiotico' ? 'LMEs / Antibióticos' 
-                  : ev.tipo === 'retorno' ? 'Consultas / Retornos' 
-                  : 'Outros (Exames, Internações)'
-      if (!acc[grupo]) acc[grupo] = []
-      acc[grupo].push(ev)
-      return acc
-    }, {} as Record<string, EventoCalendario[]>)
+  const aoClicarAntibioticoGlobal = (atb: AntibioticoCurso) => {
+    navegarComContexto('prescricoes', atb.idPaciente)
+  }
+
+  if (!dia) {
+    return (
+      <div className="painel-eventos-dia">
+        <span className="painel-eventos-dia__titulo">Antibióticos em Curso</span>
+        {antibioticosCurso.length === 0 ? (
+          <p className="painel-eventos-dia__vazio">Nenhum antibiótico ativo no momento.</p>
+        ) : (
+          <ul className="painel-eventos-dia__lista">
+            {antibioticosCurso.map(atb => (
+              <li
+                key={atb.id}
+                className={`evento-item evento-item--antibiotico ${classeBadgeDias(atb.diasRestantes) === 'evento-badge--urgente' ? 'evento-item--urgente' : ''}`}
+                onClick={() => aoClicarAntibioticoGlobal(atb)}
+                title="Ver prescrições do paciente"
+              >
+                <div className="evento-item__cabecalho">
+                  <div className="evento-item__indicador" />
+                  <div className="evento-item__conteudo">
+                    <span className="evento-item__tipo">Antibiótico</span>
+                    <div className="evento-item__info">
+                      <strong>{atb.paciente}</strong>
+                      <span>{atb.medicamento}</span>
+                    </div>
+                    <div className="evento-item__periodo">
+                      <span className="evento-periodo__datas">{atb.dataInicio} → {atb.dataTermino}</span>
+                      <span className={`evento-badge ${classeBadgeDias(atb.diasRestantes)}`}>
+                        {atb.diasRestantes}d
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    )
   }
 
   const grupos = agruparEventos(eventos)
@@ -67,26 +120,37 @@ export default function PainelEventosDia({ dia, eventos }: PainelEventosDiaProps
               <ul className="painel-eventos-dia__lista">
                 {eventosGrupo.map(ev => {
                   const isAberto = eventoAberto === ev.id
+                  const temPeriodo = ev.dataInicio && ev.dataTermino
                   return (
-                    <li 
-                      key={ev.id} 
+                    <li
+                      key={ev.id}
                       className={`evento-item ${classeTipo[ev.tipo]} ${isAberto ? 'evento-item--ativo' : ''}`}
                       onClick={() => setEventoAberto(isAberto ? null : ev.id)}
                     >
                       <div className="evento-item__cabecalho">
-                        <div className="evento-item__indicador"></div>
+                        <div className="evento-item__indicador" />
                         <div className="evento-item__conteudo">
                           <span className="evento-item__tipo">{rotuloTipo[ev.tipo]}</span>
                           <div className="evento-item__info">
                             <strong>{ev.paciente}</strong>
                             <span>{ev.descricao}</span>
                           </div>
+                          {temPeriodo && (
+                            <div className="evento-item__periodo">
+                              <span className="evento-periodo__datas">{ev.dataInicio} → {ev.dataTermino}</span>
+                              {ev.diasRestantes !== undefined && (
+                                <span className={`evento-badge ${classeBadgeDias(ev.diasRestantes)}`}>
+                                  {ev.diasRestantes}d
+                                </span>
+                              )}
+                            </div>
+                          )}
                         </div>
                       </div>
                       {isAberto && (
                         <div className="evento-item__acao">
-                          <button 
-                            className="btn-acao-evento" 
+                          <button
+                            className="btn-acao-evento"
                             onClick={(e) => {
                               e.stopPropagation()
                               aoClicarAcao(ev)

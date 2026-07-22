@@ -2,7 +2,6 @@ import { useEffect } from 'react'
 import './Calendario.css'
 import CalendarioGrid from '../../components/ui/CalendarioGrid/CalendarioGrid'
 import PainelEventosDia from './PainelEventosDia'
-import ListaAntibioticos from './ListaAntibioticos'
 import useCalendarioStore from '../../store/useCalendarioStore'
 
 const legendaTipos = [
@@ -50,16 +49,14 @@ export default function Calendario() {
             aoAvancarMes={avancarMes}
             aoRetrocederMes={retrocederMes}
           />
-          {diaSelecionado && (
-            <PainelEventosDia
-              dia={diaSelecionado}
-              eventos={eventosDodiaSelecionado}
-            />
-          )}
         </div>
 
         <aside className="calendario-pagina__lateral">
-          <ListaAntibioticos antibioticos={antibioticosCurso} />
+          <PainelEventosDia
+            dia={diaSelecionado}
+            eventos={eventosDodiaSelecionado}
+            antibioticosCurso={antibioticosCurso}
+          />
         </aside>
       </div>
     </div>
