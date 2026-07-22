@@ -47,11 +47,16 @@ export default function Evolucao() {
 
   const aoSelecionarPaciente = (idPaciente: string) => {
     definirPaciente(idPaciente)
-    buscarEvolucaoAnterior(idPaciente)
+    if (dados.mesReferencia) {
+      buscarEvolucaoAnterior(idPaciente, dados.mesReferencia)
+    }
   }
 
   const aoDefinirMes = (mes: string) => {
     atualizarCampo('mesReferencia', mes)
+    if (idPacienteAtivo) {
+      buscarEvolucaoAnterior(idPacienteAtivo, mes)
+    }
   }
 
   const formularioPreenchido =
@@ -125,12 +130,17 @@ export default function Evolucao() {
             <Botao
               variante="primary"
               onClick={async () => {
-                setModalConfirmacao(false)
-                await salvarEvolucao()
-                resetar()
-                await Promise.all([buscarPacientes(), carregarDashboard()])
-                adicionarToast('Evolução registrada com sucesso!', 'sucesso')
-                navegar('pacientes')
+                const sucesso = await salvarEvolucao()
+                if (sucesso) {
+                  setModalConfirmacao(false)
+                  resetar()
+                  await Promise.all([buscarPacientes(), carregarDashboard()])
+                  adicionarToast('Evolução registrada com sucesso!', 'sucesso')
+                  navegar('pacientes')
+                } else {
+                  setModalConfirmacao(false)
+                  adicionarToast('Erro: Verifique se os dados inseridos estão dentro dos limites permitidos.', 'erro')
+                }
               }}
             >
               Confirmar Registro

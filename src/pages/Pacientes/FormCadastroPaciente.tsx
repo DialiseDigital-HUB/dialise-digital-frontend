@@ -70,6 +70,8 @@ export default function FormCadastroPaciente({ idForm, aoSubmeter, modoEdicao = 
     setSexo('M')
     setTurno('Manhã')
     setDiagnostico('DRC estágio 5 secundária a DM tipo 2')
+    setHorarioEntrada('08:00')
+    setDataEntrada('2026-06-15')
   }
 
   return (

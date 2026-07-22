@@ -93,13 +93,14 @@ const estadoInicial: DadosEvolucao = {
 
 interface EstadoEvolucao {
   idPacienteAtivo: string | null
+  idEvolucaoAtual: string | null
   dados: DadosEvolucao
   carregando: boolean
   erro: string | null
   sucesso: boolean
   definirPaciente: (idPaciente: string) => void
-  buscarEvolucaoAnterior: (idPaciente: string) => Promise<void>
-  salvarEvolucao: () => Promise<void>
+  buscarEvolucaoAnterior: (idPaciente: string, mesReferencia: string) => Promise<void>
+  salvarEvolucao: () => Promise<boolean>
   atualizarCampo: <C extends keyof DadosEvolucao>(campo: C, valor: DadosEvolucao[C]) => void
   preencherParaDebug: () => void
   resetar: () => void
@@ -108,29 +109,32 @@ interface EstadoEvolucao {
 
 const useEvolucaoStore = create<EstadoEvolucao>((set, get) => ({
   idPacienteAtivo: null,
+  idEvolucaoAtual: null,
   dados: estadoInicial,
   carregando: false,
   erro: null,
   sucesso: false,
 
   definirPaciente: idPaciente =>
-    set({
+    set(estado => ({
       idPacienteAtivo: idPaciente,
-      dados: estadoInicial,
+      idEvolucaoAtual: null,
+      dados: { ...estadoInicial, mesReferencia: estado.dados.mesReferencia },
       carregando: false,
       erro: null,
       sucesso: false,
-    }),
+    })),
 
-  buscarEvolucaoAnterior: async (idPaciente: string) => {
+  buscarEvolucaoAnterior: async (idPaciente: string, mesReferencia: string) => {
     set({ carregando: true, erro: null })
     try {
-      const response = await api.get(`/evolucoes?patient_id=${idPaciente}`)
+      const response = await api.get(`/evolucoes?patient_id=${idPaciente}&mes_referencia=${mesReferencia}`)
       if (response.data && response.data.length > 0) {
         const evo = response.data[0]
         set({
+          idEvolucaoAtual: evo.id,
           dados: {
-            mesReferencia: evo.mes_referencia || evo.mesReferencia || '',
+            mesReferencia: evo.mes_referencia || evo.mesReferencia || mesReferencia,
             evolucaoClinica: evo.texto_evolucao || evo.evolucao_clinica || evo.evolucaoClinica || '',
             ktv: evo.ktv || '',
             acessoData: evo.acesso_data || evo.acessoData || '',
@@ -182,16 +186,20 @@ const useEvolucaoStore = create<EstadoEvolucao>((set, get) => ({
           carregando: false
         })
       } else {
-        set({ carregando: false })
+        set(() => ({ 
+          idEvolucaoAtual: null,
+          dados: { ...estadoInicial, mesReferencia },
+          carregando: false 
+        }))
       }
-    } catch (error) {
+    } catch {
       set({ erro: 'Falha ao buscar evolução', carregando: false })
     }
   },
 
   salvarEvolucao: async () => {
-    const { idPacienteAtivo, dados } = get()
-    if (!idPacienteAtivo) return
+    const { idPacienteAtivo, idEvolucaoAtual, dados } = get()
+    if (!idPacienteAtivo) return false
 
     set({ carregando: true, erro: null, sucesso: false })
     try {
@@ -201,6 +209,7 @@ const useEvolucaoStore = create<EstadoEvolucao>((set, get) => ({
       const payload = {
         patient_id: idPacienteAtivo,
         medico_id: medicoIdDinamico,
+        mes_referencia: dados.mesReferencia,
         drc_etiologia: "Não informada",
         texto_evolucao: dados.evolucaoClinica || "Sem evolução",
         ktv: parseFloat(dados.ktv || '0'),
@@ -210,8 +219,8 @@ const useEvolucaoStore = create<EstadoEvolucao>((set, get) => ({
         peso_seco: parseFloat(dados.pesoSeco || '0'),
         tempo_minutos: parseInt(dados.tempoSessao || '0', 10) * 60 || 240,
         heparina: parseInt(dados.heparinaUtilizada || '0', 10) || 0,
-        fluxo_sangue: 300,
-        fluxo_dialisato: 500,
+        fluxo_sangue: parseInt(dados.fbs || '0', 10) || 300,
+        fluxo_dialisato: parseInt(dados.fbd || '0', 10) || 500,
         sodio: parseInt(dados.sodio || '0', 10) || 138,
         bicarbonato: parseInt(dados.bic || '0', 10) || 32,
         perfis_outros: dados.perfisOutros || null,
@@ -233,15 +242,15 @@ const useEvolucaoStore = create<EstadoEvolucao>((set, get) => ({
         complicacoes_acesso_vascular: dados.complicacoesAcessoVascular,
         exames_complementares_texto: dados.examesComplementares || null,
         exames_dados_json: {
-          hemoglobina: parseFloat(dados.hemoglobina || '0'),
-          calcio: parseFloat(dados.calcio || '0'),
-          ferritina: parseFloat(dados.ferritina || '0'),
-          anti_hiv: dados.antiHiv,
-          ct: parseFloat(dados.ct || '0'),
-          hematocrito: parseFloat(dados.hematocrito || '0'),
-          fosforo: parseFloat(dados.fosforo || '0'),
-          paratormonio: parseFloat(dados.paratormonio || '0'),
-          potassio: parseFloat(dados.potassio || '0'),
+          hemoglobina: dados.hemoglobina ? parseFloat(dados.hemoglobina) : null,
+          calcio: dados.calcio ? parseFloat(dados.calcio) : null,
+          ferritina: dados.ferritina ? parseFloat(dados.ferritina) : null,
+          anti_hiv: dados.antiHiv || null,
+          ct: dados.ct ? parseFloat(dados.ct) : null,
+          hematocrito: dados.hematocrito ? parseFloat(dados.hematocrito) : null,
+          fosforo: dados.fosforo ? parseFloat(dados.fosforo) : null,
+          paratormonio: dados.paratormonio ? parseFloat(dados.paratormonio) : null,
+          potassio: dados.potassio ? parseFloat(dados.potassio) : null,
         },
         pa: dados.pa || "120/80",
         fc: parseInt(dados.fc || '0', 10) || 80,
@@ -254,10 +263,16 @@ const useEvolucaoStore = create<EstadoEvolucao>((set, get) => ({
         texto_conduta: dados.conduta || "Manter prescrição"
       }
 
-      await api.post('/evolucoes', payload)
+      if (idEvolucaoAtual) {
+        await api.put(`/evolucoes/${idEvolucaoAtual}`, payload)
+      } else {
+        await api.post('/evolucoes', payload)
+      }
       set({ carregando: false, sucesso: true })
-    } catch (error) {
-      set({ erro: 'Falha ao salvar evolução', carregando: false })
+      return true
+    } catch {
+      set({ erro: 'Falha ao salvar evolução. Verifique os dados inseridos.', carregando: false })
+      return false
     }
   },
 
@@ -267,15 +282,16 @@ const useEvolucaoStore = create<EstadoEvolucao>((set, get) => ({
       sucesso: false
     })),
 
-  preencherParaDebug: () =>
-    set(estado => ({
+  preencherParaDebug: () => {
+    const hoje = new Date().toISOString().split('T')[0]
+    return set(estado => ({
       dados: {
         ...estado.dados,
-        mesReferencia: '2026-06',
+        drcEtiologia: 'Hipertensão',
         evolucaoClinica: 'Paciente clinicamente estável, sem queixas. Acesso vascular funcionando adequadamente.',
         ktv: '1.4',
-        acessoData: '2024-01-15', acessosPrevios: 'Cateter Duplo Lúmen',
-        pesoSeco: '70', tempoSessao: '4', heparinaUtilizada: '5000UI', fbs: '300', fbd: '350', sodio: '138', bic: '32', perfisOutros: 'N/A',
+        acessoData: hoje, acessosPrevios: 'Cateter Duplo Lúmen',
+        pesoSeco: '70', tempoSessao: '4', heparinaUtilizada: '5000', fbs: '300', fbd: '500', sodio: '138', bic: '32', perfisOutros: 'N/A',
         usandoFerroEv: true, usandoEpo: true, usandoSevelamer: false, usandoCaCo3: true, usandoCalcitriol: false, usandoCinacalcete: false,
         medicamentosEmUso: 'Losartana 50mg, Anlodipino 5mg', alergias: 'Dipirona',
         vacinouHepB: true, imunizadoHepB: true, inscritoTransplante: true, internouEsseMes: false,
@@ -283,17 +299,30 @@ const useEvolucaoStore = create<EstadoEvolucao>((set, get) => ({
         examesComplementares: 'Raio-X de Tórax sem alterações recentes.',
         hemoglobina: '11.2', calcio: '9.0', ferritina: '450', antiHiv: 'Não Reagente', ct: '20',
         hematocrito: '34', fosforo: '4.5', paratormonio: '300', potassio: '4.8',
-        pa: '120/80', fc: '78', altura: '1.70', pesoAtual: '71', imc: '24.5', acv: 'BNF, RCR', ar: 'MV+, sem RA', ext: 'Sem edemas',
+        pa: '120/80', fc: '78', altura: '170', pesoAtual: '71', imc: '24.5', acv: 'BNF, RCR', ar: 'MV+, sem RA', ext: 'Sem edemas',
         conduta: 'Manter prescrição dialítica atual.',
       },
-    })),
+    }))
+  },
 
   buscarHistoricoKtv: async (idPaciente: string) => {
     try {
       const response = await api.get(`/evolucoes/paciente/${idPaciente}`)
-      const evolucoes: any[] = response.data
-      return evolucoes
-        .slice(-6)
+      const todas: { mes_referencia?: string, ktv: string }[] = response.data
+      const evolucoesUnicas: { mes_referencia?: string, ktv: string }[] = []
+      const mesesVistos = new Set<string>()
+      
+      for (const e of todas) {
+        const mes = e.mes_referencia?.slice(0, 7) || ''
+        if (!mesesVistos.has(mes)) {
+          evolucoesUnicas.push(e)
+          mesesVistos.add(mes)
+        }
+      }
+
+      return evolucoesUnicas
+        .slice(0, 6)
+        .reverse()
         .map(e => ({
           mes: e.mes_referencia?.slice(0, 7) ?? '',
           valor: parseFloat(e.ktv) || 0,
@@ -303,7 +332,7 @@ const useEvolucaoStore = create<EstadoEvolucao>((set, get) => ({
     }
   },
 
-  resetar: () => set({ idPacienteAtivo: null, dados: estadoInicial, erro: null, sucesso: false }),
+  resetar: () => set({ idPacienteAtivo: null, idEvolucaoAtual: null, dados: estadoInicial, erro: null, sucesso: false }),
 }))
 
 export default useEvolucaoStore
