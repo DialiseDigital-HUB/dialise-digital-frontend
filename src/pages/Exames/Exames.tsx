@@ -1,7 +1,9 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import './Exames.css'
 import Badge from '../../components/ui/Badge/Badge'
+import Botao from '../../components/ui/Button/Button'
 import BuscaPaciente from '../../components/ui/BuscaPaciente/BuscaPaciente'
+import ModalSolicitarExame from './ModalSolicitarExame'
 import useExamesStore from '../../store/useExamesStore'
 import type { StatusExame, PeriodicidadeExame } from '../../store/useExamesStore'
 
@@ -33,6 +35,7 @@ const opcoesStatus = [
 
 export default function Exames() {
   const { filtroPaciente, filtroStatus, definirFiltroPaciente, definirFiltroStatus, examesFiltrados, buscarExames } = useExamesStore()
+  const [modalAberto, setModalAberto] = useState(false)
   
   useEffect(() => {
     buscarExames()
@@ -54,6 +57,9 @@ export default function Exames() {
             {totalVencidos === 0 && totalVenceBreve === 0 && <span>Todos os exames estão em dia.</span>}
           </p>
         </div>
+        <Botao variante="primary" onClick={() => setModalAberto(true)}>
+          Solicitar Exame
+        </Botao>
       </div>
 
       <div className="exames-pagina__filtros">
@@ -117,6 +123,11 @@ export default function Exames() {
           </tbody>
         </table>
       </div>
+
+      <ModalSolicitarExame 
+        aberto={modalAberto} 
+        aoFechar={() => setModalAberto(false)} 
+      />
     </div>
   )
 }

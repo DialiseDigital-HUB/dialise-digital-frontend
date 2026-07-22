@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import './PainelEventosDia.css'
-import type { AntibioticoCurso, EventoCalendario, TipoEvento } from '../../store/useCalendarioStore'
+import type { EventoCalendario, TipoEvento } from '../../store/useCalendarioStore'
 import useNavegacaoStore from '../../store/useNavegacaoStore'
 
 const rotuloTipo: Record<TipoEvento, string> = {

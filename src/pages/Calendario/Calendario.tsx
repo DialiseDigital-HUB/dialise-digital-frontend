@@ -13,10 +13,7 @@ const legendaTipos = [
 ]
 
 export default function Calendario() {
-  const {
-    mesAtivo, anoAtivo, eventos, antibioticosCurso,
-    diaSelecionado, definirDia, avancarMes, retrocederMes, eventosDoDia, buscarEventosEAntibioticos
-  } = useCalendarioStore()
+  const { mesAtivo, anoAtivo, eventos, eventosDoDia, retrocederMes, avancarMes, definirDia, diaSelecionado, buscarEventosEAntibioticos } = useCalendarioStore()
 
   useEffect(() => {
     buscarEventosEAntibioticos()
