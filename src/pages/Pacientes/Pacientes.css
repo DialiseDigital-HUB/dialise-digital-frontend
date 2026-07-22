@@ -195,3 +195,21 @@
   font-size: 9px;
   color: var(--gray-500);
 }
+
+
+/* Utilitarios de formulario de cadastro */
+.detalhe-paciente__grid-spaced {
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.detalhe-paciente__full-row {
+  grid-column: 1 / -1;
+}
+
+.detalhe-paciente__actions {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: -0.5rem;
+}

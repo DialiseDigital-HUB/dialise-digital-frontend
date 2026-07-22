@@ -122,3 +122,9 @@
   color: var(--gray-700);
   cursor: not-allowed;
 }
+
+
+/* Utilitarios do grid LME */
+.lme-campo--largo {
+  grid-column: span 2;
+}

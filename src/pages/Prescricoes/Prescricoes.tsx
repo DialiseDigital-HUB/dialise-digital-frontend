@@ -12,6 +12,7 @@ import Select from '../../components/ui/Select/Select'
 import Badge from '../../components/ui/Badge/Badge'
 import Icone from '../../components/ui/Icone/Icone'
 import SelectFiltro from '../../components/ui/SelectFiltro/SelectFiltro'
+import ModalFooter from '../../components/ui/Modal/ModalFooter'
 import './Prescricoes.css'
 
 const OPCOES_VIA = [
@@ -296,13 +297,10 @@ export default function Prescricoes() {
         tamanho="md"
         aoFechar={aoFechar}
         rodape={
-          <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
-            <Botao variante="ghost" onClick={preencherDebug} type="button" tamanho="sm">Preencher Debug</Botao>
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <Botao variante="ghost" onClick={aoFechar}>Cancelar</Botao>
-              <Botao variante="primary" tipo="submit" form="form-prescricao">Salvar</Botao>
-            </div>
-          </div>
+          <ModalFooter acaoSecundaria={<Botao variante="ghost" onClick={preencherDebug} type="button" tamanho="sm">Preencher Debug</Botao>}>
+            <Botao variante="ghost" onClick={aoFechar}>Cancelar</Botao>
+            <Botao variante="primary" tipo="submit" form="form-prescricao">Salvar</Botao>
+          </ModalFooter>
         }
       >
         <form id="form-prescricao" onSubmit={aoSalvar} className="prescricoes__form">
@@ -399,10 +397,10 @@ export default function Prescricoes() {
         tamanho="sm"
         aoFechar={() => setModalConfirmacao({ aberto: false, acao: null, id: null })}
         rodape={
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', width: '100%' }}>
+          <ModalFooter>
             <Botao variante="ghost" onClick={() => setModalConfirmacao({ aberto: false, acao: null, id: null })}>Cancelar</Botao>
             <Botao variante="primary" onClick={confirmarAcao}>Confirmar</Botao>
-          </div>
+          </ModalFooter>
         }
       >
         <div style={{ padding: '8px 0', color: 'var(--gray-600)', fontSize: '14px' }}>
@@ -418,10 +416,10 @@ export default function Prescricoes() {
         tamanho="sm"
         aoFechar={() => { setModalConfirmacaoEntrada(false); aoFechar() }}
         rodape={
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', width: '100%' }}>
+          <ModalFooter>
             <Botao variante="ghost" onClick={() => { setModalConfirmacaoEntrada(false); aoFechar() }}>Não salvar</Botao>
             <Botao variante="primary" onClick={confirmarSalvarEntrada}>Confirmar</Botao>
-          </div>
+          </ModalFooter>
         }
       >
         <div style={{ padding: '8px 0', color: 'var(--gray-600)', fontSize: '14px' }}>

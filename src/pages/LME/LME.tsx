@@ -117,7 +117,7 @@ export default function LME() {
               <div className="lme-secao">
                 <h4>2. Patologia e Justificativa</h4>
                 <div className="lme-grid">
-                  <div className="lme-campo" style={{ gridColumn: 'span 2' }}>
+                  <div className="lme-campo lme-campo--largo">
                     <label>CID-10 Principal</label>
                     <select value={cid10} onChange={e => setCid10(e.target.value)}>
                       {CID10_OPCOES.map(op => (
@@ -125,7 +125,7 @@ export default function LME() {
                       ))}
                     </select>
                   </div>
-                  <div className="lme-campo" style={{ gridColumn: 'span 2' }}>
+                  <div className="lme-campo lme-campo--largo">
                     <label>Anamnese e Justificativa</label>
                     <textarea
                       rows={3}
@@ -140,7 +140,7 @@ export default function LME() {
               <div className="lme-secao">
                 <h4>3. Solicitação de Medicamentos (DCB)</h4>
                 <div className="lme-grid">
-                  <div className="lme-campo" style={{ gridColumn: 'span 2' }}>
+                  <div className="lme-campo lme-campo--largo">
                     <label>Nome do Medicamento</label>
                     <select value={medicamento} onChange={e => setMedicamento(e.target.value)}>
                       {MEDICAMENTOS_OPCOES.map(m => (

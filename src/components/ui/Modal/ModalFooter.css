@@ -1,0 +1,15 @@
+.modal-footer {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  width: 100%;
+}
+
+.modal-footer--space-between {
+  justify-content: space-between;
+}
+
+.modal-footer__actions {
+  display: flex;
+  gap: 8px;
+}

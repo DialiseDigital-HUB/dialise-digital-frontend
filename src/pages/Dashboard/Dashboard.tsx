@@ -8,6 +8,7 @@ import AlertItem from '../../components/ui/AlertItem/AlertItem'
 import ProgressBar from '../../components/ui/ProgressBar/ProgressBar'
 import Icone from '../../components/ui/Icone/Icone'
 import Modal from '../../components/ui/Modal/Modal'
+import ModalFooter from '../../components/ui/Modal/ModalFooter'
 import BotaoFiltro from '../../components/ui/BotaoFiltro/BotaoFiltro'
 import './Dashboard.css'
 
@@ -209,7 +210,7 @@ export default function Dashboard() {
         tamanho="sm"
         aoFechar={() => setAlertaAberto(null)}
         rodape={
-          <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', width: '100%' }}>
+          <ModalFooter>
             <button className="botao botao--secundario" onClick={() => setAlertaAberto(null)}>Fechar</button>
             <button
               className="botao botao--secundario"
@@ -233,7 +234,7 @@ export default function Dashboard() {
                 Ir para Paciente
               </button>
             )}
-          </div>
+          </ModalFooter>
         }
       >
         {alertaAberto && (

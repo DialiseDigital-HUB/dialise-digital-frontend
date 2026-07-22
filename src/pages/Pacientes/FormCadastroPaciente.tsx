@@ -73,16 +73,16 @@ export default function FormCadastroPaciente({ idForm, aoSubmeter, modoEdicao = 
   }
 
   return (
-    <form id={idForm} onSubmit={handleSubmit} className="detalhe-paciente__grid" style={{ gap: '1rem', marginTop: '1rem' }}>
+    <form id={idForm} onSubmit={handleSubmit} className="detalhe-paciente__grid detalhe-paciente__grid-spaced">
       {!modoEdicao && (
-        <div style={{ gridColumn: '1 / -1', display: 'flex', justifyContent: 'flex-end', marginBottom: '-0.5rem' }}>
+        <div className="detalhe-paciente__actions">
           <Botao variante="ghost" type="button" onClick={preencherDebug} tamanho="sm">
             Preencher Debug
           </Botao>
         </div>
       )}
 
-      <div style={{ gridColumn: '1 / -1' }}>
+      <div className="detalhe-paciente__full-row">
         <Input
           id="nome"
           label="Nome Completo *"
@@ -143,7 +143,7 @@ export default function FormCadastroPaciente({ idForm, aoSubmeter, modoEdicao = 
         />
       </div>
 
-      <div style={{ gridColumn: '1 / -1' }}>
+      <div className="detalhe-paciente__full-row">
         <Select
           id="medico"
           label="Médico Responsável"
@@ -155,7 +155,7 @@ export default function FormCadastroPaciente({ idForm, aoSubmeter, modoEdicao = 
         />
       </div>
 
-      <div style={{ gridColumn: '1 / -1' }}>
+      <div className="detalhe-paciente__full-row">
         <Input
           id="diagnostico"
           label="Diagnóstico Base *"

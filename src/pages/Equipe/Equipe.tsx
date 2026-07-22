@@ -7,6 +7,7 @@ import Botao from '../../components/ui/Button/Button'
 import Input from '../../components/ui/Input/Input'
 import Icone from '../../components/ui/Icone/Icone'
 import Modal from '../../components/ui/Modal/Modal'
+import Alert from '../../components/ui/Alert/Alert'
 import './Equipe.css'
 
 const rotulosRole: Record<string, string> = {
@@ -96,9 +97,10 @@ export default function Equipe() {
             </div>
 
             {u.precisa_trocar_senha && (
-              <div style={{ marginTop: '12px', padding: '8px', backgroundColor: 'var(--yellow-light, #FFF3CD)', color: 'var(--yellow-dark, #856404)', borderRadius: '4px', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Icone nome="alerta" tamanho={14} />
-                <span>Senha provisória: <strong>{u.crm}</strong></span>
+              <div style={{ marginTop: '12px' }}>
+                <Alert variante="warning" icone="alerta">
+                  <span>Senha provisória: <strong>{u.crm}</strong></span>
+                </Alert>
               </div>
             )}
           </Card>
