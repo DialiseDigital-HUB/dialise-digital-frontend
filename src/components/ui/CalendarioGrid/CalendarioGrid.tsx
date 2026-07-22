@@ -9,6 +9,14 @@ const corPorTipo: Record<TipoEvento, string> = {
   retorno:    'var(--blue)',
 }
 
+const corFundoPorTipo: Record<TipoEvento, string> = {
+  dialise:    'var(--teal-pale)',
+  antibiotico:'var(--red-light)',
+  exame:      'var(--amber-light)',
+  internacao: 'var(--gray-200)',
+  retorno:    'var(--blue-soft)',
+}
+
 const nomesMeses = [
   'Janeiro','Fevereiro','Março','Abril','Maio','Junho',
   'Julho','Agosto','Setembro','Outubro','Novembro','Dezembro',
@@ -73,9 +81,12 @@ export default function CalendarioGrid({
             <button
               key={dia}
               type="button"
-              className={`cal-grid__celula ${estaAtivo ? 'cal-grid__celula--ativo' : ''}`}
+              className={`cal-grid__celula ${estaAtivo ? 'cal-grid__celula--ativo' : ''} ${eventosNoDia.length > 0 ? 'cal-grid__celula--com-evento' : ''}`}
               onClick={() => aoSelecionarDia(estaAtivo ? null : dia)}
-              style={eventosNoDia.length > 0 ? { '--cor-destaque': corPorTipo[eventosNoDia[0].tipo] } as React.CSSProperties : undefined}
+              style={eventosNoDia.length > 0 ? { 
+                '--cor-destaque': corPorTipo[eventosNoDia[0].tipo],
+                '--cor-fundo': corFundoPorTipo[eventosNoDia[0].tipo] 
+              } as React.CSSProperties : undefined}
             >
               <span className="cal-grid__numero">{dia}</span>
               {eventosNoDia.length > 0 && (
