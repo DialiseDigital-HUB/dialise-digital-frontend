@@ -11,6 +11,7 @@ import Input from '../../components/ui/Input/Input'
 import Select from '../../components/ui/Select/Select'
 import Badge from '../../components/ui/Badge/Badge'
 import Icone from '../../components/ui/Icone/Icone'
+import SelectFiltro from '../../components/ui/SelectFiltro/SelectFiltro'
 import './Prescricoes.css'
 
 const OPCOES_VIA = [
@@ -228,17 +229,19 @@ export default function Prescricoes() {
         icone={<Icone nome="medicamento" tamanho={14} />}
         titulo={`${listaPrescricoes.length} prescrições`}
         acoes={
-          <select
-            className="prescricoes__filtro-select"
-            value={filtroStatus}
-            onChange={e => definirFiltroStatus(e.target.value)}
-            style={{ height: '32px', borderRadius: '6px', border: '1px solid var(--gray-200)', padding: '0 12px', background: 'white', color: 'var(--gray-600)', fontSize: '13px', marginLeft: '16px' }}
-          >
-            <option value="todos">Todas</option>
-            <option value="ativa">Ativas</option>
-            <option value="suspensa">Suspensas</option>
-            <option value="encerrada">Encerradas</option>
-          </select>
+          <div style={{ marginLeft: '16px' }}>
+            <SelectFiltro
+              valor={filtroStatus}
+              aoAlterar={definirFiltroStatus}
+              tamanho="sm"
+              opcoes={[
+                { valor: 'todos', rotulo: 'Todas' },
+                { valor: 'ativa', rotulo: 'Ativas' },
+                { valor: 'suspensa', rotulo: 'Suspensas' },
+                { valor: 'encerrada', rotulo: 'Encerradas' }
+              ]}
+            />
+          </div>
         }
       >
         <table className="prescricoes__tabela">

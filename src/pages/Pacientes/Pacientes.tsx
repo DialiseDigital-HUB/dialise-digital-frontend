@@ -11,6 +11,8 @@ import Avatar from '../../components/ui/Avatar/Avatar'
 import Modal from '../../components/ui/Modal/Modal'
 import Botao from '../../components/ui/Button/Button'
 import Icone from '../../components/ui/Icone/Icone'
+import InputBusca from '../../components/ui/InputBusca/InputBusca'
+import SelectFiltro from '../../components/ui/SelectFiltro/SelectFiltro'
 import FormCadastroPaciente from './FormCadastroPaciente'
 import './Pacientes.css'
 
@@ -151,29 +153,20 @@ export default function Pacientes() {
         icone={<Icone nome="pacientes" tamanho={14} />}
         acoes={
           <div className="pacientes__busca-wrapper" style={{ display: 'flex', gap: '8px' }}>
-            <div className="pacientes__busca-input-container" style={{ position: 'relative', flex: 1 }}>
-              <span className="pacientes__busca-icone" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }}>
-                <Icone nome="exames" tamanho={14} />
-              </span>
-              <input
-                className="pacientes__busca"
-                type="text"
-                placeholder="Buscar por nome ou prontuário…"
-                value={termoBusca}
-                onChange={e => definirBusca(e.target.value)}
-                style={{ paddingLeft: '32px', width: '100%', height: '36px', borderRadius: '6px', border: '1px solid var(--gray-200)' }}
-              />
-            </div>
-            <select
-              className="pacientes__filtro-select"
-              value={usePacientesStore(s => s.filtroAvancado)}
-              onChange={e => usePacientesStore.getState().definirFiltroAvancado(e.target.value)}
-              style={{ height: '36px', borderRadius: '6px', border: '1px solid var(--gray-200)', padding: '0 12px', background: 'white', color: 'var(--gray-600)', fontSize: '13px' }}
-            >
-              <option value="todos">Todos os Pacientes</option>
-              <option value="transplante">Fila de Transplante</option>
-              <option value="pendente_evolucao">Pendente de Evolução</option>
-            </select>
+            <InputBusca 
+              valor={termoBusca}
+              aoAlterar={definirBusca}
+              placeholder="Buscar por nome ou prontuário…"
+            />
+            <SelectFiltro
+              valor={usePacientesStore(s => s.filtroAvancado)}
+              aoAlterar={usePacientesStore.getState().definirFiltroAvancado}
+              opcoes={[
+                { valor: 'todos', rotulo: 'Todos os Pacientes' },
+                { valor: 'transplante', rotulo: 'Fila de Transplante' },
+                { valor: 'pendente_evolucao', rotulo: 'Pendente de Evolução' }
+              ]}
+            />
           </div>
         }
         semPadding

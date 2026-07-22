@@ -8,6 +8,7 @@ import AlertItem from '../../components/ui/AlertItem/AlertItem'
 import ProgressBar from '../../components/ui/ProgressBar/ProgressBar'
 import Icone from '../../components/ui/Icone/Icone'
 import Modal from '../../components/ui/Modal/Modal'
+import BotaoFiltro from '../../components/ui/BotaoFiltro/BotaoFiltro'
 import './Dashboard.css'
 
 export default function Dashboard() {
@@ -139,12 +140,10 @@ export default function Dashboard() {
             elevated
             acoes={
               filtroSeveridade !== 'todos' ? (
-                <button
-                  style={{ fontSize: '12px', color: 'var(--gray-500)', background: 'none', border: 'none', cursor: 'pointer', padding: '4px 8px' }}
-                  onClick={() => setFiltroSeveridade('todos')}
-                >
-                  Ver todos
-                </button>
+                <BotaoFiltro 
+                  rotulo="Ver todos" 
+                  aoClicar={() => setFiltroSeveridade('todos')} 
+                />
               ) : undefined
             }
           >
