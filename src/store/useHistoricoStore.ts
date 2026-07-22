@@ -42,6 +42,7 @@ const useHistoricoStore = create<EstadoHistorico>((set, get) => ({
         : '/evolucoes/'
       const response = await api.get(url)
       
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const evolucoesMapeadas: EvolucaoHistorico[] = response.data.map((e: any) => {
         const ktvVal = parseFloat(e.ktv || '0')
         let severidade: SeveridadeEvolucao = 'ok'
@@ -55,7 +56,7 @@ const useHistoricoStore = create<EstadoHistorico>((set, get) => ({
         return {
           id: e.id,
           idPaciente: e.patient_id || e.paciente_id,
-          mes: e.data_criacao ? new Date(e.data_criacao).toISOString().slice(0, 7) : (e.mes_referencia || 'Mês indefinido'),
+          mes: e.mes_referencia || (e.data_criacao ? new Date(e.data_criacao).toISOString().slice(0, 7) : 'Mês indefinido'),
           ktv: ktvVal,
           peso: parseFloat(e.peso || e.peso_atual || '0'),
           hemoglobina: parseFloat(e.exames_dados_json?.hemoglobina || e.hemoglobina || '0'),
@@ -66,7 +67,7 @@ const useHistoricoStore = create<EstadoHistorico>((set, get) => ({
         }
       })
       set({ evolucoes: evolucoesMapeadas, carregando: false })
-    } catch (error) {
+    } catch {
       set({ erro: 'Falha ao buscar histórico de evoluções', carregando: false })
     }
   },
