@@ -6,7 +6,11 @@ import Timeline from '../../components/ui/Timeline/Timeline'
 import BarChart from '../../components/ui/BarChart/BarChart'
 import FeedAcessos from '../../components/ui/FeedAcessos/FeedAcessos'
 import BuscaPaciente from '../../components/ui/BuscaPaciente/BuscaPaciente'
+import Modal from '../../components/ui/Modal/Modal'
+import Botao from '../../components/ui/Button/Button'
+import FormEvolucao from '../Evolucao/FormEvolucao'
 import useHistoricoStore from '../../store/useHistoricoStore'
+import type { EvolucaoHistorico } from '../../store/useHistoricoStore'
 import usePacientesStore from '../../store/usePacientesStore'
 import useAcessosStore from '../../store/useAcessosStore'
 
@@ -17,9 +21,10 @@ const abasHistorico: TabItem[] = [
 
 export default function Historico() {
   const [abaAtiva, setAbaAtiva] = useState('prontuario')
+  const [evolucaoEmFoco, setEvolucaoEmFoco] = useState<EvolucaoHistorico | null>(null)
 
   const pacientes = usePacientesStore(s => s.pacientes)
-  const { idPacienteAtivo, definirPaciente, evolucoesDoPaciente, buscarHistorico } = useHistoricoStore()
+  const { idPacienteAtivo, definirPaciente, evolucoesDoPaciente, buscarHistorico, mesEmFoco, focarMes } = useHistoricoStore()
   const { registrosFiltrados, filtroTipo, definirFiltroTipo, buscarAcessos } = useAcessosStore()
 
   useEffect(() => {
@@ -30,6 +35,23 @@ export default function Historico() {
   const pacienteAtivo = pacientes.find(p => p.id === idPacienteAtivo) ?? null
   const evolucoes     = evolucoesDoPaciente()
   const acessos       = registrosFiltrados()
+
+  useEffect(() => {
+    if (mesEmFoco && evolucoes.length > 0 && abaAtiva === 'prontuario') {
+      setTimeout(() => {
+        const elemento = document.getElementById(`evolucao-${mesEmFoco}`)
+        if (elemento) {
+          elemento.scrollIntoView({ behavior: 'smooth', block: 'center' })
+          elemento.style.transition = 'background-color 0.5s'
+          elemento.style.backgroundColor = 'var(--teal-light)'
+          setTimeout(() => {
+            elemento.style.backgroundColor = ''
+          }, 2000)
+          focarMes(null)
+        }
+      }, 100) 
+    }
+  }, [mesEmFoco, evolucoes, abaAtiva, focarMes])
 
   const formatarMesGrafico = (mesStr: string) => {
     if (!mesStr || mesStr === 'Mês indefinido') return ''
@@ -94,7 +116,7 @@ export default function Historico() {
                       {pacienteAtivo?.nomeCompleto} — {evolucoes.length} {evolucoes.length === 1 ? 'registro' : 'registros'}
                     </span>
                   </div>
-                  <Timeline evolucoes={evolucoes} />
+                  <Timeline evolucoes={evolucoes} aoVisualizar={setEvolucaoEmFoco} />
                 </div>
               )}
             </main>
@@ -111,6 +133,24 @@ export default function Historico() {
           </main>
         )}
       </div>
+
+      {evolucaoEmFoco && (
+        <Modal
+          aberto
+          titulo={`Evolução — ${evolucaoEmFoco.mes}`}
+          aoFechar={() => setEvolucaoEmFoco(null)}
+          rodape={
+            <Botao variante="ghost" onClick={() => setEvolucaoEmFoco(null)}>Fechar</Botao>
+          }
+        >
+          <fieldset disabled style={{ border: 'none', padding: 0, margin: 0 }}>
+            <FormEvolucao
+              dados={evolucaoEmFoco.dadosCompletos}
+              aoAlterar={() => undefined}
+            />
+          </fieldset>
+        </Modal>
+      )}
     </div>
   )
 }

@@ -16,9 +16,10 @@ const rotuloSeveridade: Record<SeveridadeEvolucao, string> = {
 interface TimelineProps {
   evolucoes: EvolucaoHistorico[]
   aoClicar?: (idEvolucao: string) => void
+  aoVisualizar?: (evolucao: EvolucaoHistorico) => void
 }
 
-export default function Timeline({ evolucoes, aoClicar }: TimelineProps) {
+export default function Timeline({ evolucoes, aoClicar, aoVisualizar }: TimelineProps) {
   if (evolucoes.length === 0) {
     return <p className="timeline__vazio">Nenhuma evolução registrada para este paciente.</p>
   }
@@ -28,6 +29,7 @@ export default function Timeline({ evolucoes, aoClicar }: TimelineProps) {
       {evolucoes.map((ev, indice) => (
         <li
           key={ev.id}
+          id={`evolucao-${ev.mes}`}
           className={`timeline-item ${classeSeveridade[ev.severidade]} ${aoClicar ? 'timeline-item--clicavel' : ''}`}
           onClick={() => aoClicar?.(ev.id)}
         >
@@ -49,7 +51,18 @@ export default function Timeline({ evolucoes, aoClicar }: TimelineProps) {
               <span>Fósforo <strong>{ev.fosforo.toFixed(1)} mg/dL</strong></span>
               <span>Peso <strong>{ev.peso.toFixed(1)} kg</strong></span>
             </div>
-            <span className="timeline-item__medico">{ev.medico}</span>
+            <div className="timeline-item__rodape">
+              <span className="timeline-item__medico">{ev.medico}</span>
+              {aoVisualizar && (
+                <button
+                  type="button"
+                  className="timeline-item__btn-ver"
+                  onClick={e => { e.stopPropagation(); aoVisualizar(ev) }}
+                >
+                  Ver registro completo
+                </button>
+              )}
+            </div>
           </div>
         </li>
       ))}
