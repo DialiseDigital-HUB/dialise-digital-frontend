@@ -84,10 +84,9 @@ export default function ModalSolicitarExame({ aberto, aoFechar }: ModalSolicitar
 
     const sucesso = await cadastrarSolicitacao({
       idPaciente: form.pacienteId,
-      tipoExame: exameNome,
-      dataSolicitacao: new Date().toISOString().split('T')[0],
-      medicoSolicitante: 'Dr. Associado', 
-      prioridade: 'rotina'
+      exame: exameNome,
+      periodicidade: form.periodicidade,
+      dataSolicitacao: new Date().toISOString().split('T')[0]
     })
 
     if (sucesso) {
