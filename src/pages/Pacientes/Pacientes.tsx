@@ -11,6 +11,8 @@ import Avatar from '../../components/ui/Avatar/Avatar'
 import Modal from '../../components/ui/Modal/Modal'
 import Botao from '../../components/ui/Button/Button'
 import Icone from '../../components/ui/Icone/Icone'
+import InputBusca from '../../components/ui/InputBusca/InputBusca'
+import SelectFiltro from '../../components/ui/SelectFiltro/SelectFiltro'
 import FormCadastroPaciente from './FormCadastroPaciente'
 import './Pacientes.css'
 
@@ -36,6 +38,8 @@ function DetalheModal({ paciente }: { paciente: Paciente }) {
           { label: 'Acesso Vascular',    valor: paciente.acessoVascular, mono: false },
           { label: 'Médico Assistente',  valor: paciente.medico,        mono: false },
           { label: 'Turno',              valor: paciente.turno,         mono: false },
+          { label: 'Entrada',            valor: paciente.horarioEntrada, mono: true  },
+          { label: 'Data de Entrada',    valor: paciente.dataEntrada,    mono: true  },
           { label: 'Inscrito Transplante', valor: paciente.inscritoTransplante ? 'Sim' : 'Não', mono: false },
         ].map(campo => (
           <div key={campo.label}>
@@ -54,6 +58,14 @@ function DetalheModal({ paciente }: { paciente: Paciente }) {
         <div className="detalhe-paciente__ktv-chart">
           {historicoKtv.map(ponto => {
             const corOk = ponto.valor >= 1.2
+            
+            const LIMITE_MAXIMO_KTV = 5.0
+            const ALTURA_MAXIMA_BARRA_PX = 60
+            const alturaProporcional = Math.min(
+              (ponto.valor / LIMITE_MAXIMO_KTV) * ALTURA_MAXIMA_BARRA_PX,
+              ALTURA_MAXIMA_BARRA_PX
+            )
+
             return (
               <div key={ponto.mes} className="detalhe-paciente__ktv-barra-wrapper">
                 <span className="detalhe-paciente__ktv-valor" style={{ color: corOk ? 'var(--teal-sea)' : 'var(--red)' }}>
@@ -62,7 +74,7 @@ function DetalheModal({ paciente }: { paciente: Paciente }) {
                 <div
                   className="detalhe-paciente__ktv-barra"
                   style={{
-                    height: `${ponto.valor * 35}px`,
+                    height: `${alturaProporcional}px`,
                     background: corOk ? 'var(--teal-light)' : '#FEE2E2',
                     borderTop: `3px solid ${corOk ? 'var(--teal-sea)' : 'var(--red)'}`,
                   }}
@@ -93,7 +105,7 @@ export default function Pacientes() {
 
   const [modalEdicao, setModalEdicao] = useState(false)
 
-  const handleCadastro = async (dados: any) => {
+  const handleCadastro = async (dados: Partial<Paciente>) => {
     const usuarioLogado = useAuthStore.getState().usuario
     if (usuarioLogado?.role === 'medico') {
       dados.medicoAssistenteId = usuarioLogado.id
@@ -131,7 +143,7 @@ export default function Pacientes() {
     navegar('evolucao')
   }
 
-  const handleEdicao = async (dados: any) => {
+  const handleEdicao = async (dados: Partial<Paciente>) => {
     if (!pacienteSelecionado) return
     const sucesso = await editarPaciente(pacienteSelecionado.id, dados)
     if (sucesso) {
@@ -149,29 +161,20 @@ export default function Pacientes() {
         icone={<Icone nome="pacientes" tamanho={14} />}
         acoes={
           <div className="pacientes__busca-wrapper" style={{ display: 'flex', gap: '8px' }}>
-            <div className="pacientes__busca-input-container" style={{ position: 'relative', flex: 1 }}>
-              <span className="pacientes__busca-icone" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }}>
-                <Icone nome="exames" tamanho={14} />
-              </span>
-              <input
-                className="pacientes__busca"
-                type="text"
-                placeholder="Buscar por nome ou prontuário…"
-                value={termoBusca}
-                onChange={e => definirBusca(e.target.value)}
-                style={{ paddingLeft: '32px', width: '100%', height: '36px', borderRadius: '6px', border: '1px solid var(--gray-200)' }}
-              />
-            </div>
-            <select
-              className="pacientes__filtro-select"
-              value={usePacientesStore(s => s.filtroAvancado)}
-              onChange={e => usePacientesStore.getState().definirFiltroAvancado(e.target.value)}
-              style={{ height: '36px', borderRadius: '6px', border: '1px solid var(--gray-200)', padding: '0 12px', background: 'white', color: 'var(--gray-600)', fontSize: '13px' }}
-            >
-              <option value="todos">Todos os Pacientes</option>
-              <option value="transplante">Fila de Transplante</option>
-              <option value="pendente_evolucao">Pendente de Evolução</option>
-            </select>
+            <InputBusca 
+              valor={termoBusca}
+              aoAlterar={definirBusca}
+              placeholder="Buscar por nome ou prontuário…"
+            />
+            <SelectFiltro
+              valor={usePacientesStore(s => s.filtroAvancado)}
+              aoAlterar={usePacientesStore.getState().definirFiltroAvancado}
+              opcoes={[
+                { valor: 'todos', rotulo: 'Todos os Pacientes' },
+                { valor: 'transplante', rotulo: 'Fila de Transplante' },
+                { valor: 'pendente_evolucao', rotulo: 'Pendente de Evolução' }
+              ]}
+            />
           </div>
         }
         semPadding
@@ -189,6 +192,8 @@ export default function Pacientes() {
                 <th>Prontuário</th>
                 <th>Turno</th>
                 <th>Médico</th>
+                <th>Entrada</th>
+                <th>Data</th>
                 <th>Kt/V</th>
                 <th>Status</th>
               </tr>
@@ -210,6 +215,8 @@ export default function Pacientes() {
                   <td className="pacientes__prontuario">{paciente.prontuario}</td>
                   <td>{paciente.turno}</td>
                   <td>{paciente.medico}</td>
+                  <td>{paciente.horarioEntrada}</td>
+                  <td>{paciente.dataEntrada}</td>
                   <td>
                     <span className={`pacientes__ktv pacientes__ktv--${paciente.ktv >= 1.2 ? 'ok' : 'baixo'}`}>
                       {paciente.ktv}

@@ -16,7 +16,7 @@ export default function FormEvolucao({ dados, aoAlterar }: FormEvolucaoProps) {
       <FormSection id="sec-evolucao" titulo="3. Evolução">
         <Textarea id="evolucao-clinica" label="Evolução Clínica (Queixas, Dispneia, Dor Torácica, Edemas, Apetite, Diurese)" valor={dados.evolucaoClinica} aoAlterar={v => aoAlterar('evolucaoClinica', v)} linhas={3} />
         <div className="form-evolucao__grid-2">
-          <Input id="ktv" label="Kt/V" valor={dados.ktv} aoAlterar={v => aoAlterar('ktv', v)} type="number" />
+          <Input id="ktv" label="Kt/V" valor={dados.ktv} aoAlterar={v => aoAlterar('ktv', v)} type="number" min="0.0" max="5.0" step="0.1" />
         </div>
       </FormSection>
 
@@ -29,15 +29,15 @@ export default function FormEvolucao({ dados, aoAlterar }: FormEvolucaoProps) {
 
       <FormSection id="sec-prescricao" titulo="5. Prescrição Diálise">
         <div className="form-evolucao__grid-3">
-          <Input id="peso-seco" label="Peso Seco" valor={dados.pesoSeco} aoAlterar={v => aoAlterar('pesoSeco', v)} type="number" sufixo="kg" />
-          <Input id="tempo-sessao" label="Tempo" valor={dados.tempoSessao} aoAlterar={v => aoAlterar('tempoSessao', v)} type="number" sufixo="hs/min" />
-          <Input id="heparina" label="Heparina" valor={dados.heparinaUtilizada} aoAlterar={v => aoAlterar('heparinaUtilizada', v)} />
+          <Input id="peso-seco" label="Peso Seco" valor={dados.pesoSeco} aoAlterar={v => aoAlterar('pesoSeco', v)} type="number" min="30.0" max="300.0" step="0.1" sufixo="kg" />
+          <Input id="tempo-sessao" label="Tempo" valor={dados.tempoSessao} aoAlterar={v => aoAlterar('tempoSessao', v)} type="number" min="1" max="8" step="1" sufixo="hs/min" />
+          <Input id="heparina" label="Heparina" valor={dados.heparinaUtilizada} aoAlterar={v => aoAlterar('heparinaUtilizada', v)} type="number" min="0" max="20000" step="100" />
           
-          <Input id="fbs" label="FBS" valor={dados.fbs} aoAlterar={v => aoAlterar('fbs', v)} />
-          <Input id="fbd" label="FBD" valor={dados.fbd} aoAlterar={v => aoAlterar('fbd', v)} />
-          <Input id="sodio" label="Sódio" valor={dados.sodio} aoAlterar={v => aoAlterar('sodio', v)} type="number" />
+          <Input id="fbs" label="FBS" valor={dados.fbs} aoAlterar={v => aoAlterar('fbs', v)} type="number" min="100" max="600" step="10" />
+          <Input id="fbd" label="FBD" valor={dados.fbd} aoAlterar={v => aoAlterar('fbd', v)} type="number" min="300" max="1000" step="10" />
+          <Input id="sodio" label="Sódio" valor={dados.sodio} aoAlterar={v => aoAlterar('sodio', v)} type="number" min="125" max="150" step="1" />
           
-          <Input id="bic" label="BIC" valor={dados.bic} aoAlterar={v => aoAlterar('bic', v)} />
+          <Input id="bic" label="BIC" valor={dados.bic} aoAlterar={v => aoAlterar('bic', v)} type="number" min="20" max="50" step="1" />
           <Input id="perfis" label="Perfis/Outros" valor={dados.perfisOutros} aoAlterar={v => aoAlterar('perfisOutros', v)} />
         </div>
       </FormSection>
@@ -77,28 +77,28 @@ export default function FormEvolucao({ dados, aoAlterar }: FormEvolucaoProps) {
 
       <FormSection id="sec-exames" titulo="11. Exames">
         <div className="form-evolucao__grid-3">
-          <Input id="ex-hb" label="Hb (Mensal)" valor={dados.hemoglobina} aoAlterar={v => aoAlterar('hemoglobina', v)} />
-          <Input id="ex-ca" label="Ca (Mensal)" valor={dados.calcio} aoAlterar={v => aoAlterar('calcio', v)} />
-          <Input id="ex-ferr" label="Ferritina (Trimestral)" valor={dados.ferritina} aoAlterar={v => aoAlterar('ferritina', v)} />
+          <Input id="ex-hb" label="Hb (Mensal)" valor={dados.hemoglobina} aoAlterar={v => aoAlterar('hemoglobina', v)} type="number" min="3.0" max="20.0" step="0.1" />
+          <Input id="ex-ca" label="Ca (Mensal)" valor={dados.calcio} aoAlterar={v => aoAlterar('calcio', v)} type="number" min="4.0" max="15.0" step="0.1" />
+          <Input id="ex-ferr" label="Ferritina (Trimestral)" valor={dados.ferritina} aoAlterar={v => aoAlterar('ferritina', v)} type="number" min="0.0" max="5000.0" step="1" />
           
           <Input id="ex-hiv" label="Anti-HIV (Semestral)" valor={dados.antiHiv} aoAlterar={v => aoAlterar('antiHiv', v)} />
-          <Input id="ex-ct" label="CT (Anual)" valor={dados.ct} aoAlterar={v => aoAlterar('ct', v)} />
-          <Input id="ex-ht" label="Ht" valor={dados.hematocrito} aoAlterar={v => aoAlterar('hematocrito', v)} />
+          <Input id="ex-ct" label="CT (Anual)" valor={dados.ct} aoAlterar={v => aoAlterar('ct', v)} type="number" min="0.0" max="100.0" step="1" />
+          <Input id="ex-ht" label="Ht" valor={dados.hematocrito} aoAlterar={v => aoAlterar('hematocrito', v)} type="number" min="10.0" max="60.0" step="0.1" />
           
-          <Input id="ex-fos" label="Fósforo" valor={dados.fosforo} aoAlterar={v => aoAlterar('fosforo', v)} />
-          <Input id="ex-pth" label="PTH" valor={dados.paratormonio} aoAlterar={v => aoAlterar('paratormonio', v)} />
-          <Input id="ex-k" label="Potássio" valor={dados.potassio} aoAlterar={v => aoAlterar('potassio', v)} />
+          <Input id="ex-fos" label="Fósforo" valor={dados.fosforo} aoAlterar={v => aoAlterar('fosforo', v)} type="number" min="1.0" max="15.0" step="0.1" />
+          <Input id="ex-pth" label="PTH" valor={dados.paratormonio} aoAlterar={v => aoAlterar('paratormonio', v)} type="number" min="0.0" max="5000.0" step="1" />
+          <Input id="ex-k" label="Potássio" valor={dados.potassio} aoAlterar={v => aoAlterar('potassio', v)} type="number" min="1.5" max="10.0" step="0.1" />
         </div>
       </FormSection>
 
       <FormSection id="sec-fisico" titulo="12. Exame Físico">
         <div className="form-evolucao__grid-3">
-          <Input id="fis-pa" label="PA" valor={dados.pa} aoAlterar={v => aoAlterar('pa', v)} sufixo="mmHg" />
-          <Input id="fis-fc" label="FC" valor={dados.fc} aoAlterar={v => aoAlterar('fc', v)} sufixo="bpm" />
-          <Input id="fis-alt" label="Altura" valor={dados.altura} aoAlterar={v => aoAlterar('altura', v)} type="number" sufixo="cm" />
+          <Input id="fis-pa" label="PA" valor={dados.pa} aoAlterar={v => aoAlterar('pa', v)} placeholder="120/80" sufixo="mmHg" />
+          <Input id="fis-fc" label="FC" valor={dados.fc} aoAlterar={v => aoAlterar('fc', v)} type="number" min="30" max="220" step="1" sufixo="bpm" />
+          <Input id="fis-alt" label="Altura" valor={dados.altura} aoAlterar={v => aoAlterar('altura', v)} type="number" min="100" max="250" step="1" sufixo="cm" />
           
-          <Input id="fis-peso" label="Peso" valor={dados.pesoAtual} aoAlterar={v => aoAlterar('pesoAtual', v)} type="number" sufixo="kg" />
-          <Input id="fis-imc" label="IMC" valor={dados.imc} aoAlterar={v => aoAlterar('imc', v)} type="number" />
+          <Input id="fis-peso" label="Peso" valor={dados.pesoAtual} aoAlterar={v => aoAlterar('pesoAtual', v)} type="number" min="30.0" max="300.0" step="0.1" sufixo="kg" />
+          <Input id="fis-imc" label="IMC" valor={dados.imc} aoAlterar={v => aoAlterar('imc', v)} type="number" min="10.0" max="60.0" step="0.1" />
           <Input id="fis-acv" label="ACV" valor={dados.acv} aoAlterar={v => aoAlterar('acv', v)} />
           
           <Input id="fis-ar" label="AR" valor={dados.ar} aoAlterar={v => aoAlterar('ar', v)} />

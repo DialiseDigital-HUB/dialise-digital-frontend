@@ -9,6 +9,7 @@ import Input from '../../components/ui/Input/Input'
 import Select from '../../components/ui/Select/Select'
 import Badge from '../../components/ui/Badge/Badge'
 import Icone from '../../components/ui/Icone/Icone'
+import ModalFooter from '../../components/ui/Modal/ModalFooter'
 import './SolicitacaoExames.css'
 
 const opcoesExame = [
@@ -108,7 +109,7 @@ export default function SolicitacaoExames() {
       idPaciente: form.pacienteId,
       tipoExame: exameNome,
       dataSolicitacao: new Date().toISOString().split('T')[0],
-      medicoSolicitante: 'Dr. Associado', // Simulação de médico logado
+      medicoSolicitante: 'Dr. Associado', 
       prioridade: 'rotina'
     })
 
@@ -165,15 +166,10 @@ export default function SolicitacaoExames() {
         tamanho="md"
         aoFechar={aoFechar}
         rodape={
-          <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
-            <Botao variante="ghost" onClick={preencherDebug} type="button" tamanho="sm">
-              Preencher Debug
-            </Botao>
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <Botao variante="ghost" onClick={aoFechar}>Cancelar</Botao>
-              <Botao variante="primary" tipo="submit" form="form-solicitacao-exame">Salvar</Botao>
-            </div>
-          </div>
+          <ModalFooter acaoSecundaria={<Botao variante="ghost" onClick={preencherDebug} type="button" tamanho="sm">Preencher Debug</Botao>}>
+            <Botao variante="ghost" onClick={aoFechar}>Cancelar</Botao>
+            <Botao variante="primary" tipo="submit" form="form-solicitacao-exame">Salvar</Botao>
+          </ModalFooter>
         }
       >
         <form id="form-solicitacao-exame" onSubmit={aoSalvar} className="solicitacao-exames__form">

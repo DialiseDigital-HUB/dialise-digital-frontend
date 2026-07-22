@@ -1,0 +1,21 @@
+.select-filtro {
+  height: 36px;
+  border-radius: 6px;
+  border: 1px solid var(--gray-200);
+  padding: 0 12px;
+  background: white;
+  color: var(--gray-600);
+  font-size: 13px;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.select-filtro:focus {
+  border-color: var(--teal);
+  box-shadow: 0 0 0 2px var(--teal-pale);
+}
+
+.select-filtro--sm {
+  height: 32px;
+}

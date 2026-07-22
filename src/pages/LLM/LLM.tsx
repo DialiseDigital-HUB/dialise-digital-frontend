@@ -1,156 +1,118 @@
 import { useState } from 'react'
 import './LLM.css'
 import Botao from '../../components/ui/Button/Button'
+import BuscaPaciente from '../../components/ui/BuscaPaciente/BuscaPaciente'
+import type { AcaoRealizada } from '../../store/useCopilotStore'
+import type { Paciente } from '../../store/usePacientesStore'
 
-interface ResultadoLLM {
-  pendencias: string[]
-  medicamentos: string[]
-  alertas: string[]
-  rascunhoLme: string
+import useCopilotStore from '../../store/useCopilotStore'
+
+const ICONE_TIPO: Record<AcaoRealizada['tipo'], string> = {
+  evolucao: '📋',
+  lme: '📄',
+  agendamento: '📅',
+  erro: '⚠️',
 }
-
-function simularAnalise(texto: string): ResultadoLLM {
-  const temAnemia     = /anemia|hemoglobin|hb\s*\d/i.test(texto)
-  const temFosforo    = /f[oó]sforo|hiperfosfat/i.test(texto)
-  const temKtv        = /kt\/v|kpv|adep/i.test(texto)
-  const temAntibiotico = /antibi[oó]tico|infec|vancomicin|ceftriax/i.test(texto)
-  const temTransplante = /transplante|lista|enxerto/i.test(texto)
-
-  const pendencias: string[] = []
-  const medicamentos: string[] = []
-  const alertas: string[] = []
-
-  if (temAnemia)      pendencias.push('Avaliar dose de eritropoetina (EPO) e estoques de ferro.')
-  if (temFosforo)     pendencias.push('Revisar quelantes de fósforo e orientação dietética.')
-  if (temKtv)         pendencias.push('Verificar parâmetros da máquina de diálise e tempo de sessão.')
-  if (temTransplante) pendencias.push('Atualizar documentação para lista de transplante.')
-  if (!pendencias.length) pendencias.push('Sem pendências identificadas no texto informado.')
-
-  if (temAnemia)      medicamentos.push('Eritropoetina alfa 4000 UI 3x/semana EV')
-  if (temAnemia)      medicamentos.push('Ferro sacarato 100mg EV — conforme ferritina')
-  if (temFosforo)     medicamentos.push('Carbonato de cálcio 500mg 3x/dia com as refeições')
-  if (temAntibiotico) medicamentos.push('Vancomicina 1g EV — confirmar dose por nível sérico')
-
-  if (temKtv)         alertas.push('Kt/V abaixo da meta. Risco de morbimortalidade aumentado.')
-  if (temAnemia)      alertas.push('Hemoglobina abaixo de 10 g/dL. Meta: 10–12 g/dL conforme KDIGO.')
-  if (temFosforo)     alertas.push('Hiperfosfatemia pode estar relacionada à não adesão dietética.')
-  if (!alertas.length) alertas.push('Nenhum alerta crítico identificado.')
-
-  const rascunhoLme = temTransplante
-    ? `LAUDO PARA LISTA DE TRANSPLANTE RENAL\n\nPaciente em programa de hemodiálise. Dados clínicos compatíveis com indicação de inclusão em lista de espera para transplante renal.\n\nCondições clínicas atuais:\n${temAnemia ? '- Anemia de doença crônica em tratamento com EPO.\n' : ''}${temFosforo ? '- Hiperfosfatemia em controle com quelantes.\n' : ''}\nParecer favorável à inclusão em lista ativa de transplante.`
-    : `RELATÓRIO DE EVOLUÇÃO CLÍNICA\n\nPaciente em acompanhamento no serviço de hemodiálise.\n${temKtv ? 'Adequação dialítica em monitoramento contínuo.\n' : ''}${temAntibiotico ? 'Antibioticoterapia em curso conforme cultura e antibiograma.\n' : ''}\nPaciente sob acompanhamento regular da equipe de nefrologia.`
-
-  return { pendencias, medicamentos, alertas, rascunhoLme }
-}
-
-type EstadoAnalise = 'ocioso' | 'carregando' | 'concluido'
 
 export default function LLM() {
-  const [texto,        setTexto]        = useState('')
-  const [estado,       setEstado]       = useState<EstadoAnalise>('ocioso')
-  const [resultado,    setResultado]    = useState<ResultadoLLM | null>(null)
-  const [abaCopiar,    setAbaCopiar]    = useState(false)
+  const [texto, setTexto] = useState('')
+  const [pacienteAtivo, setPacienteAtivo] = useState<Paciente | null>(null)
+  const [copiado, setCopiado] = useState(false)
 
-  const aoAnalisar = () => {
-    if (!texto.trim()) return
-    setEstado('carregando')
-    setResultado(null)
+  const { executar, carregando, historico, limpar, erro } = useCopilotStore()
 
-    setTimeout(() => {
-      setResultado(simularAnalise(texto))
-      setEstado('concluido')
-    }, 1800)
+  const aoEnviar = async () => {
+    if (!texto.trim() || !pacienteAtivo?.id) return
+    await executar(texto, pacienteAtivo.id)
+    setTexto('')
   }
 
   const aoLimpar = () => {
     setTexto('')
-    setEstado('ocioso')
-    setResultado(null)
+    limpar()
   }
 
-  const aoCopiarRascunho = () => {
-    if (!resultado) return
-    navigator.clipboard.writeText(resultado.rascunhoLme)
-    setAbaCopiar(true)
-    setTimeout(() => setAbaCopiar(false), 2000)
+  const aoCopiar = (mensagem: string) => {
+    navigator.clipboard.writeText(mensagem)
+    setCopiado(true)
+    setTimeout(() => setCopiado(false), 2000)
   }
 
   return (
     <div className="llm-pagina">
       <div className="llm-pagina__cabecalho">
-        <h1 className="llm-pagina__titulo">Apoio LLM</h1>
+        <h1 className="llm-pagina__titulo">Copilot Médico</h1>
       </div>
 
       <div className="llm-pagina__corpo">
         <div className="llm-entrada">
+          <div className="llm-busca-paciente">
+            <BuscaPaciente
+              idPacienteAtivo={pacienteAtivo?.id ?? null}
+              aoSelecionar={p => setPacienteAtivo(p)}
+              placeholder="Selecione o paciente para contextualizar a anotação..."
+            />
+          </div>
+
           <label className="llm-entrada__label" htmlFor="llm-texto">
-            Texto Clínico
+            Anotação Clínica
           </label>
           <textarea
             id="llm-texto"
             className="llm-entrada__textarea"
             value={texto}
             onChange={e => setTexto(e.target.value)}
-            placeholder="Cole aqui anotações de evolução, laudos ou observações clínicas..."
-            rows={10}
-            disabled={estado === 'carregando'}
+            placeholder="Ex: Paciente João, PA 140x90, peso 72kg, ktv 1.2. Agendar retorno em 30 dias. Fazer LME pra sevelamer."
+            rows={8}
+            disabled={carregando}
           />
+
           <div className="llm-entrada__acoes">
-            <Botao variante="ghost" onClick={aoLimpar} desabilitado={!texto && estado === 'ocioso'}>
+            <Botao variante="ghost" onClick={aoLimpar} desabilitado={!texto && historico.length === 0}>
               Limpar
             </Botao>
             <Botao
               variante="primary"
-              onClick={aoAnalisar}
-              desabilitado={!texto.trim() || estado === 'carregando'}
+              onClick={aoEnviar}
+              disabled={!texto.trim() || !pacienteAtivo || carregando}
             >
-              {estado === 'carregando' ? 'Analisando...' : 'Analisar Texto'}
+              {carregando ? 'Processando...' : 'Enviar ao Copilot'}
             </Botao>
           </div>
 
-          {estado === 'carregando' && (
+          {carregando && (
             <div className="llm-carregando">
               <div className="llm-carregando__spinner" />
-              <span>Processando o texto clínico...</span>
+              <span>O agente está interpretando a anotação...</span>
             </div>
           )}
+
+          {erro && <p className="llm-erro">{erro}</p>}
         </div>
 
-        {resultado && estado === 'concluido' && (
+        {historico.length > 0 && (
           <div className="llm-resultado animate-fade-slide">
-            <div className="llm-card llm-card--pendencias">
-              <span className="llm-card__titulo">Pendencias Identificadas</span>
-              <ul className="llm-card__lista">
-                {resultado.pendencias.map((p, i) => <li key={i}>{p}</li>)}
-              </ul>
-            </div>
+            {historico.map((resp, i) => (
+              <div key={i} className="llm-card llm-card--resposta">
+                <div className="llm-card__cabecalho-acao">
+                  <span className="llm-card__titulo">Resposta do Copilot</span>
+                  <Botao variante="ghost" tamanho="sm" onClick={() => aoCopiar(resp.mensagem_final)}>
+                    {copiado ? 'Copiado' : 'Copiar'}
+                  </Botao>
+                </div>
 
-            <div className="llm-card llm-card--medicamentos">
-              <span className="llm-card__titulo">Medicamentos Sugeridos</span>
-              <ul className="llm-card__lista llm-card__lista--mono">
-                {resultado.medicamentos.length > 0
-                  ? resultado.medicamentos.map((m, i) => <li key={i}>{m}</li>)
-                  : <li className="llm-card__vazio">Nenhum medicamento identificado.</li>
-                }
-              </ul>
-            </div>
+                <ul className="llm-card__lista">
+                  {resp.acoes.map((acao, j) => (
+                    <li key={j} className={`llm-acao llm-acao--${acao.sucesso ? 'ok' : 'erro'}`}>
+                      <span>{ICONE_TIPO[acao.tipo]}</span>
+                      <span>{acao.descricao}</span>
+                    </li>
+                  ))}
+                </ul>
 
-            <div className="llm-card llm-card--alertas">
-              <span className="llm-card__titulo">Alertas Clinicos</span>
-              <ul className="llm-card__lista">
-                {resultado.alertas.map((a, i) => <li key={i}>{a}</li>)}
-              </ul>
-            </div>
-
-            <div className="llm-card llm-card--lme">
-              <div className="llm-card__cabecalho-acao">
-                <span className="llm-card__titulo">Rascunho LME / Relatorio</span>
-                <Botao variante="ghost" tamanho="sm" onClick={aoCopiarRascunho}>
-                  {abaCopiar ? 'Copiado' : 'Copiar'}
-                </Botao>
+                <p className="llm-card__mensagem-final">{resp.mensagem_final}</p>
               </div>
-              <pre className="llm-card__pre">{resultado.rascunhoLme}</pre>
-            </div>
+            ))}
           </div>
         )}
       </div>

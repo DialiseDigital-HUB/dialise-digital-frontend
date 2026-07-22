@@ -1,10 +1,8 @@
 import { create } from 'zustand'
-import axios from 'axios'
+import api from '../lib/api'
 import usePacientesStore from './usePacientesStore'
 import usePrescricoesStore from './usePrescricoesStore'
 import useCalendarioStore from './useCalendarioStore'
-
-const API_BASE = 'http://localhost:8000'
 
 export interface AlertaApi {
   id: string
@@ -81,8 +79,8 @@ const useDashboardStore = create<EstadoDashboard>((set, get) => ({
     set({ carregando: true, erro: null })
     try {
       const [resAlertas, resEstats] = await Promise.all([
-        axios.get<AlertaApi[]>(`${API_BASE}/alertas/`),
-        axios.get<EstatisticasComplicacoes>(`${API_BASE}/evolucoes/estatisticas/mes-atual`)
+        api.get<AlertaApi[]>('/alertas/'),
+        api.get<EstatisticasComplicacoes>('/evolucoes/estatisticas/mes-atual')
       ])
       set({ 
         alertas: resAlertas.data, 
@@ -96,7 +94,7 @@ const useDashboardStore = create<EstadoDashboard>((set, get) => ({
 
   resolverAlerta: async (alertaId) => {
     try {
-      await axios.patch(`${API_BASE}/alertas/${alertaId}/resolver`)
+      await api.patch(`/alertas/${alertaId}/resolver`)
       set(estado => ({
         alertas: estado.alertas.filter(a => a.id !== alertaId),
       }))

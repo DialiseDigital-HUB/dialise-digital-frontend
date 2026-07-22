@@ -64,11 +64,15 @@ const useUsuariosStore = create<EstadoUsuarios>((set) => ({
           role: novo.role,
         }),
       })
-      if (!res.ok) throw new Error()
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}))
+        throw new Error(errorData.detail || 'Falha ao criar usuário.')
+      }
       const criado: Usuario = await res.json()
       set(state => ({ usuarios: [...state.usuarios, criado], carregando: false }))
-    } catch {
-      set({ erro: 'Falha ao criar usuário.', carregando: false })
+    } catch (err: any) {
+      set({ erro: err.message || 'Falha ao criar usuário.', carregando: false })
+      throw err
     }
   },
 }))

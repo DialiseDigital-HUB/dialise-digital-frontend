@@ -7,6 +7,7 @@ import Botao from '../../components/ui/Button/Button'
 import Input from '../../components/ui/Input/Input'
 import Icone from '../../components/ui/Icone/Icone'
 import Modal from '../../components/ui/Modal/Modal'
+import Alert from '../../components/ui/Alert/Alert'
 import './Equipe.css'
 
 const rotulosRole: Record<string, string> = {
@@ -37,22 +38,26 @@ export default function Equipe() {
     e.preventDefault()
     if (!novoNome || !novoEmail || !novoCrm) return
 
-    await criarUsuario({
-      nome_completo: novoNome,
-      email: novoEmail,
-      crm: novoCrm,
-      role: novaRole,
-      ativo: true,
-      precisa_trocar_senha: true,
-    })
+    try {
+      await criarUsuario({
+        nome_completo: novoNome,
+        email: novoEmail,
+        crm: novoCrm,
+        role: novaRole,
+        ativo: true,
+        precisa_trocar_senha: true,
+      })
 
-    setModalAberto(false)
-    setNovoNome('')
-    setNovoEmail('')
-    setNovoCrm('')
-    setNovaRole('medico')
+      setModalAberto(false)
+      setNovoNome('')
+      setNovoEmail('')
+      setNovoCrm('')
+      setNovaRole('medico')
 
-    adicionarToast(`Colaborador cadastrado. Senha provisória: ${novoCrm}`, 'sucesso')
+      adicionarToast(`Colaborador cadastrado. Senha provisória: ${novoCrm}`, 'sucesso')
+    } catch (err: any) {
+      adicionarToast(err.message || 'Erro ao cadastrar colaborador.', 'erro')
+    }
   }
 
   return (
@@ -92,9 +97,10 @@ export default function Equipe() {
             </div>
 
             {u.precisa_trocar_senha && (
-              <div style={{ marginTop: '12px', padding: '8px', backgroundColor: 'var(--yellow-light, #FFF3CD)', color: 'var(--yellow-dark, #856404)', borderRadius: '4px', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Icone nome="alerta" tamanho={14} />
-                <span>Senha provisória: <strong>{u.crm}</strong></span>
+              <div style={{ marginTop: '12px' }}>
+                <Alert variante="warning" icone="alerta">
+                  <span>Senha provisória: <strong>{u.crm}</strong></span>
+                </Alert>
               </div>
             )}
           </Card>

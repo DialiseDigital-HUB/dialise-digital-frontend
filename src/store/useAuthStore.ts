@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import useNavegacaoStore from './useNavegacaoStore'
 
 const API = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000'
 
@@ -82,7 +83,10 @@ const useAuthStore = create<EstadoAuth>()(
         }
       },
 
-      logout: () => set({ autenticado: false, usuario: null, erro: null }),
+      logout: () => {
+        useNavegacaoStore.getState().navegar('dashboard')
+        set({ autenticado: false, usuario: null, erro: null })
+      },
 
       registrarCredencial: () => {},
 

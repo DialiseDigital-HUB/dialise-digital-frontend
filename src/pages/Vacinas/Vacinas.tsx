@@ -4,6 +4,7 @@ import useVacinasStore from '../../store/useVacinasStore'
 import useToastStore from '../../store/useToastStore'
 import Card from '../../components/ui/Card/Card'
 import Modal from '../../components/ui/Modal/Modal'
+import ModalFooter from '../../components/ui/Modal/ModalFooter'
 import Botao from '../../components/ui/Button/Button'
 import Input from '../../components/ui/Input/Input'
 import Select from '../../components/ui/Select/Select'
@@ -135,15 +136,10 @@ export default function Vacinas() {
         tamanho="md"
         aoFechar={aoFechar}
         rodape={
-          <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
-            <Botao variante="ghost" onClick={preencherDebug} type="button" tamanho="sm">
-              Preencher Debug
-            </Botao>
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <Botao variante="ghost" onClick={aoFechar}>Cancelar</Botao>
-              <Botao variante="primary" tipo="submit" form="form-vacina">Salvar</Botao>
-            </div>
-          </div>
+          <ModalFooter acaoSecundaria={<Botao variante="ghost" onClick={preencherDebug} type="button" tamanho="sm">Preencher Debug</Botao>}>
+            <Botao variante="ghost" onClick={aoFechar}>Cancelar</Botao>
+            <Botao variante="primary" tipo="submit" form="form-vacina">Salvar</Botao>
+          </ModalFooter>
         }
       >
         <form id="form-vacina" onSubmit={aoSalvar} className="vacinas__form">

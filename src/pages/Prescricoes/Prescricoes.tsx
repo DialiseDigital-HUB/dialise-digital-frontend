@@ -11,6 +11,8 @@ import Input from '../../components/ui/Input/Input'
 import Select from '../../components/ui/Select/Select'
 import Badge from '../../components/ui/Badge/Badge'
 import Icone from '../../components/ui/Icone/Icone'
+import SelectFiltro from '../../components/ui/SelectFiltro/SelectFiltro'
+import ModalFooter from '../../components/ui/Modal/ModalFooter'
 import './Prescricoes.css'
 
 const OPCOES_VIA = [
@@ -44,33 +46,39 @@ const ROTULO_STATUS: Record<string, string> = {
 }
 
 interface FormState {
-  pacienteId:  string
-  medicacao:   string
-  dose:        string
-  via:         string
-  frequencia:  string
-  temDataFim:  boolean
-  dataFim:     string
-  indicacao:   string
+  pacienteId:     string
+  medicacao:      string
+  dose:           string
+  via:            string
+  frequencia:     string
+  temDataFim:     boolean
+  dataFim:        string
+  indicacao:      string
+  horarioEntrada: string
+  dataEntrada:    string
 }
 
 const FORM_INICIAL: FormState = {
-  pacienteId:  '',
-  medicacao:   '',
-  dose:        '',
-  via:         '',
-  frequencia:  '',
-  temDataFim:  false,
-  dataFim:     '',
-  indicacao:   '',
+  pacienteId:     '',
+  medicacao:      '',
+  dose:           '',
+  via:            '',
+  frequencia:     '',
+  temDataFim:     false,
+  dataFim:        '',
+  indicacao:      '',
+  horarioEntrada: '',
+  dataEntrada:    '',
 }
 
 export default function Prescricoes() {
   const [modalAberto, setModalAberto] = useState(false)
   const [modalConfirmacao, setModalConfirmacao] = useState<{aberto: boolean, acao: 'suspender' | 'concluir' | null, id: string | null}>({ aberto: false, acao: null, id: null })
+  const [modalConfirmacaoEntrada, setModalConfirmacaoEntrada] = useState(false)
   const [form, setForm] = useState<FormState>(FORM_INICIAL)
 
   const pacientes          = usePacientesStore(s => s.pacientes)
+  const editarPaciente     = usePacientesStore(s => s.editarPaciente)
   const registros          = usePrescricoesStore(s => s.registros)
   const filtroStatus       = usePrescricoesStore(s => s.filtroStatus)
   const buscarPrescricoes  = usePrescricoesStore(s => s.buscarPrescricoes)
@@ -121,14 +129,16 @@ export default function Prescricoes() {
   const preencherDebug = () => {
     const pacienteMockId = pacientes.length > 0 ? pacientes[0].id : ''
     setForm({
-      pacienteId:  pacienteMockId,
-      medicacao:   'Vancomicina',
-      dose:        '1g',
-      via:         'Intravenosa',
-      frequencia:  '12/12h',
-      temDataFim:  true,
-      dataFim:     new Date(Date.now() + 14 * 86400000).toISOString().split('T')[0],
-      indicacao:   'Infecção de CVC',
+      pacienteId:     pacienteMockId,
+      medicacao:      'Vancomicina',
+      dose:           '1g',
+      via:            'Intravenosa',
+      frequencia:     '12/12h',
+      temDataFim:     true,
+      dataFim:        new Date(Date.now() + 14 * 86400000).toISOString().split('T')[0],
+      indicacao:      'Infecção de CVC',
+      horarioEntrada: '',
+      dataEntrada:    '',
     })
   }
 
@@ -149,11 +159,29 @@ export default function Prescricoes() {
     })
 
     if (sucesso) {
-      adicionarToast('Prescrição registrada com sucesso!', 'sucesso')
-      aoFechar()
+      if (form.horarioEntrada || form.dataEntrada) {
+        setModalConfirmacaoEntrada(true)
+      } else {
+        adicionarToast('Prescrição registrada com sucesso!', 'sucesso')
+        aoFechar()
+      }
     } else {
       adicionarToast('Erro ao registrar prescrição.', 'erro')
     }
+  }
+
+  const confirmarSalvarEntrada = async () => {
+    setModalConfirmacaoEntrada(false)
+    const sucesso = await editarPaciente(form.pacienteId, {
+      horarioEntrada: form.horarioEntrada || null,
+      dataEntrada:    form.dataEntrada || null,
+    })
+    if (sucesso) {
+      adicionarToast('Prescrição e horário de entrada salvos.', 'sucesso')
+    } else {
+      adicionarToast('Prescrição salva, mas falha ao atualizar entrada.', 'aviso')
+    }
+    aoFechar()
   }
 
   const aoSuspender = (id: string) => {
@@ -202,17 +230,19 @@ export default function Prescricoes() {
         icone={<Icone nome="medicamento" tamanho={14} />}
         titulo={`${listaPrescricoes.length} prescrições`}
         acoes={
-          <select
-            className="prescricoes__filtro-select"
-            value={filtroStatus}
-            onChange={e => definirFiltroStatus(e.target.value)}
-            style={{ height: '32px', borderRadius: '6px', border: '1px solid var(--gray-200)', padding: '0 12px', background: 'white', color: 'var(--gray-600)', fontSize: '13px', marginLeft: '16px' }}
-          >
-            <option value="todos">Todas</option>
-            <option value="ativa">Ativas</option>
-            <option value="suspensa">Suspensas</option>
-            <option value="encerrada">Encerradas</option>
-          </select>
+          <div style={{ marginLeft: '16px' }}>
+            <SelectFiltro
+              valor={filtroStatus}
+              aoAlterar={definirFiltroStatus}
+              tamanho="sm"
+              opcoes={[
+                { valor: 'todos', rotulo: 'Todas' },
+                { valor: 'ativa', rotulo: 'Ativas' },
+                { valor: 'suspensa', rotulo: 'Suspensas' },
+                { valor: 'encerrada', rotulo: 'Encerradas' }
+              ]}
+            />
+          </div>
         }
       >
         <table className="prescricoes__tabela">
@@ -267,13 +297,10 @@ export default function Prescricoes() {
         tamanho="md"
         aoFechar={aoFechar}
         rodape={
-          <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
-            <Botao variante="ghost" onClick={preencherDebug} type="button" tamanho="sm">Preencher Debug</Botao>
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <Botao variante="ghost" onClick={aoFechar}>Cancelar</Botao>
-              <Botao variante="primary" tipo="submit" form="form-prescricao">Salvar</Botao>
-            </div>
-          </div>
+          <ModalFooter acaoSecundaria={<Botao variante="ghost" onClick={preencherDebug} type="button" tamanho="sm">Preencher Debug</Botao>}>
+            <Botao variante="ghost" onClick={aoFechar}>Cancelar</Botao>
+            <Botao variante="primary" tipo="submit" form="form-prescricao">Salvar</Botao>
+          </ModalFooter>
         }
       >
         <form id="form-prescricao" onSubmit={aoSalvar} className="prescricoes__form">
@@ -344,6 +371,23 @@ export default function Prescricoes() {
               aoAlterar={atualizar('dataFim')}
             />
           )}
+
+          <div className="prescricoes__form-linha">
+            <Input
+              id="prescricao-horario-entrada"
+              label="Horário de Entrada"
+              type="time"
+              valor={form.horarioEntrada}
+              aoAlterar={atualizar('horarioEntrada')}
+            />
+            <Input
+              id="prescricao-data-entrada"
+              label="Data de Entrada"
+              type="date"
+              valor={form.dataEntrada}
+              aoAlterar={atualizar('dataEntrada')}
+            />
+          </div>
         </form>
       </Modal>
 
@@ -353,16 +397,33 @@ export default function Prescricoes() {
         tamanho="sm"
         aoFechar={() => setModalConfirmacao({ aberto: false, acao: null, id: null })}
         rodape={
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', width: '100%' }}>
+          <ModalFooter>
             <Botao variante="ghost" onClick={() => setModalConfirmacao({ aberto: false, acao: null, id: null })}>Cancelar</Botao>
             <Botao variante="primary" onClick={confirmarAcao}>Confirmar</Botao>
-          </div>
+          </ModalFooter>
         }
       >
         <div style={{ padding: '8px 0', color: 'var(--gray-600)', fontSize: '14px' }}>
-          {modalConfirmacao.acao === 'suspender' 
+          {modalConfirmacao.acao === 'suspender'
             ? 'Deseja realmente suspender esta prescrição?'
             : 'Deseja marcar esta prescrição como concluída?'}
+        </div>
+      </Modal>
+
+      <Modal
+        aberto={modalConfirmacaoEntrada}
+        titulo="Salvar Horário de Entrada no Paciente?"
+        tamanho="sm"
+        aoFechar={() => { setModalConfirmacaoEntrada(false); aoFechar() }}
+        rodape={
+          <ModalFooter>
+            <Botao variante="ghost" onClick={() => { setModalConfirmacaoEntrada(false); aoFechar() }}>Não salvar</Botao>
+            <Botao variante="primary" onClick={confirmarSalvarEntrada}>Confirmar</Botao>
+          </ModalFooter>
+        }
+      >
+        <div style={{ padding: '8px 0', color: 'var(--gray-600)', fontSize: '14px' }}>
+          O horário e a data de entrada preenchidos serão registrados no cadastro do paciente. Confirma?
         </div>
       </Modal>
     </div>

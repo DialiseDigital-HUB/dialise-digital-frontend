@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import axios from 'axios'
+import api from '../lib/api'
 
 export type TipoAcesso = 'visualizou' | 'editou'
 
@@ -36,9 +36,9 @@ const useAcessosStore = create<EstadoAcessos>((set, get) => ({
     set({ carregando: true, erro: null })
     try {
       const url = idPaciente && idPaciente !== 'todos'
-        ? `http://localhost:8000/acessos/?paciente_id=${idPaciente}`
-        : 'http://localhost:8000/acessos/'
-      const response = await axios.get(url)
+        ? `/acessos/?paciente_id=${idPaciente}`
+        : '/acessos/'
+      const response = await api.get(url)
       const registrosMapeados: RegistroAcesso[] = response.data.map((r: any) => ({
         id: r.id,
         idPaciente: r.paciente_id,
@@ -61,7 +61,7 @@ const useAcessosStore = create<EstadoAcessos>((set, get) => ({
         mes_evolucao: dados.mesEvolucao,
         tipo: dados.tipo
       }
-      const response = await axios.post('http://localhost:8000/acessos/', payload)
+      const response = await api.post('/acessos/', payload)
       const novoAcesso: RegistroAcesso = {
         id: response.data.id,
         idPaciente: response.data.paciente_id,

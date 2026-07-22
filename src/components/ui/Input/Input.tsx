@@ -3,13 +3,16 @@ import './Input.css'
 interface InputProps {
   label: string
   id: string
-  type?: 'text' | 'number' | 'date' | 'email' | 'password'
+  type?: 'text' | 'number' | 'date' | 'email' | 'password' | 'time' | 'month'
   valor: string | number
   aoAlterar: (valor: string) => void
   placeholder?: string
   erro?: string
   desabilitado?: boolean
   sufixo?: string
+  min?: number | string
+  max?: number | string
+  step?: number | string
 }
 
 export default function Input({
@@ -22,6 +25,9 @@ export default function Input({
   erro,
   desabilitado = false,
   sufixo,
+  min,
+  max,
+  step,
 }: InputProps) {
   return (
     <div className={`input-grupo ${erro ? 'input-grupo--erro' : ''}`}>
@@ -37,6 +43,9 @@ export default function Input({
           onChange={e => aoAlterar(e.target.value)}
           placeholder={placeholder}
           disabled={desabilitado}
+          min={min}
+          max={max}
+          step={step}
         />
         {sufixo && <span className="input-sufixo">{sufixo}</span>}
       </div>

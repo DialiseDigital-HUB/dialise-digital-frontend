@@ -31,8 +31,16 @@ export default function Historico() {
   const evolucoes     = evolucoesDoPaciente()
   const acessos       = registrosFiltrados()
 
+  const formatarMesGrafico = (mesStr: string) => {
+    if (!mesStr || mesStr === 'Mês indefinido') return ''
+    const partes = mesStr.split('-')
+    if (partes.length !== 2) return mesStr.slice(0, 3)
+    const data = new Date(parseInt(partes[0]), parseInt(partes[1]) - 1, 1)
+    return data.toLocaleString('pt-BR', { month: 'short' }).replace('.', '').toUpperCase()
+  }
+
   const dadosGrafico = evolucoes.map(ev => ({
-    rotulo: ev.mes.slice(0, 3),
+    rotulo: formatarMesGrafico(ev.mes),
     valor:  ev.ktv,
   }))
 

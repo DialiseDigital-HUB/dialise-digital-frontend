@@ -1,5 +1,6 @@
 import { create } from 'zustand'
-import axios from 'axios'
+import api from '../lib/api'
+import { buscarPacientes } from '../lib/busca'
 
 export interface Paciente {
   id: string
@@ -16,6 +17,8 @@ export interface Paciente {
   statusEvolucao: 'ok' | 'warn' | 'err'
   inscritoTransplante: boolean
   recebeuTransfusao: boolean
+  horarioEntrada: string
+  dataEntrada: string
 }
 
 interface EstadoPacientes {
@@ -45,7 +48,7 @@ const usePacientesStore = create<EstadoPacientes>((set, get) => ({
   buscarPacientes: async () => {
     set({ carregando: true, erro: null })
     try {
-      const response = await axios.get('http://localhost:8000/pacientes/resumo')
+      const response = await api.get('/pacientes/resumo')
       
       const pacientesMapeados: Paciente[] = response.data.map((p: any) => {
         return {
@@ -55,14 +58,16 @@ const usePacientesStore = create<EstadoPacientes>((set, get) => ({
           idade: p.idade || 50,
           sexo: p.sexo || 'M',
           turno: p.turno,
-          medico: p.medico || 'Dr. Associado',
+          medico: p.medico || '--',
           medicoAssistenteId: p.medico_assistente_id,
           diagnostico: p.diagnostico || 'Sem diagnóstico',
           acessoVascular: p.acesso_vascular || 'N/A',
           ktv: p.ktv || 0,
           statusEvolucao: p.status_evolucao || 'ok',
           inscritoTransplante: p.inscrito_transplante || false,
-          recebeuTransfusao: p.recebeu_transfusao || false
+          recebeuTransfusao: p.recebeu_transfusao || false,
+          horarioEntrada: p.horario_entrada || '--',
+          dataEntrada: p.data_entrada || '--',
         }
       })
       set({ pacientes: pacientesMapeados, carregando: false })
@@ -82,8 +87,10 @@ const usePacientesStore = create<EstadoPacientes>((set, get) => ({
         turno:                dados.turno,
         medico_assistente_id: dados.medicoAssistenteId ?? null,
         diagnostico:          dados.diagnostico ?? null,
+        horario_entrada:      dados.horarioEntrada ?? null,
+        data_entrada:         dados.dataEntrada ?? null,
       }
-      await axios.post('http://localhost:8000/pacientes/', payload)
+      await api.post('/pacientes/', payload)
       await get().buscarPacientes()
       return true
     } catch (error) {
@@ -102,8 +109,10 @@ const usePacientesStore = create<EstadoPacientes>((set, get) => ({
         turno:                dados.turno ?? undefined,
         medico_assistente_id: dados.medicoAssistenteId ?? undefined,
         diagnostico:          dados.diagnostico ?? undefined,
+        horario_entrada:      dados.horarioEntrada ?? undefined,
+        data_entrada:         dados.dataEntrada ?? undefined,
       }
-      await axios.patch(`http://localhost:8000/pacientes/${id}`, payload)
+      await api.patch(`/pacientes/${id}`, payload)
       await get().buscarPacientes()
       return true
     } catch {
@@ -118,15 +127,10 @@ const usePacientesStore = create<EstadoPacientes>((set, get) => ({
 
   pacientesFiltrados: () => {
     const { pacientes, termoBusca, filtroAvancado } = get()
-    const termo = termoBusca.toLowerCase().trim()
     
-    return pacientes.filter(p => {
-      const matchTexto = !termo || 
-        p.nomeCompleto.toLowerCase().includes(termo) ||
-        p.prontuario.toLowerCase().includes(termo)
-        
-      if (!matchTexto) return false
-      
+    const pacientesEncontrados = buscarPacientes(pacientes, termoBusca)
+    
+    return pacientesEncontrados.filter(p => {
       if (filtroAvancado === 'transplante') return p.inscritoTransplante
       if (filtroAvancado === 'pendente_evolucao') return p.statusEvolucao === 'err'
       

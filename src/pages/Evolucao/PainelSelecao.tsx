@@ -1,17 +1,8 @@
 import './PainelSelecao.css'
 import Avatar from '../../components/ui/Avatar/Avatar'
-import Select from '../../components/ui/Select/Select'
+import Input from '../../components/ui/Input/Input'
 import BuscaPaciente from '../../components/ui/BuscaPaciente/BuscaPaciente'
 import type { Paciente } from '../../store/usePacientesStore'
-
-const mesesDisponiveis = [
-  { valor: '2026-01', rotulo: 'Janeiro 2026' },
-  { valor: '2026-02', rotulo: 'Fevereiro 2026' },
-  { valor: '2026-03', rotulo: 'Março 2026' },
-  { valor: '2026-04', rotulo: 'Abril 2026' },
-  { valor: '2026-05', rotulo: 'Maio 2026' },
-  { valor: '2026-06', rotulo: 'Junho 2026' },
-]
 
 interface PainelSelecaoProps {
   pacientes: Paciente[]
@@ -59,13 +50,12 @@ export default function PainelSelecao({
 
       <div className="painel-selecao__bloco">
         <span className="painel-selecao__rotulo">Competência</span>
-        <Select
+        <Input
           id="sel-mes-evolucao"
           label=""
+          type="month"
           valor={mesReferencia}
           aoAlterar={aoDefinirMes}
-          opcoes={mesesDisponiveis}
-          placeholder="Selecione o mês"
         />
       </div>
 

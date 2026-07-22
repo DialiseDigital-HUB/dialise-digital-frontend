@@ -1,0 +1,24 @@
+.alert {
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-base);
+}
+
+.alert--warning {
+  background-color: var(--yellow-light, #FFF3CD);
+  color: var(--yellow-dark, #856404);
+}
+
+.alert--info {
+  background-color: var(--teal-pale);
+  color: var(--teal-sea);
+}
+
+.alert--error {
+  background-color: var(--red-light);
+  color: var(--red);
+}
