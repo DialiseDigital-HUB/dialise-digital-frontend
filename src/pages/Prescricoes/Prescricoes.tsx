@@ -44,33 +44,39 @@ const ROTULO_STATUS: Record<string, string> = {
 }
 
 interface FormState {
-  pacienteId:  string
-  medicacao:   string
-  dose:        string
-  via:         string
-  frequencia:  string
-  temDataFim:  boolean
-  dataFim:     string
-  indicacao:   string
+  pacienteId:     string
+  medicacao:      string
+  dose:           string
+  via:            string
+  frequencia:     string
+  temDataFim:     boolean
+  dataFim:        string
+  indicacao:      string
+  horarioEntrada: string
+  dataEntrada:    string
 }
 
 const FORM_INICIAL: FormState = {
-  pacienteId:  '',
-  medicacao:   '',
-  dose:        '',
-  via:         '',
-  frequencia:  '',
-  temDataFim:  false,
-  dataFim:     '',
-  indicacao:   '',
+  pacienteId:     '',
+  medicacao:      '',
+  dose:           '',
+  via:            '',
+  frequencia:     '',
+  temDataFim:     false,
+  dataFim:        '',
+  indicacao:      '',
+  horarioEntrada: '',
+  dataEntrada:    '',
 }
 
 export default function Prescricoes() {
   const [modalAberto, setModalAberto] = useState(false)
   const [modalConfirmacao, setModalConfirmacao] = useState<{aberto: boolean, acao: 'suspender' | 'concluir' | null, id: string | null}>({ aberto: false, acao: null, id: null })
+  const [modalConfirmacaoEntrada, setModalConfirmacaoEntrada] = useState(false)
   const [form, setForm] = useState<FormState>(FORM_INICIAL)
 
   const pacientes          = usePacientesStore(s => s.pacientes)
+  const editarPaciente     = usePacientesStore(s => s.editarPaciente)
   const registros          = usePrescricoesStore(s => s.registros)
   const filtroStatus       = usePrescricoesStore(s => s.filtroStatus)
   const buscarPrescricoes  = usePrescricoesStore(s => s.buscarPrescricoes)
@@ -121,14 +127,16 @@ export default function Prescricoes() {
   const preencherDebug = () => {
     const pacienteMockId = pacientes.length > 0 ? pacientes[0].id : ''
     setForm({
-      pacienteId:  pacienteMockId,
-      medicacao:   'Vancomicina',
-      dose:        '1g',
-      via:         'Intravenosa',
-      frequencia:  '12/12h',
-      temDataFim:  true,
-      dataFim:     new Date(Date.now() + 14 * 86400000).toISOString().split('T')[0],
-      indicacao:   'Infecção de CVC',
+      pacienteId:     pacienteMockId,
+      medicacao:      'Vancomicina',
+      dose:           '1g',
+      via:            'Intravenosa',
+      frequencia:     '12/12h',
+      temDataFim:     true,
+      dataFim:        new Date(Date.now() + 14 * 86400000).toISOString().split('T')[0],
+      indicacao:      'Infecção de CVC',
+      horarioEntrada: '',
+      dataEntrada:    '',
     })
   }
 
@@ -149,11 +157,29 @@ export default function Prescricoes() {
     })
 
     if (sucesso) {
-      adicionarToast('Prescrição registrada com sucesso!', 'sucesso')
-      aoFechar()
+      if (form.horarioEntrada || form.dataEntrada) {
+        setModalConfirmacaoEntrada(true)
+      } else {
+        adicionarToast('Prescrição registrada com sucesso!', 'sucesso')
+        aoFechar()
+      }
     } else {
       adicionarToast('Erro ao registrar prescrição.', 'erro')
     }
+  }
+
+  const confirmarSalvarEntrada = async () => {
+    setModalConfirmacaoEntrada(false)
+    const sucesso = await editarPaciente(form.pacienteId, {
+      horarioEntrada: form.horarioEntrada || null,
+      dataEntrada:    form.dataEntrada || null,
+    })
+    if (sucesso) {
+      adicionarToast('Prescrição e horário de entrada salvos.', 'sucesso')
+    } else {
+      adicionarToast('Prescrição salva, mas falha ao atualizar entrada.', 'aviso')
+    }
+    aoFechar()
   }
 
   const aoSuspender = (id: string) => {
@@ -344,6 +370,23 @@ export default function Prescricoes() {
               aoAlterar={atualizar('dataFim')}
             />
           )}
+
+          <div className="prescricoes__form-linha">
+            <Input
+              id="prescricao-horario-entrada"
+              label="Horário de Entrada"
+              type="time"
+              valor={form.horarioEntrada}
+              aoAlterar={atualizar('horarioEntrada')}
+            />
+            <Input
+              id="prescricao-data-entrada"
+              label="Data de Entrada"
+              type="date"
+              valor={form.dataEntrada}
+              aoAlterar={atualizar('dataEntrada')}
+            />
+          </div>
         </form>
       </Modal>
 
@@ -360,9 +403,26 @@ export default function Prescricoes() {
         }
       >
         <div style={{ padding: '8px 0', color: 'var(--gray-600)', fontSize: '14px' }}>
-          {modalConfirmacao.acao === 'suspender' 
+          {modalConfirmacao.acao === 'suspender'
             ? 'Deseja realmente suspender esta prescrição?'
             : 'Deseja marcar esta prescrição como concluída?'}
+        </div>
+      </Modal>
+
+      <Modal
+        aberto={modalConfirmacaoEntrada}
+        titulo="Salvar Horário de Entrada no Paciente?"
+        tamanho="sm"
+        aoFechar={() => { setModalConfirmacaoEntrada(false); aoFechar() }}
+        rodape={
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', width: '100%' }}>
+            <Botao variante="ghost" onClick={() => { setModalConfirmacaoEntrada(false); aoFechar() }}>Não salvar</Botao>
+            <Botao variante="primary" onClick={confirmarSalvarEntrada}>Confirmar</Botao>
+          </div>
+        }
+      >
+        <div style={{ padding: '8px 0', color: 'var(--gray-600)', fontSize: '14px' }}>
+          O horário e a data de entrada preenchidos serão registrados no cadastro do paciente. Confirma?
         </div>
       </Modal>
     </div>

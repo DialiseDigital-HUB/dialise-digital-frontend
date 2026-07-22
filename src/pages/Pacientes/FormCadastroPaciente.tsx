@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import Input from '../../components/ui/Input/Input'
 import Select from '../../components/ui/Select/Select'
 import Botao from '../../components/ui/Button/Button'
-import useUsuariosStore from '../../store/useUsuariosStore'
+import useAuthStore from '../../store/useAuthStore'
 import useAutoVinculacaoMedico from '../../hooks/useAutoVinculacaoMedico'
 import type { Paciente } from '../../store/usePacientesStore'
 
@@ -14,11 +14,7 @@ interface FormCadastroPacienteProps {
 }
 
 export default function FormCadastroPaciente({ idForm, aoSubmeter, modoEdicao = false, dadosIniciais }: FormCadastroPacienteProps) {
-  const { usuarios, buscarUsuarios } = useUsuariosStore()
-
-  useEffect(() => {
-    buscarUsuarios()
-  }, [buscarUsuarios])
+  const usuarioLogado = useAuthStore(s => s.usuario)
 
   const [prontuario, setProntuario]         = useState(dadosIniciais?.prontuario || '')
   const [nome, setNome]                     = useState(dadosIniciais?.nomeCompleto || '')
@@ -27,12 +23,17 @@ export default function FormCadastroPaciente({ idForm, aoSubmeter, modoEdicao = 
   const [turno, setTurno]                   = useState(dadosIniciais?.turno || '')
   const [medico, setMedico]                 = useState(dadosIniciais?.medicoAssistenteId || '')
   const [diagnostico, setDiagnostico]       = useState(dadosIniciais?.diagnostico || '')
+  const [horarioEntrada, setHorarioEntrada] = useState(dadosIniciais?.horarioEntrada !== '--' ? dadosIniciais?.horarioEntrada || '' : '')
+  const [dataEntrada, setDataEntrada]       = useState(dadosIniciais?.dataEntrada !== '--' ? dadosIniciais?.dataEntrada || '' : '')
 
   useAutoVinculacaoMedico(medico, setMedico, modoEdicao)
 
-  const medicosOpcoes = usuarios
-    .filter(u => u.ativo)
-    .map(u => ({ valor: u.id, rotulo: u.nome_completo }))
+  let medicosOpcoes: { valor: string; rotulo: string }[] = []
+  if (modoEdicao && dadosIniciais?.medicoAssistenteId) {
+    medicosOpcoes = [{ valor: dadosIniciais.medicoAssistenteId, rotulo: dadosIniciais.medico }]
+  } else if (!modoEdicao && usuarioLogado?.role === 'medico') {
+    medicosOpcoes = [{ valor: usuarioLogado.id, rotulo: usuarioLogado.nome }]
+  }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -43,6 +44,8 @@ export default function FormCadastroPaciente({ idForm, aoSubmeter, modoEdicao = 
         turno:               turno,
         medicoAssistenteId:  medico || null,
         diagnostico:         diagnostico,
+        horarioEntrada:      horarioEntrada || null,
+        dataEntrada:         dataEntrada || null,
       })
     } else {
       aoSubmeter({
@@ -53,6 +56,8 @@ export default function FormCadastroPaciente({ idForm, aoSubmeter, modoEdicao = 
         turno:               turno,
         medicoAssistenteId:  medico || null,
         diagnostico:         diagnostico,
+        horarioEntrada:      horarioEntrada || null,
+        dataEntrada:         dataEntrada || null,
       })
     }
   }
@@ -146,6 +151,7 @@ export default function FormCadastroPaciente({ idForm, aoSubmeter, modoEdicao = 
           aoAlterar={setMedico}
           opcoes={medicosOpcoes}
           placeholder="Selecione um médico (Opcional)"
+          desabilitado={true}
         />
       </div>
 
@@ -156,6 +162,26 @@ export default function FormCadastroPaciente({ idForm, aoSubmeter, modoEdicao = 
           valor={diagnostico}
           aoAlterar={setDiagnostico}
           placeholder="Ex: DRC estágio 5 secundária a HAS"
+        />
+      </div>
+
+      <div>
+        <Input
+          id="horario_entrada"
+          label="Horário de Entrada"
+          type="time"
+          valor={horarioEntrada}
+          aoAlterar={setHorarioEntrada}
+        />
+      </div>
+
+      <div>
+        <Input
+          id="data_entrada"
+          label="Data de Entrada"
+          type="date"
+          valor={dataEntrada}
+          aoAlterar={setDataEntrada}
         />
       </div>
     </form>

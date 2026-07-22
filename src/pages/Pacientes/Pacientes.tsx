@@ -36,6 +36,8 @@ function DetalheModal({ paciente }: { paciente: Paciente }) {
           { label: 'Acesso Vascular',    valor: paciente.acessoVascular, mono: false },
           { label: 'Médico Assistente',  valor: paciente.medico,        mono: false },
           { label: 'Turno',              valor: paciente.turno,         mono: false },
+          { label: 'Entrada',            valor: paciente.horarioEntrada, mono: true  },
+          { label: 'Data de Entrada',    valor: paciente.dataEntrada,    mono: true  },
           { label: 'Inscrito Transplante', valor: paciente.inscritoTransplante ? 'Sim' : 'Não', mono: false },
         ].map(campo => (
           <div key={campo.label}>
@@ -189,6 +191,8 @@ export default function Pacientes() {
                 <th>Prontuário</th>
                 <th>Turno</th>
                 <th>Médico</th>
+                <th>Entrada</th>
+                <th>Data</th>
                 <th>Kt/V</th>
                 <th>Status</th>
               </tr>
@@ -210,6 +214,8 @@ export default function Pacientes() {
                   <td className="pacientes__prontuario">{paciente.prontuario}</td>
                   <td>{paciente.turno}</td>
                   <td>{paciente.medico}</td>
+                  <td>{paciente.horarioEntrada}</td>
+                  <td>{paciente.dataEntrada}</td>
                   <td>
                     <span className={`pacientes__ktv pacientes__ktv--${paciente.ktv >= 1.2 ? 'ok' : 'baixo'}`}>
                       {paciente.ktv}

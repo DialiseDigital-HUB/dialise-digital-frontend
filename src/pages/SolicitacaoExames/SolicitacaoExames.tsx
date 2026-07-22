@@ -108,7 +108,7 @@ export default function SolicitacaoExames() {
       idPaciente: form.pacienteId,
       tipoExame: exameNome,
       dataSolicitacao: new Date().toISOString().split('T')[0],
-      medicoSolicitante: 'Dr. Associado', // Simulação de médico logado
+      medicoSolicitante: 'Dr. Associado', 
       prioridade: 'rotina'
     })
 
