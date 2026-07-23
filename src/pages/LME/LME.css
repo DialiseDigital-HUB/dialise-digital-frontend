@@ -124,7 +124,13 @@
 }
 
 
-/* Utilitarios do grid LME */
 .lme-campo--largo {
   grid-column: span 2;
 }
+
+.lme-medicamento-wrapper { display: flex; gap: 8px; align-items: center; }
+.lme-medicamento-novo { display: flex; gap: 8px; align-items: center; flex: 1; }
+.lme-medicamento-btn-add { background: none; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; border-radius: 4px; padding: 4px; }
+.lme-medicamento-btn-add:hover { background-color: var(--gray-100); }
+.lme-medicamento-btn-del { background: none; border: none; cursor: pointer; color: var(--danger-500); padding: 4px; display: flex; align-items: center; justify-content: center; }
+.lme-medicamento-btn-del:hover { background-color: var(--danger-50); border-radius: 4px; }

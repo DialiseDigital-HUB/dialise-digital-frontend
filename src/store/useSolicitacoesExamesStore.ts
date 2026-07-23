@@ -4,11 +4,10 @@ import api from '../lib/api'
 export interface SolicitacaoExame {
   id: string
   idPaciente: string
-  tipoExame: string
+  exame: string
+  periodicidade: string
   dataSolicitacao: string
-  medicoSolicitante: string
-  status: 'solicitado' | 'coletado' | 'resultado_disponivel' | 'cancelado'
-  prioridade: 'rotina' | 'urgente'
+  status: string
 }
 
 interface EstadoSolicitacoes {
@@ -35,11 +34,10 @@ const useSolicitacoesExamesStore = create<EstadoSolicitacoes>((set, get) => ({
       const solicitacoesMapeadas: SolicitacaoExame[] = response.data.map((r: any) => ({
         id: r.id,
         idPaciente: r.paciente_id,
-        tipoExame: r.tipo_exame,
+        exame: r.exame,
+        periodicidade: r.periodicidade,
         dataSolicitacao: r.data_solicitacao,
-        medicoSolicitante: r.medico_solicitante,
-        status: r.status as 'solicitado' | 'coletado' | 'resultado_disponivel' | 'cancelado',
-        prioridade: r.prioridade as 'rotina' | 'urgente'
+        status: r.status
       }))
       set({ registros: solicitacoesMapeadas, carregando: false })
     } catch (error) {
@@ -52,10 +50,9 @@ const useSolicitacoesExamesStore = create<EstadoSolicitacoes>((set, get) => ({
     try {
       const payload = {
         paciente_id: dados.idPaciente,
-        tipo_exame: dados.tipoExame,
-        data_solicitacao: dados.dataSolicitacao,
-        medico_solicitante: dados.medicoSolicitante,
-        prioridade: dados.prioridade
+        exame: dados.exame,
+        periodicidade: dados.periodicidade,
+        data_solicitacao: dados.dataSolicitacao
       }
       await api.post('/solicitacoes-exame/', payload)
       await get().buscarSolicitacoes()

@@ -5,6 +5,7 @@ import { buscarPacientes } from '../lib/busca'
 export interface Paciente {
   id: string
   prontuario: string
+  cartaoSus: string
   nomeCompleto: string
   idade: number
   sexo: 'M' | 'F'
@@ -54,6 +55,7 @@ const usePacientesStore = create<EstadoPacientes>((set, get) => ({
         return {
           id: p.id,
           prontuario: p.prontuario,
+          cartaoSus: p.cartao_sus || '--',
           nomeCompleto: p.nome_completo || p.nomeCompleto,
           idade: p.idade || 50,
           sexo: p.sexo || 'M',
@@ -81,6 +83,7 @@ const usePacientesStore = create<EstadoPacientes>((set, get) => ({
     try {
       const payload = {
         prontuario:           dados.prontuario,
+        cartao_sus:           dados.cartaoSus,
         nome_completo:        dados.nomeCompleto,
         data_nascimento:      dados.dataNascimento,
         sexo:                 dados.sexo,
@@ -104,6 +107,7 @@ const usePacientesStore = create<EstadoPacientes>((set, get) => ({
     try {
       const payload = {
         nome_completo:        dados.nomeCompleto ?? undefined,
+        cartao_sus:           dados.cartaoSus ?? undefined,
         data_nascimento:      dados.dataNascimento ?? undefined,
         sexo:                 dados.sexo ?? undefined,
         turno:                dados.turno ?? undefined,

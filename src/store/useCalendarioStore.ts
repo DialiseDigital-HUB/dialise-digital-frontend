@@ -13,6 +13,9 @@ export interface EventoCalendario {
   tipo: TipoEvento
   descricao: string
   paciente?: string
+  dataInicio?: string
+  dataTermino?: string
+  diasRestantes?: number
 }
 
 export interface AntibioticoCurso {
@@ -87,8 +90,35 @@ const useCalendarioStore = create<EstadoCalendario>((set, get) => ({
         api.get(urlAnti)
       ])
 
+      const antiPorEventoId: Record<string, { dataInicio: string; dataTermino: string; diasRestantes: number }> = {}
+      resAnti.data.forEach((a: any) => {
+        if (a.evento_id) {
+          antiPorEventoId[a.evento_id] = {
+            dataInicio: a.data_inicio,
+            dataTermino: a.data_termino,
+            diasRestantes: a.dias_restantes,
+          }
+        }
+      })
+
       const eventosMapeados: EventoCalendario[] = resEventos.data.map((e: any) => {
         const paciente = listaPacientes.find(p => p.id === e.paciente_id)
+        const periodoAnti = antiPorEventoId[e.id]
+        
+        let dataInicio = e.data_inicio ?? periodoAnti?.dataInicio
+        let dataTermino = e.data_termino ?? periodoAnti?.dataTermino
+        let diasRestantes = e.dias_restantes ?? periodoAnti?.diasRestantes
+
+        if (e.tipo === 'antibiotico' && !dataInicio) {
+          // Fallback: Casar o antibiótico pelo id do paciente
+          const atb = resAnti.data.find((a: any) => a.paciente_id === e.paciente_id && (e.descricao.includes(a.medicamento) || a.medicamento.includes(e.descricao) || true))
+          if (atb) {
+            dataInicio = atb.data_inicio
+            dataTermino = atb.data_termino
+            diasRestantes = atb.dias_restantes
+          }
+        }
+
         return {
           id: e.id,
           idPaciente: e.paciente_id,
@@ -97,7 +127,10 @@ const useCalendarioStore = create<EstadoCalendario>((set, get) => ({
           ano: e.ano,
           tipo: e.tipo,
           descricao: e.descricao,
-          paciente: paciente?.nomeCompleto
+          paciente: paciente?.nomeCompleto,
+          dataInicio,
+          dataTermino,
+          diasRestantes,
         }
       })
 

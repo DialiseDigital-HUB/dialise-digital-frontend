@@ -3,7 +3,7 @@ import api from '../lib/api'
 import usePacientesStore from './usePacientesStore'
 
 export type PeriodicidadeExame = 'mensal' | 'trimestral' | 'semestral' | 'anual'
-export type StatusExame = 'em_dia' | 'vence_breve' | 'vencido'
+export type StatusExame = 'em_dia' | 'vence_breve' | 'vencido' | 'solicitado'
 
 export interface Exame {
   id: string

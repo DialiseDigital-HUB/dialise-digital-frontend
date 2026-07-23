@@ -10,7 +10,6 @@ import LLM from './pages/LLM/LLM'
 import LME from './pages/LME/LME'
 import Prescricoes from './pages/Prescricoes/Prescricoes'
 import Vacinas from './pages/Vacinas/Vacinas'
-import SolicitacaoExames from './pages/SolicitacaoExames/SolicitacaoExames'
 import Login from './pages/Login/Login'
 import TrocarSenha from './pages/TrocarSenha/TrocarSenha'
 import Equipe from './pages/Equipe/Equipe'
@@ -32,7 +31,6 @@ const paginasDisponiveis: Record<string, React.ComponentType> = {
   lme:               LME,
   prescricoes:        Prescricoes,
   vacinas:            Vacinas,
-  'solicitacao-exames': SolicitacaoExames,
   equipe:     Equipe,
 }
 

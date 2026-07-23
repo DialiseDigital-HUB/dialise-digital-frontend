@@ -4,6 +4,7 @@ import useNavegacaoStore from '../../store/useNavegacaoStore'
 import useEvolucaoStore from '../../store/useEvolucaoStore'
 import useToastStore from '../../store/useToastStore'
 import useAuthStore from '../../store/useAuthStore'
+import useHistoricoStore from '../../store/useHistoricoStore'
 import type { Paciente } from '../../store/usePacientesStore'
 import Card from '../../components/ui/Card/Card'
 import Badge from '../../components/ui/Badge/Badge'
@@ -23,6 +24,16 @@ const rotuloStatus: Record<string, string> = {
 function DetalheModal({ paciente }: { paciente: Paciente }) {
   const buscarHistoricoKtv = useEvolucaoStore(s => s.buscarHistoricoKtv)
   const [historicoKtv, setHistoricoKtv] = useState<{ mes: string; valor: number }[]>([])
+  
+  const definirPacienteHistorico = useHistoricoStore(s => s.definirPaciente)
+  const focarMes = useHistoricoStore(s => s.focarMes)
+  const navegar = useNavegacaoStore(s => s.navegar)
+
+  const aoClicarMes = (mes: string) => {
+    definirPacienteHistorico(paciente.id)
+    focarMes(mes)
+    navegar('historico')
+  }
 
   useEffect(() => {
     buscarHistoricoKtv(paciente.id).then(setHistoricoKtv)
@@ -34,6 +45,7 @@ function DetalheModal({ paciente }: { paciente: Paciente }) {
       <div className="detalhe-paciente__grid">
         {[
           { label: 'Prontuário',         valor: paciente.prontuario,    mono: true  },
+          { label: 'Cartão SUS',         valor: paciente.cartaoSus,     mono: true  },
           { label: 'Diagnóstico',        valor: paciente.diagnostico,   mono: false },
           { label: 'Acesso Vascular',    valor: paciente.acessoVascular, mono: false },
           { label: 'Médico Assistente',  valor: paciente.medico,        mono: false },
@@ -67,7 +79,11 @@ function DetalheModal({ paciente }: { paciente: Paciente }) {
             )
 
             return (
-              <div key={ponto.mes} className="detalhe-paciente__ktv-barra-wrapper">
+              <div 
+                key={ponto.mes} 
+                className="detalhe-paciente__ktv-barra-wrapper"
+                onClick={() => aoClicarMes(ponto.mes)}
+              >
                 <span className="detalhe-paciente__ktv-valor" style={{ color: corOk ? 'var(--teal-sea)' : 'var(--red)' }}>
                   {ponto.valor.toFixed(1)}
                 </span>
@@ -141,6 +157,12 @@ export default function Pacientes() {
     definirPaciente(paciente.id)
     selecionarPaciente(null)
     navegar('evolucao')
+  }
+
+  const aoVerEvolucoes = (paciente: Paciente) => {
+    useHistoricoStore.getState().definirPaciente(paciente.id)
+    selecionarPaciente(null)
+    navegar('historico')
   }
 
   const handleEdicao = async (dados: Partial<Paciente>) => {
@@ -242,6 +264,12 @@ export default function Pacientes() {
           <>
             <Botao variante="ghost" onClick={aoFecharModal}>Fechar</Botao>
             <Botao variante="ghost" onClick={() => setModalEdicao(true)}>Editar</Botao>
+            <Botao
+              variante="ghost"
+              onClick={() => pacienteSelecionado && aoVerEvolucoes(pacienteSelecionado)}
+            >
+              Ver Evoluções
+            </Botao>
             <Botao
               variante="primary"
               onClick={() => pacienteSelecionado && aoNovaEvolucao(pacienteSelecionado)}

@@ -17,6 +17,7 @@ export default function FormCadastroPaciente({ idForm, aoSubmeter, modoEdicao = 
   const usuarioLogado = useAuthStore(s => s.usuario)
 
   const [prontuario, setProntuario]         = useState(dadosIniciais?.prontuario || '')
+  const [cartaoSus, setCartaoSus]           = useState(dadosIniciais?.cartaoSus || '')
   const [nome, setNome]                     = useState(dadosIniciais?.nomeCompleto || '')
   const [dataNascimento, setDataNascimento] = useState('')
   const [sexo, setSexo]                     = useState(dadosIniciais?.sexo || '')
@@ -40,6 +41,7 @@ export default function FormCadastroPaciente({ idForm, aoSubmeter, modoEdicao = 
     if (modoEdicao) {
       aoSubmeter({
         nomeCompleto:        nome,
+        cartaoSus:           cartaoSus,
         sexo:                sexo,
         turno:               turno,
         medicoAssistenteId:  medico || null,
@@ -50,6 +52,7 @@ export default function FormCadastroPaciente({ idForm, aoSubmeter, modoEdicao = 
     } else {
       aoSubmeter({
         prontuario:          prontuario,
+        cartaoSus:           cartaoSus,
         nomeCompleto:        nome,
         dataNascimento:      dataNascimento,
         sexo:                sexo,
@@ -65,6 +68,7 @@ export default function FormCadastroPaciente({ idForm, aoSubmeter, modoEdicao = 
   const preencherDebug = () => {
     if (modoEdicao) return
     setProntuario(String(Math.floor(Math.random() * 90000) + 10000))
+    setCartaoSus('7' + String(Math.floor(Math.random() * 90000000000000)).padStart(14, '0'))
     setNome('Paciente Mockado de Teste')
     setDataNascimento('1975-08-15')
     setSexo('M')
@@ -103,6 +107,16 @@ export default function FormCadastroPaciente({ idForm, aoSubmeter, modoEdicao = 
               valor={prontuario}
               aoAlterar={setProntuario}
               placeholder="Ex: 12345"
+            />
+          </div>
+
+          <div>
+            <Input
+              id="cartao_sus"
+              label="Cartão SUS (CNS) *"
+              valor={cartaoSus}
+              aoAlterar={setCartaoSus}
+              placeholder="Ex: 7000 0000 0000 000"
             />
           </div>
 

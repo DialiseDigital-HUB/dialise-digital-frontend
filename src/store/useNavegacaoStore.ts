@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 
-type PaginaAtiva = 'dashboard' | 'pacientes' | 'evolucao' | 'calendario' | 'exames' | 'historico' | 'llm' | 'lme' | 'prescricoes' | 'vacinas' | 'solicitacao-exames' | 'equipe'
+type PaginaAtiva = 'dashboard' | 'pacientes' | 'evolucao' | 'calendario' | 'exames' | 'historico' | 'llm' | 'lme' | 'prescricoes' | 'vacinas' | 'equipe'
 
 interface EstadoNavegacao {
   paginaAtiva: PaginaAtiva

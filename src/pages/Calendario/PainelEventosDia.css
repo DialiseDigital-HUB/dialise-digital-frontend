@@ -193,3 +193,45 @@
 }
 .evento-item--ativo.evento-item--retorno .evento-item__tipo { color: var(--teal-sea); }
 .evento-item--ativo.evento-item--retorno .evento-item__indicador { height: 100%; position: absolute; left: 0; top: 0; border-radius: 0; width: 4px; margin-top: 0; }
+
+/* Linha de período (data início → data fim + badge de dias) */
+.evento-item__periodo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.evento-periodo__datas {
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: var(--gray-500);
+  background: var(--gray-100);
+  border-radius: var(--radius-xs);
+  padding: 2px 6px;
+  letter-spacing: .02em;
+}
+
+/* Badge de dias restantes */
+.evento-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 22px;
+  border-radius: 100px;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 0 8px;
+  flex-shrink: 0;
+}
+
+.evento-badge--ok      { background: var(--teal-sea);  color: var(--white); }
+.evento-badge--atencao { background: var(--amber);      color: var(--white); }
+.evento-badge--urgente { background: var(--red);        color: var(--white); }
+
+/* Item de antibiótico clicável fora de um dia selecionado */
+.evento-item--urgente {
+  cursor: pointer;
+}
+

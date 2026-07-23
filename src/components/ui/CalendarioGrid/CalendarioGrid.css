@@ -85,10 +85,31 @@
   border-color: var(--gray-300);
 }
 
+/* 2026 UX Trend: Liquid Glass translucent fills for events */
+.cal-grid__celula--com-evento {
+  background: var(--cor-fundo);
+  border-color: transparent;
+}
+
+.cal-grid__celula--com-evento .cal-grid__numero {
+  color: var(--cor-destaque);
+  font-weight: 700;
+}
+
+.cal-grid__celula--com-evento:hover {
+  filter: brightness(0.96);
+  border-color: transparent;
+}
+
+/* Estilos de célula selecionada/ativa */
 .cal-grid__celula--ativo {
   background: transparent;
   border-color: var(--cor-destaque, var(--gray-900));
   box-shadow: 0 0 0 1px var(--cor-destaque, var(--gray-900));
+}
+
+.cal-grid__celula--com-evento.cal-grid__celula--ativo {
+  background: var(--cor-fundo);
 }
 
 .cal-grid__celula--ativo .cal-grid__numero {
