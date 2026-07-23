@@ -45,6 +45,7 @@ function DetalheModal({ paciente }: { paciente: Paciente }) {
       <div className="detalhe-paciente__grid">
         {[
           { label: 'Prontuário',         valor: paciente.prontuario,    mono: true  },
+          { label: 'Cartão SUS',         valor: paciente.cartaoSus,     mono: true  },
           { label: 'Diagnóstico',        valor: paciente.diagnostico,   mono: false },
           { label: 'Acesso Vascular',    valor: paciente.acessoVascular, mono: false },
           { label: 'Médico Assistente',  valor: paciente.medico,        mono: false },
