@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react'
 import usePacientesStore from '../../store/usePacientesStore'
 import useSolicitacoesExamesStore from '../../store/useSolicitacoesExamesStore'
+import useExamesStore from '../../store/useExamesStore'
 import useToastStore from '../../store/useToastStore'
 import Modal from '../../components/ui/Modal/Modal'
 import Botao from '../../components/ui/Button/Button'
@@ -9,13 +10,17 @@ import Select from '../../components/ui/Select/Select'
 import ModalFooter from '../../components/ui/Modal/ModalFooter'
 
 const opcoesExame = [
-  { valor: 'Hemograma', rotulo: 'Hemograma' },
+  { valor: 'Hemograma Completo', rotulo: 'Hemograma Completo' },
   { valor: 'Ureia', rotulo: 'Ureia' },
   { valor: 'Creatinina', rotulo: 'Creatinina' },
-  { valor: 'PTH', rotulo: 'PTH' },
+  { valor: 'PTH Intacto', rotulo: 'PTH Intacto' },
   { valor: 'Ferritina', rotulo: 'Ferritina' },
-  { valor: 'Transferrina', rotulo: 'Transferrina' },
+  { valor: 'Saturação de Transferrina', rotulo: 'Saturação de Transferrina' },
   { valor: 'Kt/V', rotulo: 'Kt/V' },
+  { valor: 'Albumina', rotulo: 'Albumina' },
+  { valor: 'Fósforo', rotulo: 'Fósforo' },
+  { valor: 'Anti-HCV', rotulo: 'Anti-HCV' },
+  { valor: 'Cálcio Total', rotulo: 'Cálcio Total' },
   { valor: 'Outros', rotulo: 'Outros' },
 ]
 
@@ -71,7 +76,7 @@ export default function ModalSolicitarExame({ aberto, aoFechar }: ModalSolicitar
     const pacienteMockId = pacientes.length > 0 ? pacientes[0].id : ''
     setForm({
       pacienteId: pacienteMockId,
-      exame: 'Hemograma',
+      exame: 'Hemograma Completo',
       exameOutro: '',
       periodicidade: 'Mensal'
     })
@@ -90,6 +95,7 @@ export default function ModalSolicitarExame({ aberto, aoFechar }: ModalSolicitar
     })
 
     if (sucesso) {
+      useExamesStore.getState().buscarExames()
       adicionarToast('Exame solicitado com sucesso!', 'sucesso')
       fecharELimpar()
     } else {
