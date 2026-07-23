@@ -3,6 +3,7 @@ import useNavegacaoStore from '../../store/useNavegacaoStore'
 import usePacientesStore from '../../store/usePacientesStore'
 import useLmeStore from '../../store/useLmeStore'
 import useAuthStore from '../../store/useAuthStore'
+import useMedicamentosStore from '../../store/useMedicamentosStore'
 import Botao from '../../components/ui/Button/Button'
 import Icone from '../../components/ui/Icone/Icone'
 import BuscaPaciente from '../../components/ui/BuscaPaciente/BuscaPaciente'
@@ -14,25 +15,33 @@ const CID10_OPCOES = [
   { valor: 'E83.3', rotulo: 'E83.3 - Distúrbios do metabolismo do fósforo' },
 ]
 
-const MEDICAMENTOS_OPCOES = [
-  'Cloridrato de Sevelamer 800mg',
-  'Alfaepoetina 4.000 UI',
-  'Cinacalcete 30mg',
-]
-
 export default function LME() {
   const pacienteEmFoco = useNavegacaoStore(s => s.pacienteEmFoco)
   const limparContexto = useNavegacaoStore(s => s.limparContexto)
   const pacientes = usePacientesStore(s => s.pacientes)
   const usuario = useAuthStore(s => s.usuario)
   const { registros, carregando, criar, buscarPorPaciente } = useLmeStore()
+  const { medicamentos, buscarMedicamentos, adicionarMedicamento, removerMedicamento } = useMedicamentosStore()
 
   const [pacienteAtivoId, setPacienteAtivoId] = useState<string | null>(null)
   const [cid10, setCid10] = useState(CID10_OPCOES[0].valor)
-  const [medicamento, setMedicamento] = useState(MEDICAMENTOS_OPCOES[0])
+  const [medicamento, setMedicamento] = useState('')
   const [justificativa, setJustificativa] = useState('')
   const [validoAte, setValidoAte] = useState('')
   const [sucesso, setSucesso] = useState(false)
+  
+  const [criandoMedicamento, setCriandoMedicamento] = useState(false)
+  const [novoMedicamentoNome, setNovoMedicamentoNome] = useState('')
+
+  useEffect(() => {
+    buscarMedicamentos()
+  }, [buscarMedicamentos])
+
+  useEffect(() => {
+    if (medicamentos.length > 0 && !medicamento) {
+      setMedicamento(medicamentos[0].nome)
+    }
+  }, [medicamentos, medicamento])
 
   useEffect(() => {
     if (pacienteEmFoco) {
@@ -63,6 +72,28 @@ export default function LME() {
       setTimeout(() => setSucesso(false), 3000)
     }
   }
+
+  const aoAdicionarMedicamento = async () => {
+    if (!novoMedicamentoNome.trim()) return
+    const ok = await adicionarMedicamento(novoMedicamentoNome)
+    if (ok) {
+      setMedicamento(novoMedicamentoNome)
+      setCriandoMedicamento(false)
+      setNovoMedicamentoNome('')
+    }
+  }
+
+  const aoRemoverMedicamento = async () => {
+    const medSelecionado = medicamentos.find(m => m.nome === medicamento)
+    if (!medSelecionado) return
+    if (!window.confirm(`Tem certeza que deseja deletar "${medSelecionado.nome}" do sistema?`)) return
+    const ok = await removerMedicamento(medSelecionado.id)
+    if (ok) {
+      setMedicamento('')
+    }
+  }
+
+  const ehAdmin = usuario?.role === 'admin'
 
   return (
     <div className="lme-pagina">
@@ -108,8 +139,12 @@ export default function LME() {
                     <input type="text" value={paciente.nomeCompleto} readOnly className="input-readOnly" />
                   </div>
                   <div className="lme-campo">
-                    <label>CNS (Cartão Nacional de Saúde)</label>
+                    <label>Prontuário</label>
                     <input type="text" value={paciente.prontuario} readOnly className="input-readOnly" />
+                  </div>
+                  <div className="lme-campo">
+                    <label>CNS (Cartão Nacional de Saúde)</label>
+                    <input type="text" value={paciente.cartaoSus} readOnly className="input-readOnly" />
                   </div>
                 </div>
               </div>
@@ -140,13 +175,56 @@ export default function LME() {
               <div className="lme-secao">
                 <h4>3. Solicitação de Medicamentos (DCB)</h4>
                 <div className="lme-grid">
-                  <div className="lme-campo lme-campo--largo">
+                  <div className="lme-campo lme-campo--largo" style={{ position: 'relative' }}>
                     <label>Nome do Medicamento</label>
-                    <select value={medicamento} onChange={e => setMedicamento(e.target.value)}>
-                      {MEDICAMENTOS_OPCOES.map(m => (
-                        <option key={m}>{m}</option>
-                      ))}
-                    </select>
+                    {criandoMedicamento ? (
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <input
+                          type="text"
+                          value={novoMedicamentoNome}
+                          onChange={e => setNovoMedicamentoNome(e.target.value)}
+                          placeholder="Digite o novo medicamento..."
+                          autoFocus
+                        />
+                        <Botao variante="primary" onClick={aoAdicionarMedicamento}>
+                          Salvar
+                        </Botao>
+                        <Botao variante="ghost" onClick={() => setCriandoMedicamento(false)}>
+                          Cancelar
+                        </Botao>
+                      </div>
+                    ) : (
+                      <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                        <select value={medicamento} onChange={e => setMedicamento(e.target.value)} style={{ flex: 1 }}>
+                          {medicamento === '' && <option value="" disabled>Selecione ou adicione...</option>}
+                          {medicamentos.map(m => (
+                            <option key={m.id} value={m.nome}>{m.nome}</option>
+                          ))}
+                        </select>
+                        {ehAdmin && (
+                          <>
+                            <button
+                              type="button"
+                              className="btn-icon"
+                              title="Adicionar novo medicamento ao sistema"
+                              onClick={() => setCriandoMedicamento(true)}
+                            >
+                              <Icone nome="plus" tamanho={20} cor="var(--primary-color)" />
+                            </button>
+                            {medicamento && (
+                              <button
+                                type="button"
+                                className="btn-icon"
+                                title="Deletar medicamento selecionado do sistema"
+                                onClick={aoRemoverMedicamento}
+                              >
+                                <Icone nome="trash" tamanho={20} cor="var(--danger-color)" />
+                              </button>
+                            )}
+                          </>
+                        )}
+                      </div>
+                    )}
                   </div>
                   <div className="lme-campo">
                     <label>Válido até</label>
