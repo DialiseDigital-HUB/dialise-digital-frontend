@@ -8,6 +8,7 @@ import Exames from './pages/Exames/Exames'
 import Historico from './pages/Historico/Historico'
 import LLM from './pages/LLM/LLM'
 import LME from './pages/LME/LME'
+import Impressao from './pages/Impressao/Impressao'
 import Prescricoes from './pages/Prescricoes/Prescricoes'
 import Vacinas from './pages/Vacinas/Vacinas'
 import Login from './pages/Login/Login'
@@ -29,6 +30,7 @@ const paginasDisponiveis: Record<string, React.ComponentType> = {
   historico:  Historico,
   llm:        LLM,
   lme:               LME,
+  impressao:         Impressao,
   prescricoes:        Prescricoes,
   vacinas:            Vacinas,
   equipe:     Equipe,

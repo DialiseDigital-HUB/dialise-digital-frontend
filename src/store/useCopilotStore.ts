@@ -1,10 +1,13 @@
 import { create } from 'zustand'
 import api from '../lib/api'
+import type { PaginaAtiva } from './useNavegacaoStore'
 
 export interface AcaoRealizada {
-  tipo: 'evolucao' | 'lme' | 'agendamento' | 'erro'
+  tipo: 'evolucao' | 'lme' | 'agendamento' | 'prescricao' | 'erro'
   descricao: string
   sucesso: boolean
+  link_pagina?: PaginaAtiva
+  link_rotulo?: string
 }
 
 export interface RespostaCopilot {

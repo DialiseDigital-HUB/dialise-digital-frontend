@@ -13,7 +13,7 @@ const legendaTipos = [
 ]
 
 export default function Calendario() {
-  const { mesAtivo, anoAtivo, eventos, eventosDoDia, retrocederMes, avancarMes, definirDia, diaSelecionado, buscarEventosEAntibioticos } = useCalendarioStore()
+  const { mesAtivo, anoAtivo, eventosDoDia, retrocederMes, avancarMes, definirDia, diaSelecionado, buscarEventosEAntibioticos } = useCalendarioStore()
 
   useEffect(() => {
     buscarEventosEAntibioticos()
@@ -40,7 +40,7 @@ export default function Calendario() {
           <CalendarioGrid
             mes={mesAtivo}
             ano={anoAtivo}
-            eventos={eventos}
+            eventosPorDia={eventosDoDia}
             diaSelecionado={diaSelecionado}
             aoSelecionarDia={definirDia}
             aoAvancarMes={avancarMes}

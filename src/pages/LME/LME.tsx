@@ -6,6 +6,7 @@ import useAuthStore from '../../store/useAuthStore'
 import useMedicamentosStore from '../../store/useMedicamentosStore'
 import Botao from '../../components/ui/Button/Button'
 import Icone from '../../components/ui/Icone/Icone'
+import Badge from '../../components/ui/Badge/Badge'
 import BuscaPaciente from '../../components/ui/BuscaPaciente/BuscaPaciente'
 import './LME.css'
 
@@ -176,7 +177,10 @@ export default function LME() {
                 <h4>3. Solicitação de Medicamentos (DCB)</h4>
                 <div className="lme-grid">
                   <div className="lme-campo lme-campo--largo" style={{ position: 'relative' }}>
-                    <label>Nome do Medicamento</label>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <label style={{ margin: 0 }}>Nome do Medicamento</label>
+                      {ehAdmin && <Badge variante="teal" comDot>Modo Admin</Badge>}
+                    </div>
                     {criandoMedicamento ? (
                       <div style={{ display: 'flex', gap: '8px' }}>
                         <input
@@ -203,23 +207,25 @@ export default function LME() {
                         </select>
                         {ehAdmin && (
                           <>
-                            <button
-                              type="button"
-                              className="btn-icon"
+                            <Botao
+                              variante="primary"
+                              tamanho="sm"
                               title="Adicionar novo medicamento ao sistema"
                               onClick={() => setCriandoMedicamento(true)}
+                              style={{ padding: '0 8px' }}
                             >
-                              <Icone nome="plus" tamanho={20} cor="var(--primary-color)" />
-                            </button>
+                              <Icone nome="plus" tamanho={16} /> Adicionar
+                            </Botao>
                             {medicamento && (
-                              <button
-                                type="button"
-                                className="btn-icon"
+                              <Botao
+                                variante="danger"
+                                tamanho="sm"
                                 title="Deletar medicamento selecionado do sistema"
                                 onClick={aoRemoverMedicamento}
+                                style={{ padding: '0 8px' }}
                               >
-                                <Icone nome="trash" tamanho={20} cor="var(--danger-color)" />
-                              </button>
+                                <Icone nome="trash" tamanho={16} /> Deletar
+                              </Botao>
                             )}
                           </>
                         )}

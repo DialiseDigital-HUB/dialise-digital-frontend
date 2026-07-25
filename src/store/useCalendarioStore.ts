@@ -153,7 +153,43 @@ const useCalendarioStore = create<EstadoCalendario>((set, get) => ({
     }
   },
 
-  eventosDoDia: dia => get().eventos.filter(e => e.dia === dia),
+  eventosDoDia: (dia: number) => {
+    const { eventos, antibioticosCurso, mesAtivo, anoAtivo } = get()
+    
+    const eventosNormais = eventos.filter(e => e.dia === dia)
+    const dataClicada = new Date(anoAtivo, mesAtivo - 1, dia)
+    
+    // Adicionar eventos dinâmicos de antibiótico que cruzam com este dia
+    const eventosAntibiotico: EventoCalendario[] = []
+    
+    antibioticosCurso.forEach(atb => {
+      const inicio = new Date(atb.dataInicio + 'T00:00:00')
+      const fim = new Date(atb.dataTermino + 'T23:59:59')
+      
+      if (dataClicada >= inicio && dataClicada <= fim) {
+        // Verificar se já não existe um evento neste mesmo dia para evitar duplicidade
+        // (ex: o evento pontual de Início/Fim que o backend pode ter retornado)
+        const jaExiste = eventosNormais.some(e => e.idPaciente === atb.idPaciente && e.tipo === 'antibiotico' && (e.descricao.includes(atb.medicamento) || atb.medicamento.includes(e.descricao)))
+        
+        if (!jaExiste) {
+          eventosAntibiotico.push({
+            id: `atb-dinamico-${atb.id}-${dia}`,
+            idPaciente: atb.idPaciente,
+            dia,
+            mes: mesAtivo,
+            ano: anoAtivo,
+            tipo: 'antibiotico',
+            descricao: `Em uso: ${atb.medicamento}`,
+            paciente: atb.paciente,
+            dataInicio: atb.dataInicio,
+            dataTermino: atb.dataTermino,
+          })
+        }
+      }
+    })
+    
+    return [...eventosNormais, ...eventosAntibiotico]
+  },
 }))
 
 export default useCalendarioStore

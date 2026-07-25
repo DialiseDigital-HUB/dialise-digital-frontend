@@ -1,0 +1,132 @@
+.impressao-pagina {
+  padding: 24px;
+  background-color: var(--white);
+  min-height: 100vh;
+  color: #000;
+}
+
+.impressao-alerta {
+  text-align: center;
+  padding: 40px;
+  color: var(--gray-500);
+}
+
+.impressao-cabecalho-tela {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+/* Documento Oficial */
+.documento-impresso {
+  max-width: 900px;
+  margin: 0 auto;
+  background: white;
+  border: 1px solid #ccc;
+  padding: 40px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.cabecalho-oficial {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid #000;
+  padding-bottom: 16px;
+  margin-bottom: 24px;
+}
+
+.cabecalho-logos {
+  display: flex;
+  flex-direction: column;
+}
+
+.cabecalho-logos h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.cabecalho-logos h3 {
+  margin: 4px 0 0 0;
+  font-size: 16px;
+  font-weight: normal;
+}
+
+.cabecalho-dados {
+  text-align: right;
+  font-size: 14px;
+}
+
+.dados-paciente {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 32px;
+  background: #f9f9f9;
+  padding: 16px;
+  border: 1px solid #ddd;
+}
+
+.dados-paciente p {
+  margin: 4px 0;
+}
+
+.secao-relatorio {
+  margin-bottom: 32px;
+}
+
+.secao-relatorio h4 {
+  font-size: 18px;
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 8px;
+  margin-bottom: 16px;
+  color: #333;
+}
+
+.rodape-oficial {
+  margin-top: 60px;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+}
+
+.linha-assinatura {
+  width: 300px;
+  border-bottom: 1px solid #000;
+  margin-bottom: 8px;
+}
+
+.nome-medico {
+  font-weight: bold;
+}
+
+/* Esconder elementos na impressão real */
+@media print {
+  @page { margin: 0.5cm; }
+  
+  body * {
+    visibility: hidden;
+  }
+  
+  .d-print-none {
+    display: none !important;
+  }
+  
+  .documento-impresso, .documento-impresso * {
+    visibility: visible;
+  }
+  
+  .documento-impresso {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    border: none;
+    box-shadow: none;
+  }
+}
