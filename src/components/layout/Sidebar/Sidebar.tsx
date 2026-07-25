@@ -2,8 +2,7 @@ import Icone from '../../ui/Icone/Icone'
 import type { NomeIcone } from '../../ui/Icone/Icone'
 import useAuthStore from '../../../store/useAuthStore'
 import './Sidebar.css'
-
-type PaginaAtiva = 'dashboard' | 'pacientes' | 'evolucao' | 'calendario' | 'exames' | 'historico' | 'llm' | 'lme' | 'prescricoes' | 'vacinas' | 'equipe'
+type PaginaAtiva = 'dashboard' | 'pacientes' | 'evolucao' | 'calendario' | 'exames' | 'historico' | 'llm' | 'lme' | 'impressao' | 'prescricoes' | 'vacinas' | 'equipe'
 
 interface SidebarProps {
   paginaAtiva: PaginaAtiva
@@ -32,6 +31,7 @@ const secoes: { label: string; itens: ItemNavegacao[]; role?: string }[] = [
       { id: 'calendario', rotulo: 'Calendário & Alertas',  icone: 'calendario' },
       { id: 'exames',     rotulo: 'Exames',                icone: 'exames'     },
       { id: 'lme',              rotulo: 'Laudos LME',          icone: 'lme'        },
+      { id: 'impressao',        rotulo: 'Impressão (Relatório)', icone: 'lapis'      },
       { id: 'prescricoes',      rotulo: 'Prescrições',         icone: 'medicamento' },
       { id: 'vacinas',          rotulo: 'Controle de Vacinas', icone: 'saude'       },
       { id: 'historico',        rotulo: 'Histórico',          icone: 'historico'  },

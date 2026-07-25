@@ -103,11 +103,18 @@ export default function PainelEventosDia({ dia, eventos }: PainelEventosDiaProps
                           {temPeriodo && (
                             <div className="evento-item__periodo">
                               <span className="evento-periodo__datas">{ev.dataInicio} → {ev.dataTermino}</span>
-                              {ev.diasRestantes !== undefined && (
-                                <span className={`evento-badge ${classeBadgeDias(ev.diasRestantes)}`}>
-                                  {ev.diasRestantes}d
-                                </span>
-                              )}
+                              {(() => {
+                                if (!ev.dataTermino || !dia) return null
+                                const dFim = new Date(ev.dataTermino + 'T23:59:59')
+                                const dataAtual = new Date(ev.ano, ev.mes - 1, dia)
+                                const diferenca = Math.ceil((dFim.getTime() - dataAtual.getTime()) / (1000 * 60 * 60 * 24))
+                                if (diferenca < 0) return null
+                                return (
+                                  <span className={`evento-badge ${classeBadgeDias(diferenca)}`}>
+                                    {diferenca}d
+                                  </span>
+                                )
+                              })()}
                             </div>
                           )}
                         </div>

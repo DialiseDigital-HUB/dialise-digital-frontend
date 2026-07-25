@@ -27,7 +27,7 @@ const diasSemana = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb']
 interface CalendarioGridProps {
   mes: number
   ano: number
-  eventos: EventoCalendario[]
+  eventosPorDia: (dia: number) => EventoCalendario[]
   diaSelecionado: number | null
   aoSelecionarDia: (dia: number | null) => void
   aoAvancarMes: () => void
@@ -37,7 +37,7 @@ interface CalendarioGridProps {
 export default function CalendarioGrid({
   mes,
   ano,
-  eventos,
+  eventosPorDia,
   diaSelecionado,
   aoSelecionarDia,
   aoAvancarMes,
@@ -48,8 +48,6 @@ export default function CalendarioGrid({
   const celulas       = Array.from({ length: primeiroDia + totalDias }, (_, i) =>
     i < primeiroDia ? null : i - primeiroDia + 1
   )
-
-  const eventosPorDia = (dia: number) => eventos.filter(e => e.dia === dia)
 
   return (
     <div className="cal-grid">
@@ -76,6 +74,9 @@ export default function CalendarioGrid({
           if (!dia) return <div key={`vazio-${indice}`} className="cal-grid__celula cal-grid__celula--vazia" />
           const eventosNoDia = eventosPorDia(dia)
           const estaAtivo    = dia === diaSelecionado
+          
+          // Deduplicar os tipos de eventos para mostrar apenas 1 ponto de cada cor por dia
+          const tiposUnicos = Array.from(new Set(eventosNoDia.map(ev => ev.tipo)))
 
           return (
             <button
@@ -89,13 +90,14 @@ export default function CalendarioGrid({
               } as React.CSSProperties : undefined}
             >
               <span className="cal-grid__numero">{dia}</span>
-              {eventosNoDia.length > 0 && (
+              {tiposUnicos.length > 0 && (
                 <div className="cal-grid__dots">
-                  {eventosNoDia.slice(0, 3).map(ev => (
+                  {tiposUnicos.slice(0, 4).map(tipo => (
                     <span
-                      key={ev.id}
+                      key={tipo}
                       className="cal-grid__dot"
-                      style={{ background: corPorTipo[ev.tipo] }}
+                      style={{ background: corPorTipo[tipo] }}
+                      title={tipo}
                     />
                   ))}
                 </div>

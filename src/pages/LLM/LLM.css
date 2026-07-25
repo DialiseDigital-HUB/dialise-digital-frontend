@@ -139,10 +139,11 @@
   text-transform: uppercase;
 }
 
-.llm-card--pendencias .llm-card__titulo { color: var(--teal-mid); }
+.llm-card--pendencias .llm-card__titulo  { color: var(--teal-mid); }
 .llm-card--medicamentos .llm-card__titulo { color: var(--teal-sea); }
-.llm-card--alertas .llm-card__titulo { color: var(--red); }
-.llm-card--lme .llm-card__titulo { color: var(--gray-700); }
+.llm-card--alertas .llm-card__titulo     { color: var(--red); }
+.llm-card--lme .llm-card__titulo         { color: var(--gray-700); }
+.llm-card--resposta .llm-card__titulo    { color: var(--teal-deep); }
 
 .llm-card__lista {
   list-style: none;
@@ -151,13 +152,36 @@
   gap: 8px;
 }
 
-.llm-card__lista li {
+.llm-acao {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
   font-size: 13px;
   color: var(--gray-700);
   line-height: 1.5;
-  padding-left: 12px;
-  border-left: 2.5px solid;
-  border-radius: 0 0 0 0;
+  padding: 6px 0 6px 12px;
+  border-left: 2.5px solid var(--gray-300);
+}
+
+.llm-acao--ok  { border-color: var(--teal-sea); }
+.llm-acao--erro { border-color: var(--red); }
+
+.llm-acao__info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+}
+
+.llm-acao__tipo {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--gray-500);
+  white-space: nowrap;
 }
 
 .llm-card--pendencias .llm-card__lista li   { border-color: var(--teal-mid); }

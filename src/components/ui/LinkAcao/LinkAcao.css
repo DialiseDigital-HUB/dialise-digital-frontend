@@ -1,0 +1,59 @@
+.link-acao {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  border: 1px solid transparent;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: opacity 0.15s ease, transform 0.1s ease;
+  white-space: nowrap;
+  font-family: inherit;
+}
+
+.link-acao:hover {
+  opacity: 0.8;
+  transform: translateY(-1px);
+}
+
+.link-acao:active {
+  transform: translateY(0);
+}
+
+.link-acao__icone {
+  flex-shrink: 0;
+}
+
+/* Variantes por tipo */
+.link-acao--evolucao {
+  background: var(--teal-light);
+  color: var(--teal-mid);
+  border-color: #b2e8e0;
+}
+
+.link-acao--lme {
+  background: var(--amber-light);
+  color: #92400e;
+  border-color: #fde68a;
+}
+
+.link-acao--agendamento {
+  background: var(--blue-soft);
+  color: var(--blue);
+  border-color: #bfdbfe;
+}
+
+.link-acao--prescricao {
+  background: var(--red-light);
+  color: var(--red);
+  border-color: #fecaca;
+}
+
+.link-acao--erro {
+  background: var(--gray-100);
+  color: var(--gray-700);
+  border-color: var(--gray-300);
+}

@@ -2,22 +2,24 @@ import { useState } from 'react'
 import './LLM.css'
 import Botao from '../../components/ui/Button/Button'
 import BuscaPaciente from '../../components/ui/BuscaPaciente/BuscaPaciente'
+import LinkAcao from '../../components/ui/LinkAcao/LinkAcao'
 import type { AcaoRealizada } from '../../store/useCopilotStore'
 import type { Paciente } from '../../store/usePacientesStore'
 
 import useCopilotStore from '../../store/useCopilotStore'
 
-const ICONE_TIPO: Record<AcaoRealizada['tipo'], string> = {
-  evolucao: '📋',
-  lme: '📄',
-  agendamento: '📅',
-  erro: '⚠️',
+const ROTULO_TIPO: Record<AcaoRealizada['tipo'], string> = {
+  evolucao:    'Evolução',
+  lme:         'LME',
+  agendamento: 'Agendamento',
+  prescricao:  'Prescrição',
+  erro:        'Erro',
 }
 
 export default function LLM() {
-  const [texto, setTexto] = useState('')
+  const [texto, setTexto]             = useState('')
   const [pacienteAtivo, setPacienteAtivo] = useState<Paciente | null>(null)
-  const [copiado, setCopiado] = useState(false)
+  const [copiado, setCopiado]         = useState(false)
 
   const { executar, carregando, historico, limpar, erro } = useCopilotStore()
 
@@ -62,7 +64,7 @@ export default function LLM() {
             className="llm-entrada__textarea"
             value={texto}
             onChange={e => setTexto(e.target.value)}
-            placeholder="Ex: Paciente João, PA 140x90, peso 72kg, ktv 1.2. Agendar retorno em 30 dias. Fazer LME pra sevelamer."
+            placeholder="Ex: Paciente João, PA 140x90, peso 72kg, ktv 1.2. Prescrever vancomicina 1g EV por 7 dias. Agendar retorno em 30 dias."
             rows={8}
             disabled={carregando}
           />
@@ -104,8 +106,17 @@ export default function LLM() {
                 <ul className="llm-card__lista">
                   {resp.acoes.map((acao, j) => (
                     <li key={j} className={`llm-acao llm-acao--${acao.sucesso ? 'ok' : 'erro'}`}>
-                      <span>{ICONE_TIPO[acao.tipo]}</span>
-                      <span>{acao.descricao}</span>
+                      <div className="llm-acao__info">
+                        <span className="llm-acao__tipo">{ROTULO_TIPO[acao.tipo]}</span>
+                        <span>{acao.descricao}</span>
+                      </div>
+                      {acao.link_pagina && acao.link_rotulo && (
+                        <LinkAcao
+                          rotulo={acao.link_rotulo}
+                          pagina={acao.link_pagina}
+                          tipo={acao.tipo}
+                        />
+                      )}
                     </li>
                   ))}
                 </ul>

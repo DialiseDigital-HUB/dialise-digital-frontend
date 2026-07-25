@@ -152,7 +152,7 @@
 .evento-item--antibiotico .evento-item__indicador { background: var(--red); }
 .evento-item--exame .evento-item__indicador { background: var(--amber); }
 .evento-item--internacao .evento-item__indicador { background: var(--gray-700); }
-.evento-item--retorno .evento-item__indicador { background: var(--teal-sea); }
+.evento-item--retorno .evento-item__indicador { background: var(--blue); }
 
 /* Estados Ativos - Acende o background */
 .evento-item--ativo {
@@ -188,10 +188,10 @@
 .evento-item--ativo.evento-item--internacao .evento-item__indicador { height: 100%; position: absolute; left: 0; top: 0; border-radius: 0; width: 4px; margin-top: 0; }
 
 .evento-item--ativo.evento-item--retorno {
-  background: var(--teal-light);
-  border: 1px solid #99F6E4;
+  background: var(--blue-soft);
+  border: 1px solid #BFDBFE;
 }
-.evento-item--ativo.evento-item--retorno .evento-item__tipo { color: var(--teal-sea); }
+.evento-item--ativo.evento-item--retorno .evento-item__tipo { color: var(--blue); }
 .evento-item--ativo.evento-item--retorno .evento-item__indicador { height: 100%; position: absolute; left: 0; top: 0; border-radius: 0; width: 4px; margin-top: 0; }
 
 /* Linha de período (data início → data fim + badge de dias) */

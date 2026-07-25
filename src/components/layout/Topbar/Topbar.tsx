@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react'
 import Botao from '../../ui/Button/Button'
 import useAuthStore from '../../../store/useAuthStore'
+import usePacientesStore from '../../../store/usePacientesStore'
+import useCalendarioStore from '../../../store/useCalendarioStore'
+import useNavegacaoStore from '../../../store/useNavegacaoStore'
 import './Topbar.css'
 
 interface TopbarProps {
@@ -11,26 +14,22 @@ interface TopbarProps {
 }
 
 const mapaRotulos: Record<string, string> = {
-  dashboard:  'Painel Geral',
-  pacientes:  'Pacientes',
-  evolucao:   'Evolução Mensal',
-  calendario: 'Calendário & Alertas',
-  exames:     'Exames',
-  historico:  'Histórico',
-  llm:        'Apoio LLM',
-  lme:        'Laudo de Solicitação de Medicamentos (LME)',
+  dashboard:   'Painel Geral',
+  pacientes:   'Pacientes',
+  evolucao:    'Evolução Mensal',
+  calendario:  'Calendário & Alertas',
+  exames:      'Exames',
+  historico:   'Histórico',
+  llm:         'Apoio LLM',
+  lme:         'Laudo de Solicitação de Medicamentos (LME)',
+  vacinas:     'Controle de Vacinas',
+  prescricoes: 'Prescrições Médicas',
 }
 
-const mapaSubtitulos: Record<string, string> = {
-  dashboard:  'Centro de Diálise · HUB-UnB',
-  pacientes:  '48 pacientes ativos',
-  evolucao:   'Formulário digital HUB-UnB',
-  calendario: 'Junho 2025',
-  exames:     'Periodicidade e status por paciente',
-  historico:  'Rastreabilidade de evoluções',
-  llm:        'Organização textual e extração de pendências',
-  lme:        'Componente Especializado da Assistência Farmacêutica (CEAF / SUS)',
-}
+const nomesMeses = [
+  'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+  'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+]
 
 const rotulosRole: Record<string, string> = {
   admin:      'Administrador',
@@ -48,8 +47,15 @@ export default function Topbar({
   aoNovaCriacao,
   labelAcaoPrimaria,
 }: TopbarProps) {
-  const usuario    = useAuthStore(s => s.usuario)
+  const usuario = useAuthStore(s => s.usuario)
   const [scrollado, setScrollado] = useState(false)
+  
+  const pacientes = usePacientesStore(s => s.pacientes)
+  const mesAtivo = useCalendarioStore(s => s.mesAtivo)
+  const anoAtivo = useCalendarioStore(s => s.anoAtivo)
+  const contextoPacienteId = useNavegacaoStore(s => s.pacienteEmFoco)
+  
+  const pacienteContexto = pacientes.find(p => p.id === contextoPacienteId)
 
   useEffect(() => {
     const areaConteudo = document.querySelector('.layout__pagina')
@@ -64,7 +70,21 @@ export default function Topbar({
   const cargoUsuario = usuario?.role ? rotulosRole[usuario.role] : ''
   const iniciais     = nomeUsuario ? extrairIniciais(nomeUsuario) : '--'
   const rotulo       = mapaRotulos[tituloPagina] ?? tituloPagina
-  const subtitulo    = mapaSubtitulos[tituloPagina]
+
+  let subtitulo = ''
+  if (tituloPagina === 'dashboard') {
+    subtitulo = 'Centro de Diálise · HUB-UnB'
+  } else if (tituloPagina === 'pacientes') {
+    subtitulo = `${pacientes.length} pacientes ativos`
+  } else if (tituloPagina === 'calendario') {
+    subtitulo = `${nomesMeses[mesAtivo - 1]} ${anoAtivo}`
+  } else {
+    if (pacienteContexto) {
+      subtitulo = `Paciente: ${pacienteContexto.nomeCompleto} (${pacienteContexto.prontuario})`
+    } else {
+      subtitulo = 'Selecione um paciente para gerenciar'
+    }
+  }
 
   return (
     <header className={`topbar${scrollado ? ' topbar--scrolled' : ''}`}>
