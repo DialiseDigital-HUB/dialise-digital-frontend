@@ -54,6 +54,8 @@ const secoes: { label: string; itens: ItemNavegacao[]; role?: string }[] = [
 
 
 
+const VERSAO_SISTEMA = import.meta.env.VITE_APP_VERSION ?? 'v0.1.1'
+
 export default function Sidebar({ paginaAtiva, aoNavegar, totalAlertas = 0 }: SidebarProps) {
   const usuario = useAuthStore(s => s.usuario)
   const logout  = useAuthStore(s => s.logout)
@@ -70,7 +72,7 @@ export default function Sidebar({ paginaAtiva, aoNavegar, totalAlertas = 0 }: Si
             <div className="sidebar__logo-sub">HUB-UnB · Grupo 5</div>
           </div>
         </div>
-        <div className="sidebar__logo-badge">MVP · Protótipo</div>
+        <div className="sidebar__logo-badge">{VERSAO_SISTEMA}</div>
       </div>
 
       {secoes.map(secao => {

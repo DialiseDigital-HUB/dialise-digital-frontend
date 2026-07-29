@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import usePacientesStore from '../../store/usePacientesStore'
 import useNavegacaoStore from '../../store/useNavegacaoStore'
 import useEvolucaoStore from '../../store/useEvolucaoStore'
@@ -117,6 +117,7 @@ export default function Pacientes() {
   const fecharModalCadastro  = useNavegacaoStore(s => s.fecharModalCadastro)
   const cadastrarPaciente    = usePacientesStore(s => s.cadastrarPaciente)
   const editarPaciente       = usePacientesStore(s => s.editarPaciente)
+  const inativarPaciente     = usePacientesStore(s => s.inativarPaciente)
   const adicionarToast       = useToastStore(s => s.adicionarToast)
 
   const [modalEdicao, setModalEdicao] = useState(false)
@@ -143,15 +144,15 @@ export default function Pacientes() {
 
   useEffect(() => {
     if (pacienteEmFoco) {
-      const p = lista.find(pac => pac.id === pacienteEmFoco || pac.nomeCompleto.toLowerCase().includes(pacienteEmFoco.toLowerCase()))
-      if (p) {
-        selecionarPaciente(p)
-      }
+      const p = lista.find(item => item.id === pacienteEmFoco)
+      if (p) selecionarPaciente(p)
       limparContexto()
     }
   }, [pacienteEmFoco, lista, selecionarPaciente, limparContexto])
 
-  const aoFecharModal = useCallback(() => selecionarPaciente(null), [selecionarPaciente])
+  const aoFecharModal = () => {
+    selecionarPaciente(null)
+  }
 
   const aoNovaEvolucao = (paciente: Paciente) => {
     definirPaciente(paciente.id)
@@ -173,6 +174,18 @@ export default function Pacientes() {
       adicionarToast('Paciente atualizado com sucesso!', 'sucesso')
     } else {
       adicionarToast('Erro ao atualizar paciente.', 'erro')
+    }
+  }
+
+  const handleInativacao = async () => {
+    if (!pacienteSelecionado) return
+    if (!window.confirm(`Confirma a inativação de ${pacienteSelecionado.nomeCompleto}? O prontuário será preservado no histórico.`)) return
+    const sucesso = await inativarPaciente(pacienteSelecionado.id)
+    if (sucesso) {
+      selecionarPaciente(null)
+      adicionarToast('Paciente inativado com sucesso.', 'sucesso')
+    } else {
+      adicionarToast('Erro ao inativar paciente.', 'erro')
     }
   }
 
@@ -262,6 +275,7 @@ export default function Pacientes() {
         aoFechar={aoFecharModal}
         rodape={
           <>
+            <Botao variante="danger" onClick={handleInativacao}>Inativar</Botao>
             <Botao variante="ghost" onClick={aoFecharModal}>Fechar</Botao>
             <Botao variante="ghost" onClick={() => setModalEdicao(true)}>Editar</Botao>
             <Botao

@@ -20,6 +20,7 @@ export interface Paciente {
   recebeuTransfusao: boolean
   horarioEntrada: string
   dataEntrada: string
+  ativo?: boolean
 }
 
 interface EstadoPacientes {
@@ -36,6 +37,7 @@ interface EstadoPacientes {
   pacientesFiltrados: () => Paciente[]
   cadastrarPaciente: (dados: any) => Promise<boolean>
   editarPaciente: (id: string, dados: any) => Promise<boolean>
+  inativarPaciente: (id: string) => Promise<boolean>
 }
 
 const usePacientesStore = create<EstadoPacientes>((set, get) => ({
@@ -121,6 +123,18 @@ const usePacientesStore = create<EstadoPacientes>((set, get) => ({
       return true
     } catch {
       set({ erro: 'Falha ao atualizar paciente', carregando: false })
+      return false
+    }
+  },
+
+  inativarPaciente: async (id) => {
+    set({ carregando: true, erro: null })
+    try {
+      await api.delete(`/pacientes/${id}`)
+      await get().buscarPacientes()
+      return true
+    } catch {
+      set({ erro: 'Falha ao inativar paciente', carregando: false })
       return false
     }
   },
