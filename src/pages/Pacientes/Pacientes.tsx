@@ -119,6 +119,7 @@ export default function Pacientes() {
   const editarPaciente       = usePacientesStore(s => s.editarPaciente)
   const inativarPaciente     = usePacientesStore(s => s.inativarPaciente)
   const adicionarToast       = useToastStore(s => s.adicionarToast)
+  const usuario              = useAuthStore(s => s.usuario)
 
   const [modalEdicao, setModalEdicao] = useState(false)
 
@@ -140,15 +141,13 @@ export default function Pacientes() {
 
   const lista = pacientesFiltrados()
   const pacienteEmFoco = useNavegacaoStore(s => s.pacienteEmFoco)
-  const limparContexto = useNavegacaoStore(s => s.limparContexto)
 
   useEffect(() => {
     if (pacienteEmFoco) {
       const p = lista.find(item => item.id === pacienteEmFoco)
       if (p) selecionarPaciente(p)
-      limparContexto()
     }
-  }, [pacienteEmFoco, lista, selecionarPaciente, limparContexto])
+  }, [pacienteEmFoco, lista, selecionarPaciente])
 
   const aoFecharModal = () => {
     selecionarPaciente(null)
@@ -275,7 +274,9 @@ export default function Pacientes() {
         aoFechar={aoFecharModal}
         rodape={
           <>
-            <Botao variante="danger" onClick={handleInativacao}>Inativar</Botao>
+            {usuario?.role === 'admin' && (
+              <Botao variante="danger" onClick={handleInativacao}>Inativar</Botao>
+            )}
             <Botao variante="ghost" onClick={aoFecharModal}>Fechar</Botao>
             <Botao variante="ghost" onClick={() => setModalEdicao(true)}>Editar</Botao>
             <Botao
