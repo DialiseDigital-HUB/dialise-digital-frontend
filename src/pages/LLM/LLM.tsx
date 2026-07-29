@@ -5,7 +5,7 @@ import BuscaPaciente from '../../components/ui/BuscaPaciente/BuscaPaciente'
 import LinkAcao from '../../components/ui/LinkAcao/LinkAcao'
 import useNavegacaoStore from '../../store/useNavegacaoStore'
 import type { AcaoRealizada, CitacaoClinica } from '../../store/useCopilotStore'
-import type { Paciente } from '../../store/usePacientesStore'
+import usePacientesStore, { type Paciente } from '../../store/usePacientesStore'
 import useCopilotStore from '../../store/useCopilotStore'
 
 const ROTULO_TIPO: Record<AcaoRealizada['tipo'], string> = {
@@ -17,8 +17,9 @@ const ROTULO_TIPO: Record<AcaoRealizada['tipo'], string> = {
   erro:        'Erro',
 }
 
-function CardCitacao({ citacoes }: { citacoes: CitacaoClinica[] }) {
+function CardCitacao({ citacoes, pacienteId }: { citacoes: CitacaoClinica[]; pacienteId?: string }) {
   const navegar = useNavegacaoStore(s => s.navegar)
+  const navegarComContexto = useNavegacaoStore(s => s.navegarComContexto)
   return (
     <ul className="llm-citacoes">
       {citacoes.map((c, i) => (
@@ -28,7 +29,13 @@ function CardCitacao({ citacoes }: { citacoes: CitacaoClinica[] }) {
           {c.link_pagina && c.link_rotulo && (
             <button
               className="llm-citacao__link"
-              onClick={() => navegar(c.link_pagina!)}
+              onClick={() => {
+                if (pacienteId) {
+                  navegarComContexto(c.link_pagina!, pacienteId)
+                } else {
+                  navegar(c.link_pagina!)
+                }
+              }}
               type="button"
             >
               {c.link_rotulo}
@@ -76,12 +83,31 @@ function IconePaciente() {
 }
 
 export default function LLM() {
+  const pacientes                             = usePacientesStore(s => s.pacientes)
+  const pacienteEmFoco                        = useNavegacaoStore(s => s.pacienteEmFoco)
+  const definirPaciente                       = useNavegacaoStore(s => s.definirPaciente)
   const [texto, setTexto]                     = useState('')
-  const [pacienteAtivo, setPacienteAtivo]     = useState<Paciente | null>(null)
+  const [pacienteAtivo, setPacienteAtivo]     = useState<Paciente | null>(
+    pacienteEmFoco ? (pacientes.find(p => p.id === pacienteEmFoco) ?? null) : null
+  )
   const [copiado, setCopiado]                 = useState(false)
   const chatRef                               = useRef<HTMLDivElement>(null)
 
   const { executar, carregando, historico, limpar, mensagensEnviadas } = useCopilotStore()
+
+  useEffect(() => {
+    if (pacienteEmFoco && (!pacienteAtivo || pacienteAtivo.id !== pacienteEmFoco)) {
+      const p = pacientes.find(item => item.id === pacienteEmFoco)
+      if (p) setPacienteAtivo(p)
+    }
+  }, [pacienteEmFoco, pacienteAtivo, pacientes])
+
+  const aoSelecionarPaciente = (p: Paciente | null) => {
+    setPacienteAtivo(p)
+    if (p?.id) {
+      definirPaciente(p.id)
+    }
+  }
 
   useEffect(() => {
     chatRef.current?.scrollTo({ top: chatRef.current.scrollHeight, behavior: 'smooth' })
@@ -125,7 +151,7 @@ export default function LLM() {
         <div className="llm-selecao-paciente">
           <BuscaPaciente
             idPacienteAtivo={pacienteAtivo?.id ?? null}
-            aoSelecionar={p => setPacienteAtivo(p)}
+            aoSelecionar={aoSelecionarPaciente}
             placeholder="Selecione um paciente para contextualizar o assistente..."
           />
           {pacienteAtivo && (
@@ -186,14 +212,14 @@ export default function LLM() {
                                 <span>{acao.descricao}</span>
                               </div>
                               {acao.link_pagina && acao.link_rotulo && (
-                                <LinkAcao rotulo={acao.link_rotulo} pagina={acao.link_pagina} tipo={acao.tipo} />
+                                <LinkAcao rotulo={acao.link_rotulo} pagina={acao.link_pagina} tipo={acao.tipo} pacienteId={pacienteAtivo?.id} />
                               )}
                             </li>
                           ))}
                         </ul>
                       )}
                       {resposta.citacoes && resposta.citacoes.length > 0 && (
-                        <CardCitacao citacoes={resposta.citacoes} />
+                        <CardCitacao citacoes={resposta.citacoes} pacienteId={pacienteAtivo?.id} />
                       )}
                     </div>
                   )}
