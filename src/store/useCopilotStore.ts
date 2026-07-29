@@ -17,6 +17,7 @@ export interface RespostaCopilot {
 
 interface EstadoCopilot {
   historico: RespostaCopilot[]
+  mensagensEnviadas: string[]
   carregando: boolean
   erro: string | null
   executar: (texto: string, pacienteId: string) => Promise<RespostaCopilot | null>
@@ -25,17 +26,22 @@ interface EstadoCopilot {
 
 const useCopilotStore = create<EstadoCopilot>((set, get) => ({
   historico: [],
+  mensagensEnviadas: [],
   carregando: false,
   erro: null,
 
   executar: async (texto, pacienteId) => {
-    set({ carregando: true, erro: null })
+    set({
+      carregando: true,
+      erro: null,
+      mensagensEnviadas: [...get().mensagensEnviadas, texto],
+    })
     try {
       const { data } = await api.post<RespostaCopilot>('/copilot/executar', {
         texto,
         paciente_id: pacienteId,
       })
-      set({ historico: [data, ...get().historico], carregando: false })
+      set({ historico: [...get().historico, data], carregando: false })
       return data
     } catch {
       set({ erro: 'Falha ao comunicar com o copilot', carregando: false })
@@ -43,7 +49,7 @@ const useCopilotStore = create<EstadoCopilot>((set, get) => ({
     }
   },
 
-  limpar: () => set({ historico: [], erro: null }),
+  limpar: () => set({ historico: [], mensagensEnviadas: [], erro: null }),
 }))
 
 export default useCopilotStore
