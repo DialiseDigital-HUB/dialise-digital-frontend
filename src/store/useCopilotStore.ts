@@ -3,9 +3,16 @@ import api from '../lib/api'
 import type { PaginaAtiva } from './useNavegacaoStore'
 
 export interface AcaoRealizada {
-  tipo: 'evolucao' | 'lme' | 'agendamento' | 'prescricao' | 'erro'
+  tipo: 'evolucao' | 'lme' | 'agendamento' | 'prescricao' | 'consulta' | 'erro'
   descricao: string
   sucesso: boolean
+  link_pagina?: PaginaAtiva
+  link_rotulo?: string
+}
+
+export interface CitacaoClinica {
+  fonte: string
+  texto_referencia: string
   link_pagina?: PaginaAtiva
   link_rotulo?: string
 }
@@ -13,6 +20,7 @@ export interface AcaoRealizada {
 export interface RespostaCopilot {
   acoes: AcaoRealizada[]
   mensagem_final: string
+  citacoes?: CitacaoClinica[]
 }
 
 interface EstadoCopilot {

@@ -340,3 +340,56 @@
     max-width: 95%;
   }
 }
+
+.llm-citacoes {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  border-top: 1px solid var(--gray-200);
+  padding-top: 8px;
+}
+
+.llm-citacao {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: var(--gray-50, #f8fafc);
+  border: 1px solid var(--gray-200, #e2e8f0);
+}
+
+.llm-citacao__fonte {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--gray-500);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.llm-citacao__ref {
+  font-size: 12px;
+  color: var(--gray-700, #334155);
+}
+
+.llm-citacao__link {
+  align-self: flex-start;
+  margin-top: 4px;
+  padding: 3px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  border: 1px solid var(--primary, #2563eb);
+  border-radius: 4px;
+  color: var(--primary, #2563eb);
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.llm-citacao__link:hover {
+  background: var(--primary, #2563eb);
+  color: #fff;
+}

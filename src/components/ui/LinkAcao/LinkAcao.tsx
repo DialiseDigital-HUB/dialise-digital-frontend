@@ -5,7 +5,7 @@ import './LinkAcao.css'
 interface LinkAcaoProps {
   rotulo: string
   pagina: PaginaAtiva
-  tipo: 'evolucao' | 'lme' | 'agendamento' | 'prescricao' | 'erro'
+  tipo: 'evolucao' | 'lme' | 'agendamento' | 'prescricao' | 'consulta' | 'erro'
 }
 
 export default function LinkAcao({ rotulo, pagina, tipo }: LinkAcaoProps) {

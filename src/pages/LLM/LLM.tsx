@@ -3,7 +3,8 @@ import './LLM.css'
 import Botao from '../../components/ui/Button/Button'
 import BuscaPaciente from '../../components/ui/BuscaPaciente/BuscaPaciente'
 import LinkAcao from '../../components/ui/LinkAcao/LinkAcao'
-import type { AcaoRealizada } from '../../store/useCopilotStore'
+import useNavegacaoStore from '../../store/useNavegacaoStore'
+import type { AcaoRealizada, CitacaoClinica } from '../../store/useCopilotStore'
 import type { Paciente } from '../../store/usePacientesStore'
 import useCopilotStore from '../../store/useCopilotStore'
 
@@ -12,7 +13,31 @@ const ROTULO_TIPO: Record<AcaoRealizada['tipo'], string> = {
   lme:         'LME',
   agendamento: 'Agendamento',
   prescricao:  'Prescrição',
+  consulta:    'Consulta',
   erro:        'Erro',
+}
+
+function CardCitacao({ citacoes }: { citacoes: CitacaoClinica[] }) {
+  const navegar = useNavegacaoStore(s => s.navegar)
+  return (
+    <ul className="llm-citacoes">
+      {citacoes.map((c, i) => (
+        <li key={i} className="llm-citacao">
+          <span className="llm-citacao__fonte">{c.fonte}</span>
+          <span className="llm-citacao__ref">{c.texto_referencia}</span>
+          {c.link_pagina && c.link_rotulo && (
+            <button
+              className="llm-citacao__link"
+              onClick={() => navegar(c.link_pagina!)}
+              type="button"
+            >
+              {c.link_rotulo}
+            </button>
+          )}
+        </li>
+      ))}
+    </ul>
+  )
 }
 
 function IconeAlerta() {
@@ -166,6 +191,9 @@ export default function LLM() {
                             </li>
                           ))}
                         </ul>
+                      )}
+                      {resposta.citacoes && resposta.citacoes.length > 0 && (
+                        <CardCitacao citacoes={resposta.citacoes} />
                       )}
                     </div>
                   )}
