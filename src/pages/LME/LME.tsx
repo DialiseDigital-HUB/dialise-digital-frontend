@@ -17,8 +17,7 @@ const CID10_OPCOES = [
 ]
 
 export default function LME() {
-  const pacienteEmFoco = useNavegacaoStore(s => s.pacienteEmFoco)
-  const limparContexto = useNavegacaoStore(s => s.limparContexto)
+  const { pacienteEmFoco, definirPaciente } = useNavegacaoStore()
   const pacientes = usePacientesStore(s => s.pacientes)
   const usuario = useAuthStore(s => s.usuario)
   const { registros, carregando, criar, buscarPorPaciente } = useLmeStore()
@@ -34,28 +33,24 @@ export default function LME() {
   const [criandoMedicamento, setCriandoMedicamento] = useState(false)
   const [novoMedicamentoNome, setNovoMedicamentoNome] = useState('')
 
+  const medicamentoAtual = medicamento || (medicamentos.length > 0 ? medicamentos[0].nome : '')
+  const pacienteAtivoIdAtual = pacienteAtivoId || pacienteEmFoco || null
+
   useEffect(() => {
     buscarMedicamentos()
   }, [buscarMedicamentos])
 
   useEffect(() => {
-    if (medicamentos.length > 0 && !medicamento) {
-      setMedicamento(medicamentos[0].nome)
-    }
-  }, [medicamentos, medicamento])
+    if (pacienteAtivoIdAtual) buscarPorPaciente(pacienteAtivoIdAtual)
+  }, [pacienteAtivoIdAtual, buscarPorPaciente])
 
-  useEffect(() => {
-    if (pacienteEmFoco) {
-      setPacienteAtivoId(pacienteEmFoco)
-      limparContexto()
-    }
-  }, [pacienteEmFoco, limparContexto])
+  const paciente = pacientes.find(p => p.id === pacienteAtivoIdAtual)
 
-  useEffect(() => {
-    if (pacienteAtivoId) buscarPorPaciente(pacienteAtivoId)
-  }, [pacienteAtivoId])
-
-  const paciente = pacientes.find(p => p.id === pacienteAtivoId)
+  const aoSelecionarPaciente = (p: { id?: string }) => {
+    const id = p.id || null
+    setPacienteAtivoId(id)
+    if (id) definirPaciente(id)
+  }
 
   const aoSalvar = async () => {
     if (!paciente || !usuario) return
@@ -63,7 +58,7 @@ export default function LME() {
       pacienteId:              paciente.id!,
       medicoId:                usuario.id,
       cid10,
-      medicamentosSolicitados: medicamento,
+      medicamentosSolicitados: medicamentoAtual,
       justificativa,
       validoAte:               validoAte || undefined,
     })
@@ -117,8 +112,8 @@ export default function LME() {
         <div className="lme-formulario-container">
           <div className="lme-busca-topo">
             <BuscaPaciente
-              idPacienteAtivo={pacienteAtivoId}
-              aoSelecionar={p => setPacienteAtivoId(p.id || null)}
+              idPacienteAtivo={pacienteAtivoIdAtual}
+              aoSelecionar={aoSelecionarPaciente}
               placeholder="Pesquise o paciente para preencher o LME..."
             />
           </div>
@@ -199,8 +194,8 @@ export default function LME() {
                       </div>
                     ) : (
                       <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                        <select value={medicamento} onChange={e => setMedicamento(e.target.value)} style={{ flex: 1 }}>
-                          {medicamento === '' && <option value="" disabled>Selecione ou adicione...</option>}
+                        <select value={medicamentoAtual} onChange={e => setMedicamento(e.target.value)} style={{ flex: 1 }}>
+                          {medicamentoAtual === '' && <option value="" disabled>Selecione ou adicione...</option>}
                           {medicamentos.map(m => (
                             <option key={m.id} value={m.nome}>{m.nome}</option>
                           ))}

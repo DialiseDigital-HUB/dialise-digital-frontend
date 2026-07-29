@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react'
 import usePacientesStore from '../../store/usePacientesStore'
 import useVacinasStore from '../../store/useVacinasStore'
 import useToastStore from '../../store/useToastStore'
+import useNavegacaoStore from '../../store/useNavegacaoStore'
 import Card from '../../components/ui/Card/Card'
 import Modal from '../../components/ui/Modal/Modal'
 import ModalFooter from '../../components/ui/Modal/ModalFooter'
@@ -42,10 +43,17 @@ export default function Vacinas() {
   const pacientes = usePacientesStore(s => s.pacientes)
   const { registros, buscarVacinas, cadastrarVacina } = useVacinasStore()
   const adicionarToast = useToastStore(s => s.adicionarToast)
+  const pacienteEmFoco = useNavegacaoStore(s => s.pacienteEmFoco)
 
   useEffect(() => {
     buscarVacinas()
   }, [buscarVacinas])
+
+  useEffect(() => {
+    if (modalAberto && pacienteEmFoco) {
+      setForm(prev => ({ ...prev, pacienteId: pacienteEmFoco }))
+    }
+  }, [modalAberto, pacienteEmFoco])
 
   const opcoesPacientes = pacientes.map(p => ({ valor: p.id, rotulo: p.nomeCompleto }))
 

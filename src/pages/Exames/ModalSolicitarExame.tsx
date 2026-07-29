@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import usePacientesStore from '../../store/usePacientesStore'
 import useSolicitacoesExamesStore from '../../store/useSolicitacoesExamesStore'
 import useExamesStore from '../../store/useExamesStore'
@@ -50,10 +50,20 @@ const formInicial: FormState = {
 interface ModalSolicitarExameProps {
   aberto: boolean
   aoFechar: () => void
+  pacienteIdInicial?: string | null
 }
 
-export default function ModalSolicitarExame({ aberto, aoFechar }: ModalSolicitarExameProps) {
-  const [form, setForm] = useState<FormState>(formInicial)
+export default function ModalSolicitarExame({ aberto, aoFechar, pacienteIdInicial }: ModalSolicitarExameProps) {
+  const [form, setForm] = useState<FormState>(() => ({
+    ...formInicial,
+    pacienteId: pacienteIdInicial ?? '',
+  }))
+
+  useEffect(() => {
+    if (aberto && pacienteIdInicial) {
+      setForm(prev => ({ ...prev, pacienteId: pacienteIdInicial }))
+    }
+  }, [aberto, pacienteIdInicial])
 
   const pacientes = usePacientesStore(s => s.pacientes)
   const { cadastrarSolicitacao } = useSolicitacoesExamesStore()

@@ -15,7 +15,6 @@ import './Impressao.css'
 
 export default function Impressao() {
   const pacienteEmFoco = useNavegacaoStore(s => s.pacienteEmFoco)
-  const limparContexto = useNavegacaoStore(s => s.limparContexto)
   const pacientes = usePacientesStore(s => s.pacientes)
   const usuario = useAuthStore(s => s.usuario)
 
@@ -42,9 +41,8 @@ export default function Impressao() {
   useEffect(() => {
     if (pacienteEmFoco) {
       setPacienteAtivoId(pacienteEmFoco)
-      limparContexto()
     }
-  }, [pacienteEmFoco, limparContexto])
+  }, [pacienteEmFoco])
 
   useEffect(() => {
     if (pacienteAtivoId) {
