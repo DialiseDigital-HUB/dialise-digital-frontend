@@ -20,6 +20,7 @@ export interface Paciente {
   recebeuTransfusao: boolean
   horarioEntrada: string
   dataEntrada: string
+  ativo?: boolean
 }
 
 interface EstadoPacientes {
