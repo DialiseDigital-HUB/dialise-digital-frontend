@@ -6,9 +6,11 @@ import ModalSolicitarExame from './ModalSolicitarExame'
 import TabelaControleExames from './TabelaControleExames'
 import TabelaSolicitacoes from './TabelaSolicitacoes'
 import useExamesStore from '../../store/useExamesStore'
+import useNavegacaoStore from '../../store/useNavegacaoStore'
 
 export default function Exames() {
   const { examesFiltrados, buscarExames } = useExamesStore()
+  const pacienteEmFoco = useNavegacaoStore(s => s.pacienteEmFoco)
   const [modalAberto, setModalAberto] = useState(false)
   const [abaAtiva, setAbaAtiva] = useState('controle')
   
@@ -51,9 +53,10 @@ export default function Exames() {
       {abaAtiva === 'controle' && <TabelaControleExames />}
       {abaAtiva === 'solicitacoes' && <TabelaSolicitacoes />}
 
-      <ModalSolicitarExame 
-        aberto={modalAberto} 
-        aoFechar={() => setModalAberto(false)} 
+      <ModalSolicitarExame
+        aberto={modalAberto}
+        aoFechar={() => setModalAberto(false)}
+        pacienteIdInicial={pacienteEmFoco}
       />
     </div>
   )

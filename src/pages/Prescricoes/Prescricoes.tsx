@@ -86,7 +86,6 @@ export default function Prescricoes() {
   const definirFiltroStatus = usePrescricoesStore(s => s.definirFiltroStatus)
   const adicionarToast     = useToastStore(s => s.adicionarToast)
   const pacienteEmFoco     = useNavegacaoStore(s => s.pacienteEmFoco)
-  const limparContexto     = useNavegacaoStore(s => s.limparContexto)
 
   const listaPrescricoes = useMemo(() => {
     const hoje = new Date().toISOString().split('T')[0]
@@ -107,8 +106,7 @@ export default function Prescricoes() {
   useEffect(() => {
     buscarPrescricoes()
     carregarDashboard()
-    return () => { limparContexto() }
-  }, [buscarPrescricoes, carregarDashboard, limparContexto])
+  }, [buscarPrescricoes, carregarDashboard])
 
   const opcoesPacientes = pacientes.map(p => ({ valor: p.id, rotulo: p.nomeCompleto }))
 

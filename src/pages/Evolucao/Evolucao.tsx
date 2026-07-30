@@ -36,14 +36,12 @@ export default function Evolucao() {
   const pacienteAtivo = pacientes.find(p => p.id === idPacienteAtivo) ?? null
 
   const pacienteEmFoco = useNavegacaoStore(s => s.pacienteEmFoco)
-  const limparContexto = useNavegacaoStore(s => s.limparContexto)
 
   useEffect(() => {
     if (pacienteEmFoco) {
       definirPaciente(pacienteEmFoco)
-      limparContexto()
     }
-  }, [pacienteEmFoco, limparContexto, definirPaciente])
+  }, [pacienteEmFoco, definirPaciente])
 
   const aoSelecionarPaciente = (idPaciente: string) => {
     definirPaciente(idPaciente)

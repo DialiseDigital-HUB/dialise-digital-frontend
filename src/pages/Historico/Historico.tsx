@@ -13,6 +13,7 @@ import useHistoricoStore from '../../store/useHistoricoStore'
 import type { EvolucaoHistorico } from '../../store/useHistoricoStore'
 import usePacientesStore from '../../store/usePacientesStore'
 import useAcessosStore from '../../store/useAcessosStore'
+import useNavegacaoStore from '../../store/useNavegacaoStore'
 
 const abasHistorico: TabItem[] = [
   { id: 'prontuario', rotulo: 'Prontuário do Paciente' },
@@ -26,6 +27,13 @@ export default function Historico() {
   const pacientes = usePacientesStore(s => s.pacientes)
   const { idPacienteAtivo, definirPaciente, evolucoesDoPaciente, buscarHistorico, mesEmFoco, focarMes } = useHistoricoStore()
   const { registrosFiltrados, filtroTipo, definirFiltroTipo, buscarAcessos } = useAcessosStore()
+  const pacienteEmFoco = useNavegacaoStore(s => s.pacienteEmFoco)
+
+  useEffect(() => {
+    if (pacienteEmFoco) {
+      definirPaciente(pacienteEmFoco)
+    }
+  }, [pacienteEmFoco, definirPaciente])
 
   useEffect(() => {
     buscarHistorico()

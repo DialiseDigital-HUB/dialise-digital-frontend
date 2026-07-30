@@ -5,17 +5,29 @@ import './LinkAcao.css'
 interface LinkAcaoProps {
   rotulo: string
   pagina: PaginaAtiva
-  tipo: 'evolucao' | 'lme' | 'agendamento' | 'prescricao' | 'erro'
+  tipo: 'evolucao' | 'lme' | 'agendamento' | 'prescricao' | 'consulta' | 'erro'
+  pacienteId?: string
 }
 
-export default function LinkAcao({ rotulo, pagina, tipo }: LinkAcaoProps) {
+export default function LinkAcao({ rotulo, pagina, tipo, pacienteId }: LinkAcaoProps) {
   const navegar = useNavegacaoStore(s => s.navegar)
+  const navegarComContexto = useNavegacaoStore(s => s.navegarComContexto)
+  const pacienteEmFoco = useNavegacaoStore(s => s.pacienteEmFoco)
+
+  const aoClicar = () => {
+    const id = pacienteId || pacienteEmFoco
+    if (id) {
+      navegarComContexto(pagina, id)
+    } else {
+      navegar(pagina)
+    }
+  }
 
   return (
     <button
       type="button"
       className={`link-acao link-acao--${tipo}`}
-      onClick={() => navegar(pagina)}
+      onClick={aoClicar}
       title={`Ir para ${rotulo}`}
     >
       <svg className="link-acao__icone" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">

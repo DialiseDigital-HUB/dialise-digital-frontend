@@ -9,6 +9,7 @@ interface EstadoNavegacao {
   modalCadastroPacienteAberto: boolean
   navegar: (pagina: PaginaAtiva) => void
   navegarComContexto: (pagina: PaginaAtiva, pacienteId: string) => void
+  definirPaciente: (pacienteId: string | null) => void
   limparContexto: () => void
   definirTotalAlertas: (total: number) => void
   abrirModalCadastro: () => void
@@ -22,6 +23,7 @@ const useNavegacaoStore = create<EstadoNavegacao>(set => ({
   modalCadastroPacienteAberto: false,
   navegar: pagina => set({ paginaAtiva: pagina }),
   navegarComContexto: (pagina, pacienteId) => set({ paginaAtiva: pagina, pacienteEmFoco: pacienteId }),
+  definirPaciente: pacienteId => set({ pacienteEmFoco: pacienteId }),
   limparContexto: () => set({ pacienteEmFoco: null }),
   definirTotalAlertas: total => set({ totalAlertas: total }),
   abrirModalCadastro: () => set({ modalCadastroPacienteAberto: true }),
