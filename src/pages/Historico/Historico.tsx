@@ -91,7 +91,11 @@ export default function Historico() {
                 <span className="historico-lateral__rotulo">Paciente</span>
                 <BuscaPaciente
                   idPacienteAtivo={idPacienteAtivo}
-                  aoSelecionar={p => definirPaciente(p.id)}
+                  aoSelecionar={p => {
+                    const id = p.id || ''
+                    definirPaciente(id)
+                    useNavegacaoStore.getState().definirPaciente(id || null)
+                  }}
                 />
               </div>
 

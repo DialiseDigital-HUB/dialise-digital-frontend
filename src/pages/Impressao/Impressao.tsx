@@ -14,7 +14,6 @@ import api from '../../lib/api'
 import './Impressao.css'
 
 export default function Impressao() {
-  const pacienteEmFoco = useNavegacaoStore(s => s.pacienteEmFoco)
   const pacientes = usePacientesStore(s => s.pacientes)
   const usuario = useAuthStore(s => s.usuario)
 
@@ -35,14 +34,10 @@ export default function Impressao() {
   const buscarExames = useExamesStore(s => s.buscarExames)
   const exames = useExamesStore(s => s.exames)
 
-  const [pacienteAtivoId, setPacienteAtivoId] = useState<string | null>(null)
+  const [pacienteAtivoId, setPacienteAtivoId] = useState<string | null>(() => {
+    return useNavegacaoStore.getState().pacienteEmFoco || null
+  })
   const [notificando, setNotificando] = useState(false)
-
-  useEffect(() => {
-    if (pacienteEmFoco) {
-      setPacienteAtivoId(pacienteEmFoco)
-    }
-  }, [pacienteEmFoco])
 
   useEffect(() => {
     if (pacienteAtivoId) {

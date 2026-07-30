@@ -98,11 +98,13 @@ interface EstadoEvolucao {
   carregando: boolean
   erro: string | null
   sucesso: boolean
+  temRascunhoAtivo: boolean
   definirPaciente: (idPaciente: string) => void
   buscarEvolucaoAnterior: (idPaciente: string, mesReferencia: string) => Promise<void>
   salvarEvolucao: () => Promise<boolean>
   atualizarCampo: <C extends keyof DadosEvolucao>(campo: C, valor: DadosEvolucao[C]) => void
   preencherParaDebug: () => void
+  preencherComRascunho: (rascunho: Record<string, unknown>) => void
   resetar: () => void
   buscarHistoricoKtv: (idPaciente: string) => Promise<{ mes: string; valor: number }[]>
 }
@@ -114,6 +116,39 @@ const useEvolucaoStore = create<EstadoEvolucao>((set, get) => ({
   carregando: false,
   erro: null,
   sucesso: false,
+  temRascunhoAtivo: false,
+
+  preencherComRascunho: rascunho => {
+    set(estado => {
+      const novDados = { ...estado.dados }
+      if (rascunho.drc_etiologia != null) novDados.evolucaoClinica = String(rascunho.drc_etiologia)
+      if (rascunho.texto_evolucao != null) novDados.evolucaoClinica = String(rascunho.texto_evolucao)
+      if (rascunho.ktv != null) novDados.ktv = String(rascunho.ktv)
+      if (rascunho.peso_seco != null) novDados.pesoSeco = String(rascunho.peso_seco)
+      if (rascunho.tempo_minutos != null) novDados.tempoSessao = String(rascunho.tempo_minutos)
+      if (rascunho.heparina != null) novDados.heparinaUtilizada = String(rascunho.heparina)
+      if (rascunho.fluxo_sangue != null) novDados.fbs = String(rascunho.fluxo_sangue)
+      if (rascunho.fluxo_dialisato != null) novDados.fbd = String(rascunho.fluxo_dialisato)
+      if (rascunho.sodio != null) novDados.sodio = String(rascunho.sodio)
+      if (rascunho.bicarbonato != null) novDados.bic = String(rascunho.bicarbonato)
+      if (rascunho.pa != null) novDados.pa = String(rascunho.pa)
+      if (rascunho.fc != null) novDados.fc = String(rascunho.fc)
+      if (rascunho.altura != null) novDados.altura = String(rascunho.altura)
+      if (rascunho.peso != null) novDados.pesoAtual = String(rascunho.peso)
+      if (rascunho.imc != null) novDados.imc = String(rascunho.imc)
+      if (rascunho.texto_conduta != null) novDados.conduta = String(rascunho.texto_conduta)
+      if (rascunho.acesso_atual != null) novDados.acessosPrevios = String(rascunho.acesso_atual)
+      if (rascunho.acv != null) novDados.acv = String(rascunho.acv)
+      if (rascunho.ar != null) novDados.ar = String(rascunho.ar)
+      if (rascunho.ext != null) novDados.ext = String(rascunho.ext)
+      const pacId = (rascunho.paciente_id || rascunho.patient_id) as string | undefined
+      return {
+        dados: novDados,
+        idPacienteAtivo: pacId || estado.idPacienteAtivo,
+        temRascunhoAtivo: true,
+      }
+    })
+  },
 
   definirPaciente: idPaciente =>
     set(estado => ({

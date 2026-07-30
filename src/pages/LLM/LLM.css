@@ -163,6 +163,17 @@
   gap: 10px;
 }
 
+@keyframes animacao-entrada-balao {
+  0% {
+    opacity: 0;
+    transform: translateY(12px) scale(0.985);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
 .llm-chat__balao {
   display: flex;
   flex-direction: column;
@@ -172,6 +183,8 @@
   border-radius: var(--radius);
   font-size: 13px;
   line-height: 1.6;
+  animation: animacao-entrada-balao 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transform-origin: bottom left;
 }
 
 .llm-chat__balao--usuario {
@@ -179,6 +192,7 @@
   background: var(--teal-deep);
   color: var(--white);
   border-bottom-right-radius: 4px;
+  transform-origin: bottom right;
 }
 
 .llm-chat__balao--assistente {

@@ -1,0 +1,162 @@
+.hitl-card {
+  margin-top: 10px;
+  border-radius: var(--radius);
+  border: 1px solid var(--teal-sea);
+  background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, var(--teal-light) 100%);
+  backdrop-filter: blur(8px);
+  overflow: hidden;
+  animation: hitl-entrada 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes hitl-entrada {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.hitl-card__cabecalho {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: var(--teal-deep);
+  color: var(--white);
+}
+
+.hitl-card__icone-tipo {
+  flex-shrink: 0;
+  opacity: 0.9;
+}
+
+.hitl-card__titulo {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  flex: 1;
+}
+
+.hitl-card__selo {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+
+.hitl-card__instrucao {
+  margin: 10px 14px 6px;
+  font-size: 12px;
+  color: var(--gray-500);
+  line-height: 1.5;
+}
+
+.hitl-card__tabela {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  margin-bottom: 2px;
+}
+
+.hitl-card__linha {
+  border-top: 1px solid var(--gray-100);
+}
+
+.hitl-card__linha:first-child {
+  border-top: none;
+}
+
+.hitl-card__chave {
+  padding: 6px 14px;
+  color: var(--gray-500);
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  width: 38%;
+  vertical-align: top;
+}
+
+.hitl-card__valor {
+  padding: 6px 14px 6px 0;
+  color: var(--gray-800);
+  font-weight: 400;
+  word-break: break-word;
+}
+
+.hitl-card__acoes {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 10px 14px;
+  border-top: 1px solid var(--gray-100);
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.hitl-card__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  border: none;
+  font-family: var(--font-base);
+}
+
+.hitl-card__btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.hitl-card__btn--descartar {
+  background: transparent;
+  color: var(--gray-500);
+  border: 1px solid var(--gray-300);
+}
+
+.hitl-card__btn--descartar:hover:not(:disabled) {
+  background: var(--gray-100);
+  color: var(--gray-700);
+}
+
+.hitl-card__btn--revisar {
+  background: var(--teal-light);
+  color: var(--teal-deep);
+  border: 1px solid var(--teal-sea);
+}
+
+.hitl-card__btn--revisar:hover:not(:disabled) {
+  background: var(--teal-sea);
+  color: var(--white);
+}
+
+.hitl-card__btn--confirmar {
+  background: var(--teal-deep);
+  color: var(--white);
+}
+
+.hitl-card__btn--confirmar:hover:not(:disabled) {
+  opacity: 0.88;
+}
+
+.hitl-card__spinner {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: var(--white);
+  animation: spin 0.65s linear infinite;
+  flex-shrink: 0;
+}

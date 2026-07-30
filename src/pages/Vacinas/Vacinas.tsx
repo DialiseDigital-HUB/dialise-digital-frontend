@@ -7,6 +7,7 @@ import Card from '../../components/ui/Card/Card'
 import Modal from '../../components/ui/Modal/Modal'
 import ModalFooter from '../../components/ui/Modal/ModalFooter'
 import Botao from '../../components/ui/Button/Button'
+import Badge from '../../components/ui/Badge/Badge'
 import Input from '../../components/ui/Input/Input'
 import Select from '../../components/ui/Select/Select'
 import Icone from '../../components/ui/Icone/Icone'
@@ -15,9 +16,10 @@ import './Vacinas.css'
 const opcoesVacinas = [
   { valor: 'Hepatite B', rotulo: 'Hepatite B' },
   { valor: 'Influenza', rotulo: 'Influenza' },
-  { valor: 'Pneumocócica', rotulo: 'Pneumocócica' },
-  { valor: 'Dupla Adulto', rotulo: 'Dupla Adulto' },
-  { valor: 'COVID-19', rotulo: 'COVID-19' },
+  { valor: 'Pneumocócica 13V', rotulo: 'Pneumocócica 13V' },
+  { valor: 'Pneumocócica 23V', rotulo: 'Pneumocócica 23V' },
+  { valor: 'COVID-19 (Reforço)', rotulo: 'COVID-19 (Reforço)' },
+  { valor: 'Dupla Adulto (dT)', rotulo: 'Dupla Adulto (dT)' }
 ]
 
 interface FormState {
@@ -49,27 +51,32 @@ export default function Vacinas() {
     buscarVacinas()
   }, [buscarVacinas])
 
-  useEffect(() => {
-    if (modalAberto && pacienteEmFoco) {
-      setForm(prev => ({ ...prev, pacienteId: pacienteEmFoco }))
-    }
-  }, [modalAberto, pacienteEmFoco])
+  const abrirModal = () => {
+    setForm(prev => ({ ...prev, pacienteId: useNavegacaoStore.getState().pacienteEmFoco || '' }))
+    setModalAberto(true)
+  }
 
   const opcoesPacientes = pacientes.map(p => ({ valor: p.id, rotulo: p.nomeCompleto }))
 
   const mapaPacientes = useMemo(() => {
-    const mapa: Record<string, string> = {}
-    pacientes.forEach(p => mapa[p.id] = p.nomeCompleto)
-    return mapa
+    return pacientes.reduce<Record<string, string>>((acc, p) => {
+      acc[p.id] = p.nomeCompleto
+      return acc
+    }, {})
   }, [pacientes])
 
-  const atualizar = (campo: keyof FormState) => (valor: string) =>
-    setForm(prev => ({ ...prev, [campo]: valor }))
+  const vacinasFiltradas = useMemo(() => {
+    if (pacienteEmFoco) return registros.filter(r => r.idPaciente === pacienteEmFoco)
+    return registros
+  }, [registros, pacienteEmFoco])
 
   const aoFechar = () => {
     setModalAberto(false)
     setForm(formInicial)
   }
+
+  const atualizar = (campo: keyof FormState) => (valor: string) =>
+    setForm(prev => ({ ...prev, [campo]: valor }))
 
   const preencherDebug = () => {
     const pacienteMockId = pacientes.length > 0 ? pacientes[0].id : ''
@@ -108,12 +115,33 @@ export default function Vacinas() {
           <h1 className="vacinas__titulo">Controle de Vacinas</h1>
           <p className="vacinas__subtitulo">Registro vacinal dos pacientes em hemodiálise</p>
         </div>
-        <Botao variante="primary" onClick={() => setModalAberto(true)}>
+        <Botao variante="primary" onClick={abrirModal}>
           Registrar Vacina
         </Botao>
       </div>
 
-      <Card semPadding icone={<Icone nome="saude" tamanho={14} />} titulo={`${registros.length} registros`}>
+      <Card
+        semPadding
+        icone={<Icone nome="saude" tamanho={14} />}
+        titulo={`${vacinasFiltradas.length} registros`}
+        acoes={
+          pacienteEmFoco ? (
+            <div style={{ marginLeft: '16px' }}>
+              <Badge variante="info">
+                Filtrado: {mapaPacientes[pacienteEmFoco] || 'Paciente'}
+                <button
+                  type="button"
+                  onClick={() => useNavegacaoStore.getState().definirPaciente(null)}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', marginLeft: '6px', fontWeight: 'bold' }}
+                  title="Limpar filtro de paciente"
+                >
+                  ×
+                </button>
+              </Badge>
+            </div>
+          ) : undefined
+        }
+      >
         <table className="vacinas__tabela">
           <thead>
             <tr>
@@ -125,7 +153,7 @@ export default function Vacinas() {
             </tr>
           </thead>
           <tbody>
-            {registros.map(v => (
+            {vacinasFiltradas.map(v => (
               <tr key={v.id}>
                 <td className="vacinas__td-paciente">{mapaPacientes[v.idPaciente] || 'Desconhecido'}</td>
                 <td className="vacinas__td-vacina">{v.vacina}</td>

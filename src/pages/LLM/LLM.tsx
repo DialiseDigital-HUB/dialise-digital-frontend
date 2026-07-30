@@ -1,12 +1,28 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useMemo } from 'react'
 import './LLM.css'
 import Botao from '../../components/ui/Button/Button'
 import BuscaPaciente from '../../components/ui/BuscaPaciente/BuscaPaciente'
+import CardConfirmacaoAcao from '../../components/ui/CardConfirmacaoAcao/CardConfirmacaoAcao'
 import LinkAcao from '../../components/ui/LinkAcao/LinkAcao'
 import useNavegacaoStore from '../../store/useNavegacaoStore'
 import type { AcaoRealizada, CitacaoClinica } from '../../store/useCopilotStore'
 import usePacientesStore, { type Paciente } from '../../store/usePacientesStore'
 import useCopilotStore from '../../store/useCopilotStore'
+import useAuthStore from '../../store/useAuthStore'
+import useEvolucaoStore from '../../store/useEvolucaoStore'
+import usePrescricoesStore from '../../store/usePrescricoesStore'
+import useLmeStore from '../../store/useLmeStore'
+
+function formatarNomeExibicao(nomeCompleto?: string): string {
+  if (!nomeCompleto) return 'Usuário'
+  const partes = nomeCompleto.trim().split(/\s+/)
+  if (partes.length === 1) return partes[0]
+  const prefixos = ['dr.', 'dra.', 'dr', 'dra', 'prof.', 'profa.']
+  if (prefixos.includes(partes[0].toLowerCase()) && partes.length >= 2) {
+    return `${partes[0]} ${partes[1]}`
+  }
+  return partes[0]
+}
 
 const ROTULO_TIPO: Record<AcaoRealizada['tipo'], string> = {
   evolucao:    'Evolução',
@@ -83,30 +99,41 @@ function IconePaciente() {
 }
 
 export default function LLM() {
+  const usuario                               = useAuthStore(s => s.usuario)
   const pacientes                             = usePacientesStore(s => s.pacientes)
   const pacienteEmFoco                        = useNavegacaoStore(s => s.pacienteEmFoco)
   const definirPaciente                       = useNavegacaoStore(s => s.definirPaciente)
+  const navegarComContexto                    = useNavegacaoStore(s => s.navegarComContexto)
   const [texto, setTexto]                     = useState('')
-  const [pacienteAtivo, setPacienteAtivo]     = useState<Paciente | null>(
-    pacienteEmFoco ? (pacientes.find(p => p.id === pacienteEmFoco) ?? null) : null
-  )
+  const pacienteAtivo                         = useMemo(() => {
+    return pacienteEmFoco ? (pacientes.find(p => p.id === pacienteEmFoco) ?? null) : null
+  }, [pacienteEmFoco, pacientes])
   const [copiado, setCopiado]                 = useState(false)
   const chatRef                               = useRef<HTMLDivElement>(null)
 
-  const { executar, carregando, historico, limpar, mensagensEnviadas } = useCopilotStore()
+  const { executar, carregando, historico, limpar, mensagensEnviadas, confirmarAcao, descartarAcao } = useCopilotStore()
 
-  useEffect(() => {
-    if (pacienteEmFoco && (!pacienteAtivo || pacienteAtivo.id !== pacienteEmFoco)) {
-      const p = pacientes.find(item => item.id === pacienteEmFoco)
-      if (p) setPacienteAtivo(p)
+  const aoRevisarModal = (acao: AcaoRealizada) => {
+    if (!acao.payload_pendente) return
+    const idPac = pacienteAtivo?.id ?? ''
+    const payload = acao.payload_pendente.payload
+
+    if (acao.payload_pendente.tipo_acao === 'evolucao') {
+      useEvolucaoStore.getState().preencherComRascunho(payload)
+      navegarComContexto('evolucao', idPac)
+    } else if (acao.payload_pendente.tipo_acao === 'prescricao') {
+      usePrescricoesStore.getState().definirRascunhoModal({ ...payload, paciente_id: idPac })
+      navegarComContexto('prescricoes', idPac)
+    } else if (acao.payload_pendente.tipo_acao === 'lme') {
+      useLmeStore.getState().definirRascunhoLme({ ...payload, paciente_id: idPac })
+      navegarComContexto('lme', idPac)
+    } else if (acao.payload_pendente.tipo_acao === 'agendamento') {
+      navegarComContexto('calendario', idPac)
     }
-  }, [pacienteEmFoco, pacienteAtivo, pacientes])
+  }
 
   const aoSelecionarPaciente = (p: Paciente | null) => {
-    setPacienteAtivo(p)
-    if (p?.id) {
-      definirPaciente(p.id)
-    }
+    definirPaciente(p?.id ?? null)
   }
 
   useEffect(() => {
@@ -188,7 +215,7 @@ export default function LLM() {
                   <div className="llm-chat__balao llm-chat__balao--usuario">
                     <div className="llm-chat__balao-header">
                       <span className="llm-chat__balao-icone"><IconeUsuario /></span>
-                      <span>Médico</span>
+                      <span>{formatarNomeExibicao(usuario?.nome)}</span>
                     </div>
                     <p className="llm-chat__balao-texto">{entrada}</p>
                   </div>
@@ -205,17 +232,38 @@ export default function LLM() {
                       <p className="llm-chat__balao-texto">{resposta.mensagem_final}</p>
                       {resposta.acoes.length > 0 && (
                         <ul className="llm-chat__acoes">
-                          {resposta.acoes.map((acao, j) => (
-                            <li key={j} className={`llm-acao llm-acao--${acao.sucesso ? 'ok' : 'erro'}`}>
-                              <div className="llm-acao__info">
-                                <span className="llm-acao__tipo">{ROTULO_TIPO[acao.tipo]}</span>
-                                <span>{acao.descricao}</span>
-                              </div>
-                              {acao.link_pagina && acao.link_rotulo && (
-                                <LinkAcao rotulo={acao.link_rotulo} pagina={acao.link_pagina} tipo={acao.tipo} pacienteId={pacienteAtivo?.id} />
-                              )}
-                            </li>
-                          ))}
+                          {resposta.acoes.map((acao, j) => {
+                            if (acao.requer_confirmacao && acao.payload_pendente) {
+                              return (
+                                <li key={j}>
+                                  <CardConfirmacaoAcao
+                                    acao={acao}
+                                    onConfirmar={() =>
+                                      confirmarAcao(acao, pacienteAtivo?.id ?? '', i, j)
+                                    }
+                                    onDescartar={() => descartarAcao(i, j)}
+                                    onRevisarModal={() => aoRevisarModal(acao)}
+                                  />
+                                </li>
+                              )
+                            }
+                            return (
+                              <li key={j} className={`llm-acao llm-acao--${acao.sucesso ? 'ok' : 'erro'}`}>
+                                <div className="llm-acao__info">
+                                  <span className="llm-acao__tipo">{ROTULO_TIPO[acao.tipo]}</span>
+                                  <span>{acao.descricao}</span>
+                                </div>
+                                {acao.link_pagina && acao.link_rotulo && (
+                                  <LinkAcao
+                                    rotulo={acao.link_rotulo}
+                                    pagina={acao.link_pagina}
+                                    tipo={acao.tipo}
+                                    pacienteId={pacienteAtivo?.id}
+                                  />
+                                )}
+                              </li>
+                            )
+                          })}
                         </ul>
                       )}
                       {resposta.citacoes && resposta.citacoes.length > 0 && (

@@ -151,15 +151,18 @@ export default function Pacientes() {
 
   const aoFecharModal = () => {
     selecionarPaciente(null)
+    useNavegacaoStore.getState().definirPaciente(null)
   }
 
   const aoNovaEvolucao = (paciente: Paciente) => {
+    useNavegacaoStore.getState().definirPaciente(paciente.id)
     definirPaciente(paciente.id)
     selecionarPaciente(null)
     navegar('evolucao')
   }
 
   const aoVerEvolucoes = (paciente: Paciente) => {
+    useNavegacaoStore.getState().definirPaciente(paciente.id)
     useHistoricoStore.getState().definirPaciente(paciente.id)
     selecionarPaciente(null)
     navegar('historico')

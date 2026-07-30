@@ -38,15 +38,21 @@ export default function Evolucao() {
   const pacienteEmFoco = useNavegacaoStore(s => s.pacienteEmFoco)
 
   useEffect(() => {
+    if (useEvolucaoStore.getState().temRascunhoAtivo) {
+      useEvolucaoStore.setState({ temRascunhoAtivo: false })
+      return
+    }
     if (pacienteEmFoco) {
       definirPaciente(pacienteEmFoco)
     }
   }, [pacienteEmFoco, definirPaciente])
 
   const aoSelecionarPaciente = (idPaciente: string) => {
-    definirPaciente(idPaciente)
-    if (dados.mesReferencia) {
-      buscarEvolucaoAnterior(idPaciente, dados.mesReferencia)
+    const id = idPaciente || ''
+    definirPaciente(id)
+    useNavegacaoStore.getState().definirPaciente(id || null)
+    if (id && dados.mesReferencia) {
+      buscarEvolucaoAnterior(id, dados.mesReferencia)
     }
   }
 

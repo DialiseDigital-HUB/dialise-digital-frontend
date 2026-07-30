@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import useNavegacaoStore from './useNavegacaoStore'
+import useCopilotStore from './useCopilotStore'
 
 const API = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000'
 
@@ -66,6 +67,7 @@ const useAuthStore = create<EstadoAuth>()(
 
           const perfil = await resPerfil.json()
 
+          useCopilotStore.getState().limpar()
           set({
             carregando: false,
             autenticado: true,
@@ -84,6 +86,7 @@ const useAuthStore = create<EstadoAuth>()(
       },
 
       logout: () => {
+        useCopilotStore.getState().limpar()
         useNavegacaoStore.getState().navegar('dashboard')
         set({ autenticado: false, usuario: null, erro: null })
       },
