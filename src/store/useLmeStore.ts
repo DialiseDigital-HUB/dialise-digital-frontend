@@ -28,12 +28,16 @@ interface EstadoLme {
   erro: string | null
   buscarPorPaciente: (pacienteId: string) => Promise<void>
   criar: (dados: NovoLme) => Promise<boolean>
+  rascunhoLme: Record<string, unknown> | null
+  definirRascunhoLme: (rascunho: Record<string, unknown> | null) => void
 }
 
 const useLmeStore = create<EstadoLme>((set, get) => ({
   registros: [],
   carregando: false,
   erro: null,
+  rascunhoLme: null,
+  definirRascunhoLme: rascunho => set({ rascunhoLme: rascunho }),
 
   buscarPorPaciente: async (pacienteId) => {
     set({ carregando: true, erro: null })

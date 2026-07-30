@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo } from 'react'
 import usePacientesStore from '../../store/usePacientesStore'
 import useSolicitacoesExamesStore from '../../store/useSolicitacoesExamesStore'
 import useExamesStore from '../../store/useExamesStore'
@@ -58,12 +58,14 @@ export default function ModalSolicitarExame({ aberto, aoFechar, pacienteIdInicia
     ...formInicial,
     pacienteId: pacienteIdInicial ?? '',
   }))
+  const [ultimoAberto, setUltimoAberto] = useState(aberto)
 
-  useEffect(() => {
-    if (aberto && pacienteIdInicial) {
-      setForm(prev => ({ ...prev, pacienteId: pacienteIdInicial }))
-    }
-  }, [aberto, pacienteIdInicial])
+  if (aberto && !ultimoAberto) {
+    setUltimoAberto(true)
+    setForm({ ...formInicial, pacienteId: pacienteIdInicial ?? '' })
+  } else if (!aberto && ultimoAberto) {
+    setUltimoAberto(false)
+  }
 
   const pacientes = usePacientesStore(s => s.pacientes)
   const { cadastrarSolicitacao } = useSolicitacoesExamesStore()

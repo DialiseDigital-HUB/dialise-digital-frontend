@@ -20,14 +20,29 @@ export default function LME() {
   const { pacienteEmFoco, definirPaciente } = useNavegacaoStore()
   const pacientes = usePacientesStore(s => s.pacientes)
   const usuario = useAuthStore(s => s.usuario)
-  const { registros, carregando, criar, buscarPorPaciente } = useLmeStore()
+  const { registros, carregando, criar, buscarPorPaciente, rascunhoLme, definirRascunhoLme } = useLmeStore()
   const { medicamentos, buscarMedicamentos, adicionarMedicamento, removerMedicamento } = useMedicamentosStore()
 
-  const [pacienteAtivoId, setPacienteAtivoId] = useState<string | null>(null)
-  const [cid10, setCid10] = useState(CID10_OPCOES[0].valor)
-  const [medicamento, setMedicamento] = useState('')
-  const [justificativa, setJustificativa] = useState('')
-  const [validoAte, setValidoAte] = useState('')
+  const [pacienteAtivoId, setPacienteAtivoId] = useState<string | null>(() => {
+    const r = useLmeStore.getState().rascunhoLme
+    return r?.paciente_id ? String(r.paciente_id) : null
+  })
+  const [cid10, setCid10] = useState(() => {
+    const r = useLmeStore.getState().rascunhoLme
+    return r?.cid10 ? String(r.cid10) : CID10_OPCOES[0].valor
+  })
+  const [medicamento, setMedicamento] = useState(() => {
+    const r = useLmeStore.getState().rascunhoLme
+    return (r?.medicamento || r?.medicamentos_solicitados) ? String(r.medicamento ?? r.medicamentos_solicitados) : ''
+  })
+  const [justificativa, setJustificativa] = useState(() => {
+    const r = useLmeStore.getState().rascunhoLme
+    return r?.justificativa ? String(r.justificativa) : ''
+  })
+  const [validoAte, setValidoAte] = useState(() => {
+    const r = useLmeStore.getState().rascunhoLme
+    return r?.valido_ate ? String(r.valido_ate) : ''
+  })
   const [sucesso, setSucesso] = useState(false)
   
   const [criandoMedicamento, setCriandoMedicamento] = useState(false)
@@ -44,12 +59,25 @@ export default function LME() {
     if (pacienteAtivoIdAtual) buscarPorPaciente(pacienteAtivoIdAtual)
   }, [pacienteAtivoIdAtual, buscarPorPaciente])
 
+  const [ultimoRascunho, setUltimoRascunho] = useState(rascunhoLme)
+  if (rascunhoLme && rascunhoLme !== ultimoRascunho) {
+    setUltimoRascunho(rascunhoLme)
+    if (rascunhoLme.paciente_id) setPacienteAtivoId(String(rascunhoLme.paciente_id))
+    if (rascunhoLme.cid10) setCid10(String(rascunhoLme.cid10))
+    if (rascunhoLme.medicamento || rascunhoLme.medicamentos_solicitados) {
+      setMedicamento(String(rascunhoLme.medicamento ?? rascunhoLme.medicamentos_solicitados))
+    }
+    if (rascunhoLme.justificativa) setJustificativa(String(rascunhoLme.justificativa))
+    if (rascunhoLme.valido_ate) setValidoAte(String(rascunhoLme.valido_ate))
+    definirRascunhoLme(null)
+  }
+
   const paciente = pacientes.find(p => p.id === pacienteAtivoIdAtual)
 
   const aoSelecionarPaciente = (p: { id?: string }) => {
     const id = p.id || null
     setPacienteAtivoId(id)
-    if (id) definirPaciente(id)
+    definirPaciente(id)
   }
 
   const aoSalvar = async () => {

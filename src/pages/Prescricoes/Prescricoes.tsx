@@ -72,10 +72,27 @@ const FORM_INICIAL: FormState = {
 }
 
 export default function Prescricoes() {
-  const [modalAberto, setModalAberto] = useState(false)
+  const rascunhoInicial = usePrescricoesStore.getState().rascunhoModal
+  const pacienteFocoInicial = useNavegacaoStore.getState().pacienteEmFoco
+
+  const [modalAberto, setModalAberto] = useState(() => Boolean(rascunhoInicial))
   const [modalConfirmacao, setModalConfirmacao] = useState<{aberto: boolean, acao: 'suspender' | 'concluir' | null, id: string | null}>({ aberto: false, acao: null, id: null })
   const [modalConfirmacaoEntrada, setModalConfirmacaoEntrada] = useState(false)
-  const [form, setForm] = useState<FormState>(FORM_INICIAL)
+  const [form, setForm] = useState<FormState>(() => {
+    if (rascunhoInicial) {
+      return {
+        ...FORM_INICIAL,
+        pacienteId: (rascunhoInicial.paciente_id as string) || pacienteFocoInicial || '',
+        medicacao: (rascunhoInicial.medicacao as string) || '',
+        dose: (rascunhoInicial.dose as string) || '',
+        via: (rascunhoInicial.via as string) || '',
+        frequencia: (rascunhoInicial.frequencia as string) || '',
+        indicacao: (rascunhoInicial.indicacao as string) || '',
+        temDataFim: Boolean(rascunhoInicial.duracao_dias),
+      }
+    }
+    return FORM_INICIAL
+  })
 
   const pacientes          = usePacientesStore(s => s.pacientes)
   const editarPaciente     = usePacientesStore(s => s.editarPaciente)
@@ -84,6 +101,8 @@ export default function Prescricoes() {
   const buscarPrescricoes  = usePrescricoesStore(s => s.buscarPrescricoes)
   const cadastrarPrescricao = usePrescricoesStore(s => s.cadastrarPrescricao)
   const definirFiltroStatus = usePrescricoesStore(s => s.definirFiltroStatus)
+  const rascunhoModal      = usePrescricoesStore(s => s.rascunhoModal)
+  const definirRascunhoModal = usePrescricoesStore(s => s.definirRascunhoModal)
   const adicionarToast     = useToastStore(s => s.adicionarToast)
   const pacienteEmFoco     = useNavegacaoStore(s => s.pacienteEmFoco)
 
@@ -107,6 +126,23 @@ export default function Prescricoes() {
     buscarPrescricoes()
     carregarDashboard()
   }, [buscarPrescricoes, carregarDashboard])
+
+  const [ultimoRascunho, setUltimoRascunho] = useState(rascunhoModal)
+  if (rascunhoModal && rascunhoModal !== ultimoRascunho) {
+    setUltimoRascunho(rascunhoModal)
+    setForm({
+      ...FORM_INICIAL,
+      pacienteId: (rascunhoModal.paciente_id as string) || pacienteEmFoco || '',
+      medicacao: (rascunhoModal.medicacao as string) || '',
+      dose: (rascunhoModal.dose as string) || '',
+      via: (rascunhoModal.via as string) || 'Oral',
+      frequencia: (rascunhoModal.frequencia as string) || '1x ao dia',
+      indicacao: (rascunhoModal.indicacao as string) || '',
+      temDataFim: Boolean(rascunhoModal.duracao_dias),
+    })
+    setModalAberto(true)
+    definirRascunhoModal(null)
+  }
 
   const opcoesPacientes = pacientes.map(p => ({ valor: p.id, rotulo: p.nomeCompleto }))
 
@@ -228,7 +264,20 @@ export default function Prescricoes() {
         icone={<Icone nome="medicamento" tamanho={14} />}
         titulo={`${listaPrescricoes.length} prescrições`}
         acoes={
-          <div style={{ marginLeft: '16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: '16px' }}>
+            {pacienteEmFoco && (
+              <Badge variante="info">
+                Filtrado: {mapaPacientes[pacienteEmFoco] || 'Paciente'}
+                <button
+                  type="button"
+                  onClick={() => useNavegacaoStore.getState().definirPaciente(null)}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', marginLeft: '6px', fontWeight: 'bold' }}
+                  title="Limpar filtro de paciente"
+                >
+                  ×
+                </button>
+              </Badge>
+            )}
             <SelectFiltro
               valor={filtroStatus}
               aoAlterar={definirFiltroStatus}

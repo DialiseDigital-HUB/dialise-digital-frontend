@@ -36,6 +36,8 @@ interface EstadoPrescricoes {
   cadastrarPrescricao: (dados: NovaPrescricao) => Promise<boolean>
   suspenderPrescricao: (id: string) => Promise<boolean>
   concluirPrescricao: (id: string) => Promise<boolean>
+  rascunhoModal: Record<string, unknown> | null
+  definirRascunhoModal: (rascunho: Record<string, unknown> | null) => void
 }
 
 const usePrescricoesStore = create<EstadoPrescricoes>((set, get) => ({
@@ -43,6 +45,8 @@ const usePrescricoesStore = create<EstadoPrescricoes>((set, get) => ({
   filtroStatus: 'todos',
   carregando: false,
   erro: null,
+  rascunhoModal: null,
+  definirRascunhoModal: rascunho => set({ rascunhoModal: rascunho }),
 
   buscarPrescricoes: async (idPaciente?: string) => {
     set({ carregando: true, erro: null })
