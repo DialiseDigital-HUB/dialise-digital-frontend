@@ -5,6 +5,8 @@ import Icone from '../../components/ui/Icone/Icone'
 import useAuthStore from '../../store/useAuthStore'
 import './Login.css'
 
+const VERSAO_SISTEMA = import.meta.env.VITE_APP_VERSION ?? 'v0.1.1'
+
 export default function Login() {
   const [email, setEmail]   = useState('')
   const [senha, setSenha]   = useState('')
@@ -19,13 +21,16 @@ export default function Login() {
     <div className="login">
       <div className="login__painel">
         <div className="login__marca">
-          <div className="login__marca-icone">
-            <Icone nome="saude" tamanho={22} cor="#023D4A" />
+          <div className="login__marca-wrapper">
+            <div className="login__marca-icone">
+              <Icone nome="saude" tamanho={22} cor="#023D4A" />
+            </div>
+            <div>
+              <div className="login__marca-nome">DiáliseDigital</div>
+              <div className="login__marca-sub">HUB-UnB · Grupo 5</div>
+            </div>
           </div>
-          <div>
-            <div className="login__marca-nome">DiáliseDigital</div>
-            <div className="login__marca-sub">HUB-UnB · Grupo 5</div>
-          </div>
+          <span className="login__marca-badge">{VERSAO_SISTEMA}</span>
         </div>
 
         <div className="login__cabecalho">

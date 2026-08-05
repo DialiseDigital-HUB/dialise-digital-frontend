@@ -30,7 +30,7 @@ const secoes: { label: string; itens: ItemNavegacao[]; role?: string }[] = [
       { id: 'evolucao',   rotulo: 'Evolução Mensal',       icone: 'evolucao'   },
       { id: 'calendario', rotulo: 'Calendário & Alertas',  icone: 'calendario' },
       { id: 'exames',     rotulo: 'Exames',                icone: 'exames'     },
-      { id: 'lme',              rotulo: 'Laudos LME',          icone: 'lme'        },
+      { id: 'lme',              rotulo: 'Laudo de Medicamento Especializado',          icone: 'lme'        },
       { id: 'impressao',        rotulo: 'Impressão (Relatório)', icone: 'lapis'      },
       { id: 'prescricoes',      rotulo: 'Prescrições',         icone: 'medicamento' },
       { id: 'vacinas',          rotulo: 'Controle de Vacinas', icone: 'saude'       },
@@ -40,7 +40,7 @@ const secoes: { label: string; itens: ItemNavegacao[]; role?: string }[] = [
   {
     label: 'IA',
     itens: [
-      { id: 'llm', rotulo: 'Apoio LLM', icone: 'llm' },
+      { id: 'llm', rotulo: 'Copilot Médico', icone: 'llm' },
     ],
   },
   {

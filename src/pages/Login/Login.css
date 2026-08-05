@@ -35,7 +35,28 @@
 .login__marca {
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.login__marca-wrapper {
+  display: flex;
+  align-items: center;
   gap: 10px;
+}
+
+.login__marca-badge {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(2, 195, 154, .12);
+  border: 1px solid rgba(2, 195, 154, .25);
+  color: var(--teal-mint);
+  font-size: 9px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 20px;
+  letter-spacing: .5px;
+  text-transform: uppercase;
 }
 
 .login__marca-icone {
