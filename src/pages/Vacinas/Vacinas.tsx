@@ -97,7 +97,8 @@ export default function Vacinas() {
       vacina: form.vacina,
       dose: 'Única',
       dataAplicacao: form.data,
-      proximaDose: form.proximaDose || undefined
+      proximaDose: form.proximaDose || undefined,
+      lote: form.lote
     })
 
     if (sucesso) {

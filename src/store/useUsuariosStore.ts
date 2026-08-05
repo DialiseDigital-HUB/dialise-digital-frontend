@@ -20,9 +20,11 @@ interface EstadoUsuarios {
   erro: string | null
   buscarUsuarios: () => Promise<void>
   criarUsuario: (novo: Omit<Usuario, 'id'>) => Promise<void>
+  editarUsuario: (id: string, dados: Partial<Omit<Usuario, 'id'>>) => Promise<void>
+  desativarUsuario: (id: string) => Promise<void>
 }
 
-const useUsuariosStore = create<EstadoUsuarios>((set) => ({
+const useUsuariosStore = create<EstadoUsuarios>((set, get) => ({
   usuarios: [],
   carregando: false,
   erro: null,
@@ -72,6 +74,54 @@ const useUsuariosStore = create<EstadoUsuarios>((set) => ({
       set(state => ({ usuarios: [...state.usuarios, criado], carregando: false }))
     } catch (err: any) {
       set({ erro: err.message || 'Falha ao criar usuário.', carregando: false })
+      throw err
+    }
+  },
+
+  editarUsuario: async (id, dados) => {
+    const token = useAuthStore.getState().usuario?.token
+    if (!token) return
+
+    set({ carregando: true })
+    try {
+      const res = await fetch(`${API}/usuarios/${id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(dados),
+      })
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}))
+        throw new Error(errorData.detail || 'Falha ao editar usuário.')
+      }
+      await get().buscarUsuarios()
+    } catch (err: any) {
+      set({ erro: err.message || 'Falha ao editar usuário.', carregando: false })
+      throw err
+    }
+  },
+
+  desativarUsuario: async (id) => {
+    const token = useAuthStore.getState().usuario?.token
+    if (!token) return
+
+    set({ carregando: true })
+    try {
+      const res = await fetch(`${API}/usuarios/${id}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}))
+        throw new Error(errorData.detail || 'Falha ao desativar usuário.')
+      }
+      await get().buscarUsuarios()
+    } catch (err: any) {
+      set({ erro: err.message || 'Falha ao desativar usuário.', carregando: false })
       throw err
     }
   },

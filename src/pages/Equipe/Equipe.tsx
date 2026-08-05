@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import useUsuariosStore from '../../store/useUsuariosStore'
+import useUsuariosStore, { type Usuario } from '../../store/useUsuariosStore'
 import useToastStore from '../../store/useToastStore'
 import type { Role } from '../../store/useAuthStore'
 import Card from '../../components/ui/Card/Card'
@@ -21,6 +21,8 @@ export default function Equipe() {
   const usuarios       = useUsuariosStore(s => s.usuarios)
   const criarUsuario   = useUsuariosStore(s => s.criarUsuario)
   const buscarUsuarios = useUsuariosStore(s => s.buscarUsuarios)
+  const editarUsuario  = useUsuariosStore(s => s.editarUsuario)
+  const desativarUsuario = useUsuariosStore(s => s.desativarUsuario)
   const carregando     = useUsuariosStore(s => s.carregando)
   const adicionarToast = useToastStore(s => s.adicionarToast)
 
@@ -33,6 +35,13 @@ export default function Equipe() {
   const [novoEmail, setNovoEmail]     = useState('')
   const [novoCrm, setNovoCrm]         = useState('')
   const [novaRole, setNovaRole]       = useState<Role>('medico')
+
+  const [modalEdicaoAberto, setModalEdicaoAberto] = useState(false)
+  const [editando, setEditando] = useState<Usuario | null>(null)
+  const [editNome, setEditNome] = useState('')
+  const [editEmail, setEditEmail] = useState('')
+  const [editCrm, setEditCrm] = useState('')
+  const [editRole, setEditRole] = useState<Role>('medico')
 
   const aoSubmeter = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -57,6 +66,45 @@ export default function Equipe() {
       adicionarToast(`Colaborador cadastrado. Senha provisória: ${novoCrm}`, 'sucesso')
     } catch (err: any) {
       adicionarToast(err.message || 'Erro ao cadastrar colaborador.', 'erro')
+    }
+  }
+
+  const abrirEdicao = (u: Usuario) => {
+    setEditando(u)
+    setEditNome(u.nome_completo)
+    setEditEmail(u.email)
+    setEditCrm(u.crm)
+    setEditRole(u.role)
+    setModalEdicaoAberto(true)
+  }
+
+  const aoSubmeterEdicao = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!editNome || !editEmail || !editCrm || !editando) return
+
+    try {
+      await editarUsuario(editando.id, {
+        nome_completo: editNome,
+        crm: editCrm,
+        email: editEmail,
+        role: editRole,
+      })
+      setModalEdicaoAberto(false)
+      setEditando(null)
+      adicionarToast('Colaborador atualizado.', 'sucesso')
+    } catch (err: any) {
+      adicionarToast(err.message || 'Erro ao atualizar colaborador.', 'erro')
+    }
+  }
+
+  const aoDesativar = async (u: Usuario) => {
+    if (confirm('Deseja desativar este colaborador?')) {
+      try {
+        await desativarUsuario(u.id)
+        adicionarToast('Colaborador desativado.', 'sucesso')
+      } catch (err: any) {
+        adicionarToast(err.message || 'Erro ao desativar colaborador.', 'erro')
+      }
     }
   }
 
@@ -103,6 +151,14 @@ export default function Equipe() {
                 </Alert>
               </div>
             )}
+            <div style={{ display: 'flex', gap: '8px', marginTop: '16px', justifyContent: 'flex-end' }}>
+              <Botao variante="ghost" tamanho="sm" onClick={() => abrirEdicao(u)}>
+                <Icone nome="editar" tamanho={14} /> Editar
+              </Botao>
+              <Botao variante="ghost" tamanho="sm" onClick={() => aoDesativar(u)}>
+                <Icone nome="fechar" tamanho={14} /> Desativar
+              </Botao>
+            </div>
           </Card>
         ))}
       </div>
@@ -158,6 +214,56 @@ export default function Equipe() {
             <Botao variante="ghost" onClick={() => setModalAberto(false)}>Cancelar</Botao>
             <Botao tipo="submit" desabilitado={carregando}>
               {carregando ? 'Salvando...' : 'Cadastrar Colaborador'}
+            </Botao>
+          </div>
+        </form>
+      </Modal>
+
+      <Modal
+        aberto={modalEdicaoAberto}
+        aoFechar={() => setModalEdicaoAberto(false)}
+        titulo="Editar Colaborador"
+      >
+        <form className="equipe__form" onSubmit={aoSubmeterEdicao}>
+          <div className="equipe__form-grid">
+            <Input
+              id="edit-nome"
+              label="Nome Completo"
+              valor={editNome}
+              aoAlterar={setEditNome}
+            />
+            <Input
+              id="edit-email"
+              label="E-mail Institucional"
+              type="email"
+              valor={editEmail}
+              aoAlterar={setEditEmail}
+            />
+            <Input
+              id="edit-crm"
+              label="Registro (CRM/COREN)"
+              valor={editCrm}
+              aoAlterar={setEditCrm}
+            />
+
+            <div className="equipe__form-grupo">
+              <label className="equipe__form-label">Papel / Função</label>
+              <select 
+                className="equipe__form-select" 
+                value={editRole} 
+                onChange={e => setEditRole(e.target.value as Role)}
+              >
+                <option value="medico">Médico(a)</option>
+                <option value="residente">Residente</option>
+                <option value="enfermeiro">Enfermeiro(a)</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="equipe__form-acoes">
+            <Botao type="button" variante="ghost" onClick={() => setModalEdicaoAberto(false)}>Cancelar</Botao>
+            <Botao tipo="submit" desabilitado={carregando}>
+              {carregando ? 'Salvando...' : 'Salvar Alterações'}
             </Botao>
           </div>
         </form>
