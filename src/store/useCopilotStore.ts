@@ -40,6 +40,7 @@ interface EstadoCopilot {
   executar: (texto: string, pacienteId: string) => Promise<RespostaCopilot | null>
   confirmarAcao: (acao: AcaoRealizada, pacienteId: string, turnoIndex: number, acaoIndex: number) => Promise<void>
   descartarAcao: (turnoIndex: number, acaoIndex: number) => void
+  transferirParaRevisao: (turnoIndex: number, acaoIndex: number) => void
   limpar: () => void
 }
 
@@ -137,6 +138,22 @@ const useCopilotStore = create<EstadoCopilot>((set, get) => ({
       payload_pendente: undefined,
       descricao: 'Proposta descartada pelo profissional.',
       sucesso: false,
+    }
+    turno.acoes = acoes
+    historico[turnoIndex] = turno
+    set({ historico })
+  },
+
+  transferirParaRevisao: (turnoIndex, acaoIndex) => {
+    const historico = [...get().historico]
+    const turno = { ...historico[turnoIndex] }
+    const acoes = [...turno.acoes]
+    acoes[acaoIndex] = {
+      ...acoes[acaoIndex],
+      requer_confirmacao: false,
+      payload_pendente: undefined,
+      descricao: 'Proposta transferida para revisão no módulo clínico.',
+      sucesso: true,
     }
     turno.acoes = acoes
     historico[turnoIndex] = turno

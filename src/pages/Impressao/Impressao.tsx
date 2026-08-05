@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react'
 import useNavegacaoStore from '../../store/useNavegacaoStore'
 import usePacientesStore from '../../store/usePacientesStore'
 import useLmeStore from '../../store/useLmeStore'
-import useEvolucaoStore from '../../store/useEvolucaoStore'
+import useEvolucaoStore, { type DadosEvolucao } from '../../store/useEvolucaoStore'
+import useHistoricoStore from '../../store/useHistoricoStore'
 import usePrescricoesStore from '../../store/usePrescricoesStore'
 import useVacinasStore from '../../store/useVacinasStore'
 import useExamesStore from '../../store/useExamesStore'
@@ -12,6 +13,93 @@ import Icone from '../../components/ui/Icone/Icone'
 import BuscaPaciente from '../../components/ui/BuscaPaciente/BuscaPaciente'
 import api from '../../lib/api'
 import './Impressao.css'
+
+const exibirValor = (valor: unknown): string => {
+  if (valor === null || valor === undefined || valor === '') return 'N/A'
+  return String(valor)
+}
+
+const renderizarDadosEvolucao = (evo: DadosEvolucao, chave?: string) => (
+  <div key={chave} style={{ fontSize: '12px', marginBottom: '15px', borderBottom: '1px solid #ddd', paddingBottom: '10px' }}>
+    <p><strong>Referência:</strong> {exibirValor(evo.mesReferencia)}</p>
+    <p><strong>Evolução Clínica:</strong> {exibirValor(evo.evolucaoClinica)}</p>
+    
+    <h5 style={{ marginTop: '10px', marginBottom: '5px' }}>Dados de Hemodiálise</h5>
+    <p>
+      <strong>Acesso:</strong> {exibirValor(evo.acessosPrevios)} (Data: {exibirValor(evo.acessoData)}) | 
+      <strong> Peso Seco:</strong> {exibirValor(evo.pesoSeco)}kg | 
+      <strong> Tempo de Sessão:</strong> {exibirValor(evo.tempoSessao)}h | 
+      <strong> Kt/V:</strong> {exibirValor(evo.ktv)}
+    </p>
+    <p>
+      <strong>Fluxo Sangue (Qb):</strong> {exibirValor(evo.fbs)} | 
+      <strong> Fluxo Dialisato (Qd):</strong> {exibirValor(evo.fbd)} | 
+      <strong> Sódio:</strong> {exibirValor(evo.sodio)} | 
+      <strong> Bicarbonato:</strong> {exibirValor(evo.bic)} | 
+      <strong> Heparina:</strong> {exibirValor(evo.heparinaUtilizada)}
+    </p>
+
+    <h5 style={{ marginTop: '10px', marginBottom: '5px' }}>Exame Físico</h5>
+    <p>
+      <strong>PA:</strong> {exibirValor(evo.pa)} | 
+      <strong> FC:</strong> {exibirValor(evo.fc)} bpm | 
+      <strong> Peso Atual:</strong> {exibirValor(evo.pesoAtual)}kg | 
+      <strong> IMC:</strong> {exibirValor(evo.imc)} | 
+      <strong> Altura:</strong> {exibirValor(evo.altura)}cm
+    </p>
+    <p>
+      <strong>ACV:</strong> {exibirValor(evo.acv)} | 
+      <strong> AR:</strong> {exibirValor(evo.ar)} | 
+      <strong> EXT:</strong> {exibirValor(evo.ext)}
+    </p>
+
+    <h5 style={{ marginTop: '10px', marginBottom: '5px' }}>Intercorrências / Histórico</h5>
+    <p>
+      {evo.internouEsseMes ? '■ Internou este mês  ' : ''}
+      {evo.recebeuTransfusao ? '■ Recebeu transfusão  ' : ''}
+      {evo.complicacoesInfecciosas ? '■ Complicações infecciosas  ' : ''}
+      {evo.complicacoesCardiovasculares ? '■ Complicações cardiovasculares  ' : ''}
+      {evo.complicacoesAcessoVascular ? '■ Complicações no acesso  ' : ''}
+      {evo.inscritoTransplante ? '■ Inscrito para TX  ' : ''}
+      {evo.vacinouHepB ? '■ Vacinou Hep B  ' : ''}
+      {evo.imunizadoHepB ? '■ Imunizado Hep B  ' : ''}
+    </p>
+
+    <h5 style={{ marginTop: '10px', marginBottom: '5px' }}>Uso de Medicações (Evolução)</h5>
+    <p>
+      {evo.usandoFerroEv ? 'Ferro EV | ' : ''}
+      {evo.usandoEpo ? 'EPO | ' : ''}
+      {evo.usandoSevelamer ? 'Sevelamer | ' : ''}
+      {evo.usandoCaCo3 ? 'Carbonato de Cálcio | ' : ''}
+      {evo.usandoCalcitriol ? 'Calcitriol | ' : ''}
+      {evo.usandoCinacalcete ? 'Cinacalcete' : ''}
+    </p>
+    {evo.medicamentosEmUso && (
+      <p><strong>Outros Medicamentos:</strong> {exibirValor(evo.medicamentosEmUso)}</p>
+    )}
+    {evo.alergias && (
+      <p><strong>Alergias:</strong> {exibirValor(evo.alergias)}</p>
+    )}
+
+    <h5 style={{ marginTop: '10px', marginBottom: '5px' }}>Exames Laboratoriais (Evolução)</h5>
+    <p>
+      <strong>Hb:</strong> {exibirValor(evo.hemoglobina)} | 
+      <strong> Ht:</strong> {exibirValor(evo.hematocrito)} | 
+      <strong> K:</strong> {exibirValor(evo.potassio)} | 
+      <strong> P:</strong> {exibirValor(evo.fosforo)} | 
+      <strong> Ca:</strong> {exibirValor(evo.calcio)} | 
+      <strong> PTH:</strong> {exibirValor(evo.paratormonio)} | 
+      <strong> Ferritina:</strong> {exibirValor(evo.ferritina)} | 
+      <strong> CT:</strong> {exibirValor(evo.ct)} | 
+      <strong> Anti-HIV:</strong> {exibirValor(evo.antiHiv)}
+    </p>
+    {evo.examesComplementares && (
+      <p><strong>Exames Complementares:</strong> {exibirValor(evo.examesComplementares)}</p>
+    )}
+
+    <p style={{ marginTop: '10px' }}><strong>Conduta:</strong> {exibirValor(evo.conduta)}</p>
+  </div>
+)
 
 export default function Impressao() {
   const pacientes = usePacientesStore(s => s.pacientes)
@@ -23,6 +111,9 @@ export default function Impressao() {
   const buscarEvolucaoAnterior = useEvolucaoStore(s => s.buscarEvolucaoAnterior)
   const evolucaoAtual = useEvolucaoStore(s => s.dados)
   const idEvolucao = useEvolucaoStore(s => s.idEvolucaoAtual)
+
+  const buscarHistorico = useHistoricoStore(s => s.buscarHistorico)
+  const listaHistorico = useHistoricoStore(s => s.evolucoesDoPaciente())
 
   const buscarPrescricoes = usePrescricoesStore(s => s.buscarPrescricoes)
   const registrosPrescricoes = usePrescricoesStore(s => s.registros)
@@ -45,11 +136,11 @@ export default function Impressao() {
       buscarPrescricoes(pacienteAtivoId)
       buscarVacinas(pacienteAtivoId)
       buscarExames(pacienteAtivoId)
-      // Tentar buscar evolução do mês atual no formato YYYY-MM
+      buscarHistorico(pacienteAtivoId)
       const mesAtual = new Date().toISOString().slice(0, 7)
       buscarEvolucaoAnterior(pacienteAtivoId, mesAtual)
     }
-  }, [pacienteAtivoId, buscarLmes, buscarPrescricoes, buscarVacinas, buscarExames, buscarEvolucaoAnterior])
+  }, [pacienteAtivoId, buscarLmes, buscarPrescricoes, buscarVacinas, buscarExames, buscarHistorico, buscarEvolucaoAnterior])
 
   const paciente = pacientes.find(p => p.id === pacienteAtivoId)
   const dataHoje = new Date().toLocaleDateString('pt-BR')
@@ -113,98 +204,23 @@ export default function Impressao() {
           <div className="dados-paciente">
             <div>
               <p><strong>Nome Completo:</strong> {paciente.nomeCompleto}</p>
-              <p><strong>Cartão SUS:</strong> {paciente.cartaoSus}</p>
+              <p><strong>Cartão SUS:</strong> {exibirValor(paciente.cartaoSus)}</p>
             </div>
             <div>
-              <p><strong>Prontuário:</strong> {paciente.prontuario}</p>
-              <p><strong>Idade:</strong> {paciente.idade} anos</p>
+              <p><strong>Prontuário:</strong> {exibirValor(paciente.prontuario)}</p>
+              <p><strong>Idade:</strong> {exibirValor(paciente.idade)} anos</p>
+              <p><strong>CID:</strong> {exibirValor((paciente as any).cid)}</p>
             </div>
           </div>
 
           <div className="secao-relatorio">
-            <h4>Evolução Clínica Mais Recente</h4>
-            {evolucaoAtual && evolucaoAtual.evolucaoClinica && idEvolucao ? (
-              <div style={{ fontSize: '12px' }}>
-                <p><strong>Referência:</strong> {evolucaoAtual.mesReferencia}</p>
-                <p><strong>Evolução Clínica:</strong> {evolucaoAtual.evolucaoClinica}</p>
-                
-                <h5 style={{ marginTop: '10px', marginBottom: '5px' }}>Dados de Hemodiálise</h5>
-                <p>
-                  <strong>Acesso:</strong> {evolucaoAtual.acessosPrevios} (Data: {evolucaoAtual.acessoData}) | 
-                  <strong> Peso Seco:</strong> {evolucaoAtual.pesoSeco}kg | 
-                  <strong> Tempo de Sessão:</strong> {evolucaoAtual.tempoSessao}h | 
-                  <strong> Kt/V:</strong> {evolucaoAtual.ktv}
-                </p>
-                <p>
-                  <strong>Fluxo Sangue (Qb):</strong> {evolucaoAtual.fbs} | 
-                  <strong> Fluxo Dialisato (Qd):</strong> {evolucaoAtual.fbd} | 
-                  <strong> Sódio:</strong> {evolucaoAtual.sodio} | 
-                  <strong> Bicarbonato:</strong> {evolucaoAtual.bic} | 
-                  <strong> Heparina:</strong> {evolucaoAtual.heparinaUtilizada}
-                </p>
-
-                <h5 style={{ marginTop: '10px', marginBottom: '5px' }}>Exame Físico</h5>
-                <p>
-                  <strong>PA:</strong> {evolucaoAtual.pa} | 
-                  <strong> FC:</strong> {evolucaoAtual.fc} bpm | 
-                  <strong> Peso Atual:</strong> {evolucaoAtual.pesoAtual}kg | 
-                  <strong> IMC:</strong> {evolucaoAtual.imc} | 
-                  <strong> Altura:</strong> {evolucaoAtual.altura}cm
-                </p>
-                <p>
-                  <strong>ACV:</strong> {evolucaoAtual.acv} | 
-                  <strong> AR:</strong> {evolucaoAtual.ar} | 
-                  <strong> EXT:</strong> {evolucaoAtual.ext}
-                </p>
-
-                <h5 style={{ marginTop: '10px', marginBottom: '5px' }}>Intercorrências / Histórico</h5>
-                <p>
-                  {evolucaoAtual.internouEsseMes ? '■ Internou este mês  ' : ''}
-                  {evolucaoAtual.recebeuTransfusao ? '■ Recebeu transfusão  ' : ''}
-                  {evolucaoAtual.complicacoesInfecciosas ? '■ Complicações infecciosas  ' : ''}
-                  {evolucaoAtual.complicacoesCardiovasculares ? '■ Complicações cardiovasculares  ' : ''}
-                  {evolucaoAtual.complicacoesAcessoVascular ? '■ Complicações no acesso  ' : ''}
-                  {evolucaoAtual.inscritoTransplante ? '■ Inscrito para TX  ' : ''}
-                  {evolucaoAtual.vacinouHepB ? '■ Vacinou Hep B  ' : ''}
-                  {evolucaoAtual.imunizadoHepB ? '■ Imunizado Hep B  ' : ''}
-                </p>
-
-                <h5 style={{ marginTop: '10px', marginBottom: '5px' }}>Uso de Medicações (Evolução)</h5>
-                <p>
-                  {evolucaoAtual.usandoFerroEv ? 'Ferro EV | ' : ''}
-                  {evolucaoAtual.usandoEpo ? 'EPO | ' : ''}
-                  {evolucaoAtual.usandoSevelamer ? 'Sevelamer | ' : ''}
-                  {evolucaoAtual.usandoCaCo3 ? 'Carbonato de Cálcio | ' : ''}
-                  {evolucaoAtual.usandoCalcitriol ? 'Calcitriol | ' : ''}
-                  {evolucaoAtual.usandoCinacalcete ? 'Cinacalcete' : ''}
-                </p>
-                {evolucaoAtual.medicamentosEmUso && (
-                  <p><strong>Outros Medicamentos:</strong> {evolucaoAtual.medicamentosEmUso}</p>
-                )}
-                {evolucaoAtual.alergias && (
-                  <p><strong>Alergias:</strong> {evolucaoAtual.alergias}</p>
-                )}
-
-                <h5 style={{ marginTop: '10px', marginBottom: '5px' }}>Exames Laboratoriais (Evolução)</h5>
-                <p>
-                  <strong>Hb:</strong> {evolucaoAtual.hemoglobina} | 
-                  <strong> Ht:</strong> {evolucaoAtual.hematocrito} | 
-                  <strong> K:</strong> {evolucaoAtual.potassio} | 
-                  <strong> P:</strong> {evolucaoAtual.fosforo} | 
-                  <strong> Ca:</strong> {evolucaoAtual.calcio} | 
-                  <strong> PTH:</strong> {evolucaoAtual.paratormonio} | 
-                  <strong> Ferritina:</strong> {evolucaoAtual.ferritina} | 
-                  <strong> CT:</strong> {evolucaoAtual.ct} | 
-                  <strong> Anti-HIV:</strong> {evolucaoAtual.antiHiv}
-                </p>
-                {evolucaoAtual.examesComplementares && (
-                  <p><strong>Exames Complementares:</strong> {evolucaoAtual.examesComplementares}</p>
-                )}
-
-                <p style={{ marginTop: '10px' }}><strong>Conduta:</strong> {evolucaoAtual.conduta}</p>
-              </div>
+            <h4>Evoluções Mensais</h4>
+            {listaHistorico && listaHistorico.length > 0 ? (
+              listaHistorico.map((h) => renderizarDadosEvolucao(h.dadosCompletos, h.id))
+            ) : evolucaoAtual && evolucaoAtual.evolucaoClinica && idEvolucao ? (
+              renderizarDadosEvolucao(evolucaoAtual, idEvolucao)
             ) : (
-              <p style={{ color: '#777' }}>Nenhuma evolução encontrada para este mês.</p>
+              <p style={{ color: '#777' }}>Nenhuma evolução encontrada para este paciente.</p>
             )}
           </div>
 
