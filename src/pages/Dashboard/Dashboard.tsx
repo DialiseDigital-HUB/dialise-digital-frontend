@@ -23,7 +23,7 @@ export default function Dashboard() {
   const carregando          = useDashboardStore(s => s.carregando)
   const estatisticas        = useDashboardStore(s => s.estatisticasComplicacoes)
 
-  const totalPacientes = usePacientesStore(s => s.pacientes.length)
+  const totalPacientes = usePacientesStore(s => s.pacientes.filter(p => p.ativo !== false).length)
   const definirFiltroAvancado = usePacientesStore(s => s.definirFiltroAvancado)
 
   const refAlertas = useRef<HTMLDivElement>(null)

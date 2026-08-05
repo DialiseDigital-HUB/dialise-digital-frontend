@@ -75,7 +75,8 @@ export default function Topbar({
   if (tituloPagina === 'dashboard') {
     subtitulo = 'Centro de Diálise · HUB-UnB'
   } else if (tituloPagina === 'pacientes') {
-    subtitulo = `${pacientes.length} pacientes ativos`
+    const totalAtivos = pacientes.filter(p => p.ativo !== false).length
+    subtitulo = `${totalAtivos} pacientes ativos`
   } else if (tituloPagina === 'calendario') {
     subtitulo = `${nomesMeses[mesAtivo - 1]} ${anoAtivo}`
   } else {

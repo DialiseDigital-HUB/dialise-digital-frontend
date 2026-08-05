@@ -8,6 +8,8 @@ import Input from '../../components/ui/Input/Input'
 import Icone from '../../components/ui/Icone/Icone'
 import Modal from '../../components/ui/Modal/Modal'
 import Alert from '../../components/ui/Alert/Alert'
+import Badge from '../../components/ui/Badge/Badge'
+import ToggleSwitch from '../../components/ui/ToggleSwitch/ToggleSwitch'
 import './Equipe.css'
 
 const rotulosRole: Record<string, string> = {
@@ -23,6 +25,7 @@ export default function Equipe() {
   const buscarUsuarios = useUsuariosStore(s => s.buscarUsuarios)
   const editarUsuario  = useUsuariosStore(s => s.editarUsuario)
   const desativarUsuario = useUsuariosStore(s => s.desativarUsuario)
+  const reativarUsuario  = useUsuariosStore(s => s.reativarUsuario)
   const carregando     = useUsuariosStore(s => s.carregando)
   const adicionarToast = useToastStore(s => s.adicionarToast)
 
@@ -30,6 +33,7 @@ export default function Equipe() {
     buscarUsuarios()
   }, [])
 
+  const [mostrarInativos, setMostrarInativos] = useState(false)
   const [modalAberto, setModalAberto] = useState(false)
   const [novoNome, setNovoNome]       = useState('')
   const [novoEmail, setNovoEmail]     = useState('')
@@ -108,14 +112,33 @@ export default function Equipe() {
     }
   }
 
+  const aoReativar = async (u: Usuario) => {
+    if (confirm('Deseja reativar este colaborador? Ele voltará a ter acesso ao sistema.')) {
+      try {
+        await reativarUsuario(u.id)
+        adicionarToast('Colaborador reativado.', 'sucesso')
+      } catch (err: any) {
+        adicionarToast(err.message || 'Erro ao reativar colaborador.', 'erro')
+      }
+    }
+  }
+
   return (
     <div className="equipe animate-fade">
       <div className="equipe__cabecalho">
         <h1 className="equipe__titulo">Gestão de Equipe</h1>
         <p className="equipe__subtitulo">Controle de acesso e cadastro de profissionais de saúde.</p>
-        <Botao onClick={() => setModalAberto(true)} tamanho="sm">
-          <Icone nome="pacientes" tamanho={14} /> Novo Colaborador
-        </Botao>
+        <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+          <ToggleSwitch
+            id="toggle-inativos-equipe"
+            label="Arquivo Morto"
+            ativo={mostrarInativos}
+            aoAlterar={setMostrarInativos}
+          />
+          <Botao onClick={() => setModalAberto(true)} tamanho="sm">
+            <Icone nome="pacientes" tamanho={14} /> Novo Colaborador
+          </Botao>
+        </div>
       </div>
 
       <div className="equipe__grid">
@@ -123,14 +146,17 @@ export default function Equipe() {
         {!carregando && usuarios.length === 0 && (
           <p className="equipe__estado">Nenhum colaborador cadastrado.</p>
         )}
-        {usuarios.map(u => (
+        {usuarios.filter(u => mostrarInativos ? u.ativo === false : u.ativo !== false).map(u => (
           <Card key={u.id} className="equipe__card">
             <div className="equipe__card-topo">
               <div className="equipe__card-avatar">
                 {u.nome_completo.charAt(0)}
               </div>
               <div className="equipe__card-info">
-                <div className="equipe__card-nome">{u.nome_completo}</div>
+                <div className="equipe__card-nome" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                  {u.nome_completo}
+                  {u.ativo === false && <Badge variante="err">Inativo</Badge>}
+                </div>
                 <div className="equipe__card-crm">{u.crm}</div>
               </div>
             </div>
@@ -152,12 +178,20 @@ export default function Equipe() {
               </div>
             )}
             <div style={{ display: 'flex', gap: '8px', marginTop: '16px', justifyContent: 'flex-end' }}>
-              <Botao variante="ghost" tamanho="sm" onClick={() => abrirEdicao(u)}>
-                <Icone nome="editar" tamanho={14} /> Editar
-              </Botao>
-              <Botao variante="ghost" tamanho="sm" onClick={() => aoDesativar(u)}>
-                <Icone nome="fechar" tamanho={14} /> Desativar
-              </Botao>
+              {u.ativo === false ? (
+                <Botao variante="primary" tamanho="sm" onClick={() => aoReativar(u)}>
+                  <Icone nome="pacientes" tamanho={14} /> Reativar
+                </Botao>
+              ) : (
+                <>
+                  <Botao variante="ghost" tamanho="sm" onClick={() => abrirEdicao(u)}>
+                    <Icone nome="editar" tamanho={14} /> Editar
+                  </Botao>
+                  <Botao variante="ghost" tamanho="sm" onClick={() => aoDesativar(u)}>
+                    <Icone nome="fechar" tamanho={14} /> Desativar
+                  </Botao>
+                </>
+              )}
             </div>
           </Card>
         ))}

@@ -22,6 +22,7 @@ interface EstadoUsuarios {
   criarUsuario: (novo: Omit<Usuario, 'id'>) => Promise<void>
   editarUsuario: (id: string, dados: Partial<Omit<Usuario, 'id'>>) => Promise<void>
   desativarUsuario: (id: string) => Promise<void>
+  reativarUsuario: (id: string) => Promise<void>
 }
 
 const useUsuariosStore = create<EstadoUsuarios>((set, get) => ({
@@ -122,6 +123,31 @@ const useUsuariosStore = create<EstadoUsuarios>((set, get) => ({
       await get().buscarUsuarios()
     } catch (err: any) {
       set({ erro: err.message || 'Falha ao desativar usuário.', carregando: false })
+      throw err
+    }
+  },
+
+  reativarUsuario: async (id) => {
+    const token = useAuthStore.getState().usuario?.token
+    if (!token) return
+
+    set({ carregando: true })
+    try {
+      const res = await fetch(`${API}/usuarios/${id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ ativo: true }),
+      })
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}))
+        throw new Error(errorData.detail || 'Falha ao reativar usuário.')
+      }
+      await get().buscarUsuarios()
+    } catch (err: any) {
+      set({ erro: err.message || 'Falha ao reativar usuário.', carregando: false })
       throw err
     }
   },
