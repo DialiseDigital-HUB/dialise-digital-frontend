@@ -145,18 +145,9 @@ export default function Pacientes() {
   }
 
   const lista = pacientesFiltrados()
-  const pacienteEmFoco = useNavegacaoStore(s => s.pacienteEmFoco)
-
-  useEffect(() => {
-    if (pacienteEmFoco) {
-      const p = lista.find(item => item.id === pacienteEmFoco)
-      if (p) selecionarPaciente(p)
-    }
-  }, [pacienteEmFoco, lista, selecionarPaciente])
 
   const aoFecharModal = () => {
     selecionarPaciente(null)
-    useNavegacaoStore.getState().definirPaciente(null)
   }
 
   const aoNovaEvolucao = (paciente: Paciente) => {
