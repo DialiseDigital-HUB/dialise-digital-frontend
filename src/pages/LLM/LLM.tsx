@@ -111,9 +111,9 @@ export default function LLM() {
   const [copiado, setCopiado]                 = useState(false)
   const chatRef                               = useRef<HTMLDivElement>(null)
 
-  const { executar, carregando, historico, limpar, mensagensEnviadas, confirmarAcao, descartarAcao } = useCopilotStore()
+  const { executar, carregando, historico, limpar, mensagensEnviadas, confirmarAcao, descartarAcao, transferirParaRevisao } = useCopilotStore()
 
-  const aoRevisarModal = (acao: AcaoRealizada) => {
+  const aoRevisarModal = (acao: AcaoRealizada, turnoIndex: number, acaoIndex: number) => {
     if (!acao.payload_pendente) return
     const idPac = pacienteAtivo?.id ?? ''
     const payload = acao.payload_pendente.payload
@@ -130,6 +130,8 @@ export default function LLM() {
     } else if (acao.payload_pendente.tipo_acao === 'agendamento') {
       navegarComContexto('calendario', idPac)
     }
+
+    transferirParaRevisao(turnoIndex, acaoIndex)
   }
 
   const aoSelecionarPaciente = (p: Paciente | null) => {
@@ -242,7 +244,7 @@ export default function LLM() {
                                       confirmarAcao(acao, pacienteAtivo?.id ?? '', i, j)
                                     }
                                     onDescartar={() => descartarAcao(i, j)}
-                                    onRevisarModal={() => aoRevisarModal(acao)}
+                                    onRevisarModal={() => aoRevisarModal(acao, i, j)}
                                   />
                                 </li>
                               )

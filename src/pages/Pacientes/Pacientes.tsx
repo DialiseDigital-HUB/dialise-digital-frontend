@@ -14,6 +14,7 @@ import Botao from '../../components/ui/Button/Button'
 import Icone from '../../components/ui/Icone/Icone'
 import InputBusca from '../../components/ui/InputBusca/InputBusca'
 import SelectFiltro from '../../components/ui/SelectFiltro/SelectFiltro'
+import ToggleSwitch from '../../components/ui/ToggleSwitch/ToggleSwitch'
 import FormCadastroPaciente from './FormCadastroPaciente'
 import './Pacientes.css'
 
@@ -118,8 +119,12 @@ export default function Pacientes() {
   const cadastrarPaciente    = usePacientesStore(s => s.cadastrarPaciente)
   const editarPaciente       = usePacientesStore(s => s.editarPaciente)
   const inativarPaciente     = usePacientesStore(s => s.inativarPaciente)
+  const reativarPaciente     = usePacientesStore(s => s.reativarPaciente)
   const adicionarToast       = useToastStore(s => s.adicionarToast)
   const usuario              = useAuthStore(s => s.usuario)
+  
+  const mostrarInativos        = usePacientesStore(s => s.mostrarInativos)
+  const definirMostrarInativos = usePacientesStore(s => s.definirMostrarInativos)
 
   const [modalEdicao, setModalEdicao] = useState(false)
 
@@ -140,18 +145,9 @@ export default function Pacientes() {
   }
 
   const lista = pacientesFiltrados()
-  const pacienteEmFoco = useNavegacaoStore(s => s.pacienteEmFoco)
-
-  useEffect(() => {
-    if (pacienteEmFoco) {
-      const p = lista.find(item => item.id === pacienteEmFoco)
-      if (p) selecionarPaciente(p)
-    }
-  }, [pacienteEmFoco, lista, selecionarPaciente])
 
   const aoFecharModal = () => {
     selecionarPaciente(null)
-    useNavegacaoStore.getState().definirPaciente(null)
   }
 
   const aoNovaEvolucao = (paciente: Paciente) => {
@@ -191,13 +187,31 @@ export default function Pacientes() {
     }
   }
 
+  const handleReativacao = async () => {
+    if (!pacienteSelecionado) return
+    if (!window.confirm(`Deseja reativar o paciente ${pacienteSelecionado.nomeCompleto}? Ele voltará para a lista de atendimentos ativos.`)) return
+    const sucesso = await reativarPaciente(pacienteSelecionado.id)
+    if (sucesso) {
+      selecionarPaciente(null)
+      adicionarToast('Paciente reativado com sucesso.', 'sucesso')
+    } else {
+      adicionarToast('Erro ao reativar paciente.', 'erro')
+    }
+  }
+
   return (
     <div className="pacientes">
       <Card
         titulo={`Pacientes — ${lista.length} encontrado${lista.length !== 1 ? 's' : ''}`}
         icone={<Icone nome="pacientes" tamanho={14} />}
         acoes={
-          <div className="pacientes__busca-wrapper" style={{ display: 'flex', gap: '8px' }}>
+          <div className="pacientes__busca-wrapper" style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+            <ToggleSwitch
+              id="toggle-inativos-paciente"
+              label="Arquivo Morto"
+              ativo={mostrarInativos}
+              aoAlterar={definirMostrarInativos}
+            />
             <InputBusca 
               valor={termoBusca}
               aoAlterar={definirBusca}
@@ -242,7 +256,10 @@ export default function Pacientes() {
                     <div className="pacientes__celula-nome">
                       <Avatar nome={paciente.nomeCompleto} tamanho="sm" />
                       <div>
-                        <div className="pacientes__nome">{paciente.nomeCompleto}</div>
+                        <div className="pacientes__nome" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                          {paciente.nomeCompleto}
+                          {paciente.ativo === false && <Badge variante="err">Inativo</Badge>}
+                        </div>
                         <div className="pacientes__sub">
                           {paciente.idade} anos · {paciente.sexo === 'M' ? 'Masc.' : 'Fem.'}
                         </div>
@@ -277,23 +294,30 @@ export default function Pacientes() {
         aoFechar={aoFecharModal}
         rodape={
           <>
-            {usuario?.role === 'admin' && (
+            {usuario?.role === 'admin' && pacienteSelecionado?.ativo === false && (
+              <Botao variante="primary" onClick={handleReativacao}>Reativar</Botao>
+            )}
+            {usuario?.role === 'admin' && pacienteSelecionado?.ativo !== false && (
               <Botao variante="danger" onClick={handleInativacao}>Inativar</Botao>
             )}
             <Botao variante="ghost" onClick={aoFecharModal}>Fechar</Botao>
-            <Botao variante="ghost" onClick={() => setModalEdicao(true)}>Editar</Botao>
+            {pacienteSelecionado?.ativo !== false && (
+              <Botao variante="ghost" onClick={() => setModalEdicao(true)}>Editar</Botao>
+            )}
             <Botao
               variante="ghost"
               onClick={() => pacienteSelecionado && aoVerEvolucoes(pacienteSelecionado)}
             >
               Ver Evoluções
             </Botao>
-            <Botao
-              variante="primary"
-              onClick={() => pacienteSelecionado && aoNovaEvolucao(pacienteSelecionado)}
-            >
-              Nova Evolução
-            </Botao>
+            {pacienteSelecionado?.ativo !== false && (
+              <Botao
+                variante="primary"
+                onClick={() => pacienteSelecionado && aoNovaEvolucao(pacienteSelecionado)}
+              >
+                Nova Evolução
+              </Botao>
+            )}
           </>
         }
       >

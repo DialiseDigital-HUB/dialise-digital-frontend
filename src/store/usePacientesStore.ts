@@ -27,23 +27,27 @@ interface EstadoPacientes {
   pacientes: Paciente[]
   termoBusca: string
   filtroAvancado: string
+  mostrarInativos: boolean
   pacienteSelecionado: Paciente | null
   carregando: boolean
   erro: string | null
   buscarPacientes: () => Promise<void>
   definirBusca: (termo: string) => void
   definirFiltroAvancado: (filtro: string) => void
+  definirMostrarInativos: (mostrar: boolean) => void
   selecionarPaciente: (paciente: Paciente | null) => void
   pacientesFiltrados: () => Paciente[]
   cadastrarPaciente: (dados: any) => Promise<boolean>
   editarPaciente: (id: string, dados: any) => Promise<boolean>
   inativarPaciente: (id: string) => Promise<boolean>
+  reativarPaciente: (id: string) => Promise<boolean>
 }
 
 const usePacientesStore = create<EstadoPacientes>((set, get) => ({
   pacientes: [],
   termoBusca: '',
   filtroAvancado: 'todos',
+  mostrarInativos: false,
   pacienteSelecionado: null,
   carregando: false,
   erro: null,
@@ -72,6 +76,7 @@ const usePacientesStore = create<EstadoPacientes>((set, get) => ({
           recebeuTransfusao: p.recebeu_transfusao || false,
           horarioEntrada: p.horario_entrada || '--',
           dataEntrada: p.data_entrada || '--',
+          ativo: p.ativo ?? true,
         }
       })
       set({ pacientes: pacientesMapeados, carregando: false })
@@ -139,16 +144,31 @@ const usePacientesStore = create<EstadoPacientes>((set, get) => ({
     }
   },
 
+  reativarPaciente: async (id) => {
+    set({ carregando: true, erro: null })
+    try {
+      await api.patch(`/pacientes/${id}`, { ativo: true })
+      await get().buscarPacientes()
+      return true
+    } catch {
+      set({ erro: 'Falha ao reativar paciente', carregando: false })
+      return false
+    }
+  },
+
   definirBusca: termo => set({ termoBusca: termo }),
   definirFiltroAvancado: filtro => set({ filtroAvancado: filtro }),
+  definirMostrarInativos: mostrar => set({ mostrarInativos: mostrar }),
   selecionarPaciente: paciente => set({ pacienteSelecionado: paciente }),
 
   pacientesFiltrados: () => {
-    const { pacientes, termoBusca, filtroAvancado } = get()
+    const { pacientes, termoBusca, filtroAvancado, mostrarInativos } = get()
     
     const pacientesEncontrados = buscarPacientes(pacientes, termoBusca)
     
     return pacientesEncontrados.filter(p => {
+      if (mostrarInativos ? p.ativo !== false : p.ativo === false) return false
+      
       if (filtroAvancado === 'transplante') return p.inscritoTransplante
       if (filtroAvancado === 'pendente_evolucao') return p.statusEvolucao === 'err'
       

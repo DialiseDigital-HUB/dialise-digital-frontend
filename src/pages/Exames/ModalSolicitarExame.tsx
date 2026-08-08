@@ -38,6 +38,7 @@ interface FormState {
   exame: string
   exameOutro: string
   periodicidade: string
+  cid: string
 }
 
 const formInicial: FormState = {
@@ -45,6 +46,7 @@ const formInicial: FormState = {
   exame: '',
   exameOutro: '',
   periodicidade: '',
+  cid: '',
 }
 
 interface ModalSolicitarExameProps {
@@ -90,7 +92,8 @@ export default function ModalSolicitarExame({ aberto, aoFechar, pacienteIdInicia
       pacienteId: pacienteMockId,
       exame: 'Hemograma Completo',
       exameOutro: '',
-      periodicidade: 'Mensal'
+      periodicidade: 'Mensal',
+      cid: 'N18.5'
     })
   }
 
@@ -103,7 +106,8 @@ export default function ModalSolicitarExame({ aberto, aoFechar, pacienteIdInicia
       idPaciente: form.pacienteId,
       exame: exameNome,
       periodicidade: form.periodicidade,
-      dataSolicitacao: new Date().toISOString().split('T')[0]
+      dataSolicitacao: new Date().toISOString().split('T')[0],
+      cid: form.cid || undefined
     })
 
     if (sucesso) {
@@ -161,6 +165,13 @@ export default function ModalSolicitarExame({ aberto, aoFechar, pacienteIdInicia
           aoAlterar={atualizar('periodicidade')}
           opcoes={opcoesPeriodicidade}
           placeholder="Selecione a periodicidade..."
+        />
+        <Input
+          id="sol-cid"
+          label="CID (opcional)"
+          valor={form.cid}
+          aoAlterar={atualizar('cid')}
+          placeholder="Ex: N18.5"
         />
       </form>
     </Modal>

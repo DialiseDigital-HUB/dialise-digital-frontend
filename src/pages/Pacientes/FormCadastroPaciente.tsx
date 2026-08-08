@@ -24,6 +24,7 @@ export default function FormCadastroPaciente({ idForm, aoSubmeter, modoEdicao = 
   const [turno, setTurno]                   = useState(dadosIniciais?.turno || '')
   const [medico, setMedico]                 = useState(dadosIniciais?.medicoAssistenteId || '')
   const [diagnostico, setDiagnostico]       = useState(dadosIniciais?.diagnostico || '')
+  const [cid, setCid]                       = useState((dadosIniciais as any)?.cid || '')
   const [horarioEntrada, setHorarioEntrada] = useState(dadosIniciais?.horarioEntrada !== '--' ? dadosIniciais?.horarioEntrada || '' : '')
   const [dataEntrada, setDataEntrada]       = useState(dadosIniciais?.dataEntrada !== '--' ? dadosIniciais?.dataEntrada || '' : '')
 
@@ -46,6 +47,7 @@ export default function FormCadastroPaciente({ idForm, aoSubmeter, modoEdicao = 
         turno:               turno,
         medicoAssistenteId:  medico || null,
         diagnostico:         diagnostico,
+        cid:                 cid || null,
         horarioEntrada:      horarioEntrada || null,
         dataEntrada:         dataEntrada || null,
       })
@@ -59,6 +61,7 @@ export default function FormCadastroPaciente({ idForm, aoSubmeter, modoEdicao = 
         turno:               turno,
         medicoAssistenteId:  medico || null,
         diagnostico:         diagnostico,
+        cid:                 cid || null,
         horarioEntrada:      horarioEntrada || null,
         dataEntrada:         dataEntrada || null,
       })
@@ -74,6 +77,7 @@ export default function FormCadastroPaciente({ idForm, aoSubmeter, modoEdicao = 
     setSexo('M')
     setTurno('Manhã')
     setDiagnostico('DRC estágio 5 secundária a DM tipo 2')
+    setCid('N18.5')
     setHorarioEntrada('08:00')
     setDataEntrada('2026-06-15')
   }
@@ -178,6 +182,16 @@ export default function FormCadastroPaciente({ idForm, aoSubmeter, modoEdicao = 
           valor={diagnostico}
           aoAlterar={setDiagnostico}
           placeholder="Ex: DRC estágio 5 secundária a HAS"
+        />
+      </div>
+
+      <div>
+        <Input
+          id="cid"
+          label="CID (ex: N18.5)"
+          valor={cid}
+          aoAlterar={setCid}
+          placeholder="Ex: N18.5"
         />
       </div>
 

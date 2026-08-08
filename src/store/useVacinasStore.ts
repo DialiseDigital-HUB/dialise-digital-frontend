@@ -16,7 +16,7 @@ interface EstadoVacinas {
   carregando: boolean
   erro: string | null
   buscarVacinas: (idPaciente?: string) => Promise<void>
-  cadastrarVacina: (dados: Omit<RegistroVacina, 'id' | 'status'>) => Promise<boolean>
+  cadastrarVacina: (dados: Omit<RegistroVacina, 'id' | 'status'> & { lote?: string }) => Promise<boolean>
 }
 
 const useVacinasStore = create<EstadoVacinas>((set, get) => ({
@@ -55,7 +55,8 @@ const useVacinasStore = create<EstadoVacinas>((set, get) => ({
         vacina: dados.vacina,
         dose: dados.dose,
         data_aplicacao: dados.dataAplicacao,
-        proxima_dose: dados.proximaDose
+        proxima_dose: dados.proximaDose,
+        lote: dados.lote ?? ''
       }
       await api.post('/vacinas/', payload)
       await get().buscarVacinas()

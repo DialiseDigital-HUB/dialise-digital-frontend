@@ -8,6 +8,7 @@ export interface SolicitacaoExame {
   periodicidade: string
   dataSolicitacao: string
   status: string
+  cid?: string
 }
 
 interface EstadoSolicitacoes {
@@ -15,7 +16,7 @@ interface EstadoSolicitacoes {
   carregando: boolean
   erro: string | null
   buscarSolicitacoes: (idPaciente?: string) => Promise<void>
-  cadastrarSolicitacao: (dados: Omit<SolicitacaoExame, 'id' | 'status'>) => Promise<boolean>
+  cadastrarSolicitacao: (dados: Omit<SolicitacaoExame, 'id' | 'status'> & { cid?: string }) => Promise<boolean>
 }
 
 const useSolicitacoesExamesStore = create<EstadoSolicitacoes>((set, get) => ({
@@ -37,7 +38,8 @@ const useSolicitacoesExamesStore = create<EstadoSolicitacoes>((set, get) => ({
         exame: r.exame,
         periodicidade: r.periodicidade,
         dataSolicitacao: r.data_solicitacao,
-        status: r.status
+        status: r.status,
+        cid: r.cid
       }))
       set({ registros: solicitacoesMapeadas, carregando: false })
     } catch (error) {
@@ -52,7 +54,8 @@ const useSolicitacoesExamesStore = create<EstadoSolicitacoes>((set, get) => ({
         paciente_id: dados.idPaciente,
         exame: dados.exame,
         periodicidade: dados.periodicidade,
-        data_solicitacao: dados.dataSolicitacao
+        data_solicitacao: dados.dataSolicitacao,
+        cid: dados.cid
       }
       await api.post('/solicitacoes-exame/', payload)
       await get().buscarSolicitacoes()

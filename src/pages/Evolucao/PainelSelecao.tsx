@@ -4,6 +4,15 @@ import Input from '../../components/ui/Input/Input'
 import BuscaPaciente from '../../components/ui/BuscaPaciente/BuscaPaciente'
 import type { Paciente } from '../../store/usePacientesStore'
 
+const formatarMesExtenso = (mesStr: string): string => {
+  if (!mesStr) return ''
+  const partes = mesStr.split('-')
+  if (partes.length < 2) return mesStr
+  const data = new Date(parseInt(partes[0]), parseInt(partes[1]) - 1, 1)
+  const texto = data.toLocaleString('pt-BR', { month: 'long', year: 'numeric' })
+  return texto.charAt(0).toUpperCase() + texto.slice(1)
+}
+
 interface PainelSelecaoProps {
   pacientes: Paciente[]
   idPacienteAtivo: string | null
@@ -57,6 +66,11 @@ export default function PainelSelecao({
           valor={mesReferencia}
           aoAlterar={aoDefinirMes}
         />
+        {mesReferencia && (
+          <span className="painel-selecao__mes-formatado" style={{ display: 'block', marginTop: '4px', fontSize: '14px', color: 'var(--cor-texto-secundario)', textTransform: 'capitalize' }}>
+            {formatarMesExtenso(mesReferencia)}
+          </span>
+        )}
       </div>
 
       {idPacienteAtivo && (

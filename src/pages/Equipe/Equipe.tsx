@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import useUsuariosStore from '../../store/useUsuariosStore'
+import useUsuariosStore, { type Usuario } from '../../store/useUsuariosStore'
 import useToastStore from '../../store/useToastStore'
 import type { Role } from '../../store/useAuthStore'
 import Card from '../../components/ui/Card/Card'
@@ -8,6 +8,8 @@ import Input from '../../components/ui/Input/Input'
 import Icone from '../../components/ui/Icone/Icone'
 import Modal from '../../components/ui/Modal/Modal'
 import Alert from '../../components/ui/Alert/Alert'
+import Badge from '../../components/ui/Badge/Badge'
+import ToggleSwitch from '../../components/ui/ToggleSwitch/ToggleSwitch'
 import './Equipe.css'
 
 const rotulosRole: Record<string, string> = {
@@ -21,6 +23,9 @@ export default function Equipe() {
   const usuarios       = useUsuariosStore(s => s.usuarios)
   const criarUsuario   = useUsuariosStore(s => s.criarUsuario)
   const buscarUsuarios = useUsuariosStore(s => s.buscarUsuarios)
+  const editarUsuario  = useUsuariosStore(s => s.editarUsuario)
+  const desativarUsuario = useUsuariosStore(s => s.desativarUsuario)
+  const reativarUsuario  = useUsuariosStore(s => s.reativarUsuario)
   const carregando     = useUsuariosStore(s => s.carregando)
   const adicionarToast = useToastStore(s => s.adicionarToast)
 
@@ -28,11 +33,19 @@ export default function Equipe() {
     buscarUsuarios()
   }, [])
 
+  const [mostrarInativos, setMostrarInativos] = useState(false)
   const [modalAberto, setModalAberto] = useState(false)
   const [novoNome, setNovoNome]       = useState('')
   const [novoEmail, setNovoEmail]     = useState('')
   const [novoCrm, setNovoCrm]         = useState('')
   const [novaRole, setNovaRole]       = useState<Role>('medico')
+
+  const [modalEdicaoAberto, setModalEdicaoAberto] = useState(false)
+  const [editando, setEditando] = useState<Usuario | null>(null)
+  const [editNome, setEditNome] = useState('')
+  const [editEmail, setEditEmail] = useState('')
+  const [editCrm, setEditCrm] = useState('')
+  const [editRole, setEditRole] = useState<Role>('medico')
 
   const aoSubmeter = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -60,14 +73,72 @@ export default function Equipe() {
     }
   }
 
+  const abrirEdicao = (u: Usuario) => {
+    setEditando(u)
+    setEditNome(u.nome_completo)
+    setEditEmail(u.email)
+    setEditCrm(u.crm)
+    setEditRole(u.role)
+    setModalEdicaoAberto(true)
+  }
+
+  const aoSubmeterEdicao = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!editNome || !editEmail || !editCrm || !editando) return
+
+    try {
+      await editarUsuario(editando.id, {
+        nome_completo: editNome,
+        crm: editCrm,
+        email: editEmail,
+        role: editRole,
+      })
+      setModalEdicaoAberto(false)
+      setEditando(null)
+      adicionarToast('Colaborador atualizado.', 'sucesso')
+    } catch (err: any) {
+      adicionarToast(err.message || 'Erro ao atualizar colaborador.', 'erro')
+    }
+  }
+
+  const aoDesativar = async (u: Usuario) => {
+    if (confirm('Deseja desativar este colaborador?')) {
+      try {
+        await desativarUsuario(u.id)
+        adicionarToast('Colaborador desativado.', 'sucesso')
+      } catch (err: any) {
+        adicionarToast(err.message || 'Erro ao desativar colaborador.', 'erro')
+      }
+    }
+  }
+
+  const aoReativar = async (u: Usuario) => {
+    if (confirm('Deseja reativar este colaborador? Ele voltará a ter acesso ao sistema.')) {
+      try {
+        await reativarUsuario(u.id)
+        adicionarToast('Colaborador reativado.', 'sucesso')
+      } catch (err: any) {
+        adicionarToast(err.message || 'Erro ao reativar colaborador.', 'erro')
+      }
+    }
+  }
+
   return (
     <div className="equipe animate-fade">
       <div className="equipe__cabecalho">
         <h1 className="equipe__titulo">Gestão de Equipe</h1>
         <p className="equipe__subtitulo">Controle de acesso e cadastro de profissionais de saúde.</p>
-        <Botao onClick={() => setModalAberto(true)} tamanho="sm">
-          <Icone nome="pacientes" tamanho={14} /> Novo Colaborador
-        </Botao>
+        <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+          <ToggleSwitch
+            id="toggle-inativos-equipe"
+            label="Arquivo Morto"
+            ativo={mostrarInativos}
+            aoAlterar={setMostrarInativos}
+          />
+          <Botao onClick={() => setModalAberto(true)} tamanho="sm">
+            <Icone nome="pacientes" tamanho={14} /> Novo Colaborador
+          </Botao>
+        </div>
       </div>
 
       <div className="equipe__grid">
@@ -75,14 +146,17 @@ export default function Equipe() {
         {!carregando && usuarios.length === 0 && (
           <p className="equipe__estado">Nenhum colaborador cadastrado.</p>
         )}
-        {usuarios.map(u => (
+        {usuarios.filter(u => mostrarInativos ? u.ativo === false : u.ativo !== false).map(u => (
           <Card key={u.id} className="equipe__card">
             <div className="equipe__card-topo">
               <div className="equipe__card-avatar">
                 {u.nome_completo.charAt(0)}
               </div>
               <div className="equipe__card-info">
-                <div className="equipe__card-nome">{u.nome_completo}</div>
+                <div className="equipe__card-nome" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                  {u.nome_completo}
+                  {u.ativo === false && <Badge variante="err">Inativo</Badge>}
+                </div>
                 <div className="equipe__card-crm">{u.crm}</div>
               </div>
             </div>
@@ -103,6 +177,22 @@ export default function Equipe() {
                 </Alert>
               </div>
             )}
+            <div style={{ display: 'flex', gap: '8px', marginTop: '16px', justifyContent: 'flex-end' }}>
+              {u.ativo === false ? (
+                <Botao variante="primary" tamanho="sm" onClick={() => aoReativar(u)}>
+                  <Icone nome="pacientes" tamanho={14} /> Reativar
+                </Botao>
+              ) : (
+                <>
+                  <Botao variante="ghost" tamanho="sm" onClick={() => abrirEdicao(u)}>
+                    <Icone nome="editar" tamanho={14} /> Editar
+                  </Botao>
+                  <Botao variante="ghost" tamanho="sm" onClick={() => aoDesativar(u)}>
+                    <Icone nome="fechar" tamanho={14} /> Desativar
+                  </Botao>
+                </>
+              )}
+            </div>
           </Card>
         ))}
       </div>
@@ -158,6 +248,56 @@ export default function Equipe() {
             <Botao variante="ghost" onClick={() => setModalAberto(false)}>Cancelar</Botao>
             <Botao tipo="submit" desabilitado={carregando}>
               {carregando ? 'Salvando...' : 'Cadastrar Colaborador'}
+            </Botao>
+          </div>
+        </form>
+      </Modal>
+
+      <Modal
+        aberto={modalEdicaoAberto}
+        aoFechar={() => setModalEdicaoAberto(false)}
+        titulo="Editar Colaborador"
+      >
+        <form className="equipe__form" onSubmit={aoSubmeterEdicao}>
+          <div className="equipe__form-grid">
+            <Input
+              id="edit-nome"
+              label="Nome Completo"
+              valor={editNome}
+              aoAlterar={setEditNome}
+            />
+            <Input
+              id="edit-email"
+              label="E-mail Institucional"
+              type="email"
+              valor={editEmail}
+              aoAlterar={setEditEmail}
+            />
+            <Input
+              id="edit-crm"
+              label="Registro (CRM/COREN)"
+              valor={editCrm}
+              aoAlterar={setEditCrm}
+            />
+
+            <div className="equipe__form-grupo">
+              <label className="equipe__form-label">Papel / Função</label>
+              <select 
+                className="equipe__form-select" 
+                value={editRole} 
+                onChange={e => setEditRole(e.target.value as Role)}
+              >
+                <option value="medico">Médico(a)</option>
+                <option value="residente">Residente</option>
+                <option value="enfermeiro">Enfermeiro(a)</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="equipe__form-acoes">
+            <Botao type="button" variante="ghost" onClick={() => setModalEdicaoAberto(false)}>Cancelar</Botao>
+            <Botao tipo="submit" desabilitado={carregando}>
+              {carregando ? 'Salvando...' : 'Salvar Alterações'}
             </Botao>
           </div>
         </form>
